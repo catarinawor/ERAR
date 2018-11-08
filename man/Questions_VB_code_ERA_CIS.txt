@@ -1,0 +1,33 @@
+#=================================================================
+# these are questions that came up during translation of the program
+
+
+#=================================================================
+
+ What does the Sub SetupProgressBar does? why does use refresh inside it?
+
+ Why is Me.Refresh being used so often, even when the data has not changed?
+
+ SQL interactions, read tables - 
+is the statement from  ERASQL = "SELECT Min(age) FROM ERA_CWDBRecovery as r INNER JOIN ERA_WireTagCode as t ON r.TagCode = t.TagCode  WHERE CASStock IN (" & CASStockString & ")" the actual SQL query?
+
+GetCASStocks -  the ERASQL statement is not working with the R connection
+
+ isCombineAge5And6[ERAStock] loop
+ The last else statement seem redundant. 
+
+
+I do not understand what the following code does. 
+CISDataAdapter = New OleDbDataAdapter(ERASQL, CISDBConnection)
+Dim CASStockTable As New DataTable
+CISDataAdapter.Fill(CASStockTable)
+
+
+
+GetFirstAndLastBY - the ERASQL statement is not working with the R connection
+
+
+
+
+
+   

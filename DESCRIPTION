@@ -1,0 +1,10 @@
+Package: ERA
+Version: 0.0.0.9000
+Title: This package is a loose translation of the Chinook Technical committee ERA model 
+Description: functions were written ti mimic the Subs in the ERA original code.
+Authors@R: person("Catarina", "cor", email = "catarina.wor@dfo-mpo.gc.ca", role = c("aut", "cre"))
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+ByteCompile: true
+Depends:
