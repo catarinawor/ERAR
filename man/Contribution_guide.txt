@@ -1,0 +1,43 @@
+#=================================================================
+# Contribution Guide to the ERAR
+#=================================================================
+
+
+#==================================================================
+Github interactions
+
+If you want to write code:
+ - fork the repository
+ - make changes/revisions on your own version
+ - submit pull requests to the Catarinawor/master branch -- This will change when we get the official PSC account
+ 
+If you want to review code/ suggest coding ettiquete
+- Submit suggestions through the issues tab on the catarinawor repo (let's try to keep it centralized)
+- any suggestions, no matter how small, are welcome. 
+
+
+#========================================================================
+Guidelines on writing codes
+
+This project is designed to be a direct translation of the CIS version of the ERA. Each Sub in the VB code should correspond to it's own function in R.
+
+Document as you go: I have added templates of an R-package like help (Stolen from MFolkes/ctctools). Document each function as you write and review them. 
+
+Any problems should be discussed through the issues tool.
+
+
+#=========================================================================
+Editing this document: If you think it will help: Do it! 
+It is github, we can go back to any past commit. 
+
+
+
+
+
+
+
+
+
+
+
+   
