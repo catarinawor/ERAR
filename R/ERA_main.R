@@ -338,7 +338,7 @@ StartCohortAnalysis_Click <- function(M){
 #'
 #' @param M A list. Otput of StartCohortAnalysis_Click()
 #'
-#' @details
+#' @details  This function calls the maisn ERA routine. utputs a few log files if there are any errors relating
 #'
 #' @return A list containing all initial M items plus additional output from MainSub
 #' 
@@ -353,7 +353,7 @@ CalculateButton_Click  <- function(M){(
 
    do.call(file.remove, list(list.files("../logs", full.names = TRUE)))
 
-    if(is.na(LastYearCheckedListBox)){
+    if(is.na(M$LastYearCheckedListBox)){
 
         sink("../logs/YearSelectionError.log")
         cat("Error: You must select a year before continuing.\n")
@@ -361,7 +361,7 @@ CalculateButton_Click  <- function(M){(
 
     }
 
-    if(is.na(StockListView)){
+    if(is.na(M$StockListBox)){
 
         sink("../logs/StockListError.log")
         cat("Error: You must select at least one stock before continuing.\n")
@@ -369,12 +369,12 @@ CalculateButton_Click  <- function(M){(
 
     }
 
-    LastCalendarYear <- LastYearCheckedListBox
-    MaxCalendarYear <- LastCalendarYear
+    LastCalendarYear <- M$LastYearCheckedListBox
+    MaxCalendarYear <- M$LastCalendarYear
     
-    ERAStockArray <- vector(length=length(StockListView)) 
+    ERAStockArray <- vector(length=length(M$StockListBox)) 
 
-    if(length(M0$isCombineAge2And3 != length(StockListView)){
+    if(length(M$isCombineAge2And3 != length(M$StockListBox)){
         
         sink("../logs/CombineAge.log")
         cat("Error: You must state if isCombineAge2And3 for each stock \n")
@@ -382,7 +382,7 @@ CalculateButton_Click  <- function(M){(
 
     }
 
-    if(length(M0$isCombineAge5And6 != length(StockListView)){
+    if(length(M0$isCombineAge5And6 != length(M$StockListBox)){
 
         sink("../logs/CombineAge.log")
         cat("Error: You must state if isCombineAge5And6 for each stock \n")
@@ -390,37 +390,23 @@ CalculateButton_Click  <- function(M){(
         
     }
 
-    for( stk in 1:length(StockListView)){
-
-        ERAStockArray[stk] <- as.character(StockListView[stk])
-    }
-
+    ERAStockArray <- as.character(M$ERAStockTable[M$StockListBox,1])
     
     NumStocks <- length(ERAStockArray)
 
 
-    D <-list(
-
-        datbse=M0$datbse,
+    D <-list(     
         ERAStockArray=ERAStockArray, #array of Stock names (acronyms)
-        isCombineAge2And3=M0$isCombineAge2And3,
-        isCombineAge5And6=M0$isCombineAge5And6,
-        NumStocks = NumStocks,
-        ArithmeticMeanFlag = TRUE,
-        MaxCalendarYear=2016,
-        LastCalendarYear =2016,
-        isTraceCalc = FALSE,
-        isTraceByBroodYr = TRUE,
-        isTraceByCalendarYr = FALSE,
-        traceThisShakerMethod = "C"
+        NumStocks = NumStocks    
     )
     
+    M<-append(M,D)
 
-    D1<- MainSub(M=D)
+    D1<- MainSub(M)
     
     return(D1)
 
-    #Version of the ERA that was transcribed
+    # Original Version of the ERA 
     # If LastYearCheckedListBox.CheckedItems.Count = 0 Then
     #
     #        MsgBox("You must select a year before continuing.", , "Error")
@@ -488,7 +474,7 @@ CalculateButton_Click  <- function(M){(
 
 #' @title MainSub 
 #'
-#' @description  
+#' @description  Main routine that calculates the ERA, It calls a long list of subroutines 
 #' 
 #' 
 #'
@@ -508,15 +494,13 @@ CalculateButton_Click  <- function(M){(
 MainSub<-function(M){
 
 
-    NumStocks<-length(M$ERAStockArray)
-	
-    #CW - vb code is reseting stopwatch 
-
-    for(ERAStock in 1:NumStocks){
 
 
-        #Testing run - to be deleted
-        ERAStock <- 1
+    for(ERAStock in 1:M$NumStocks){
+
+
+        # Testing run - to be deleted
+        # ERAStock <- 1
 
     	#CW Rfresh note
     	#potentially something relating to "read from database" or read from user inputs

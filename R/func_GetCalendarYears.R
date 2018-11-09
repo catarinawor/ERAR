@@ -14,7 +14,7 @@
 #' @title GetCalendarYears
 #'
 #' @description  Check which years have incidental mortality data available, and trim Calendar years available in
-#'  the database to just those that are equal or lower that the finalyera set by the user and has incidental mortality data 
+#'  the database to just those that are equal or lower that the final year set by the user and has incidental mortality data 
 #' available.
 #' 
 #' 
@@ -22,7 +22,7 @@
 #'
 #' @details
 #'
-#' @return D: A list containing the following object: LastCalendarYear and RunYearList
+#' @return D: A list containing the following object: LastYearCheckedListBox and RunYearList
 #' 
 #' 
 #' @export
@@ -31,6 +31,11 @@
 #' 
 #' 
 GetCalendarYears <- function(M){
+
+    #========================================================
+    #TODO: Add compatibility with DGM data output
+    #========================================================
+
 
 	#make sure to select calendar years for which there is Incidental mortality data
 	#the original function also checks the final year with the user.
@@ -68,7 +73,7 @@ GetCalendarYears <- function(M){
 
 	
 
-	D <- list(LastCalendarYear=LastCalendarYear,RunYearList=ERAYear)
+	D <- list(LastYearCheckedListBox=LastCalendarYear,RunYearList=ERAYear)
 	return(D)
 
 	#Original ERA code

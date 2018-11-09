@@ -32,6 +32,11 @@
 #' 
 GetERAFisheries <- function(M){
 
+    #========================================================
+    #TODO: Add compatibility with DGM data output
+    #========================================================
+
+
 
 	#    'Get number of ERAFisheries
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path

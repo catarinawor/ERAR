@@ -34,7 +34,10 @@
 #' 
 #' 
 GetERAStocks <- function(M){
-	
+
+    #========================================================
+    #TODO: Add compatibility with DGM data output
+    #========================================================
 
 	# 'Select available ERAStocks from database
 	dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
