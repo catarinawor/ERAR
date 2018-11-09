@@ -13,6 +13,25 @@
 
 
 
+#' @title GetSuperStockData
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetSuperStockData <- function(curr_stk,dbse){
 
     dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path   

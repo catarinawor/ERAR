@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetSizeLimitLengthVulnerable
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetSizeLimitLengthVulnerable <- function(){
 
     #'get minimum vulnerable lengths and size limits for PSC fisheries

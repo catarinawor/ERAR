@@ -11,6 +11,27 @@
 #source(utils.R)
 
 
+
+
+#' @title RedimensionArrays
+#'
+#' @description  Most.Useless.Thing.Ever =)
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 RedimensionArrays <- function(){
 
 	#Redimension variables with correct number of BroodYear,Age, and Fishery dimensions

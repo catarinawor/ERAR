@@ -11,6 +11,27 @@
 #source(utils.R)
 
 
+
+
+#' @title GetWithinBYWeightFlagAndPNVRegionAndAvgMatRate
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetWithinBYWeightFlagAndPNVRegionAndAvgMatRate <- function(){
 
   #  'determines whether Within BY Weighting occurs for a stock

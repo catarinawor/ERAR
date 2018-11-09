@@ -8,9 +8,27 @@
 #=======================================================
 
 
-#source(utils.R)
 
 
+
+#' @title GetERAFisheries
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list with inital settings to be used in the ERA
+#'
+#' @details
+#'
+#' @return A list 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetERAFisheries <- function(M){
 
 

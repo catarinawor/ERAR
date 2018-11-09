@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetTaggedReleaseByBrood
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetTaggedReleaseByBrood <- function(){
 
     #read from database

@@ -8,7 +8,27 @@
 #source(utils.R)
 
 
-#CreatePNV <- function(M){
+
+#' @title CreatePNV
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
+CreatePNV <- function(M){
 
     #--------------------------------------------------------------
     #  Purpose:  Calculates stock,age,fishery,year specific PNV values using ND function and input values.
@@ -95,7 +115,7 @@
     #End Sub
    ##     
   
-#}
+}
 
 
 

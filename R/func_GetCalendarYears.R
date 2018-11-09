@@ -11,6 +11,26 @@
 #source(utils.R)
 
 
+#' @title GetCalendarYears
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list containing all initial settings contained in M and the folowing objects NumberPSCFisheries (double),
+#' PSCFisheryNumber (vector), PSCFisheryName (vector), PSCFisheryGear (vector).
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetCalendarYears <- function(M){
 
 	#make sure to select calendar years for which there is Incidental mortality data

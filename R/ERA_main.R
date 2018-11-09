@@ -13,8 +13,9 @@
 
 
 
+
 #===================================================================
-#VARIABLE DEFINTIONS
+#VARIABLE DEFINTIONS -- this needs work
 
 #-----------------#
 #Indices/counters
@@ -80,13 +81,18 @@
 #New
 #Historic
 
+#==========================================
+#list of packages required to run this model
+#RODBC
 
 
+
+#initial list of settings
 M <- list(
     isCombineAge2And3=c(TRUE,
     isCombineAge5And6=FALSE,
     StockListView =c("HAR","ATN"),
-    datbse="C:/Users/worc/Documents/CIStesting/CIS2018_Pilot_Small.accdb",
+    datbse="../data/CIS2018_Pilot_Small.accdb",
     ArithmeticMeanFlag = TRUE,
     MaxCalendarYear=2017,
     isTraceCalc = FALSE,
@@ -117,25 +123,46 @@ for(i in 1:length(funcfiles)){
 
 
 
-
+#' @title StartCohortAnalysis_Click
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list with inital settings to be used in the ERA
+#'
+#' @details
+#'
+#' @return A list containing all initial settings contained in M plus additional data gathered from other subfunctions:
+#'   GetPSCFisheries(), GetERAFisheries(), GetCalendarYears(M2), GetERAStocks(M2)
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 StartCohortAnalysis_Click <- function(M){
+
+    #=====================================
 
 
     sink("../logs/Settings.log")
     cat("You have selected the following settings:\n")
 
-    if(Average_Maturation_Rate == "LongTermAverage"){
+    if(M$Average_Maturation_Rate == "LongTermAverage"){
 
         cat("Average Maturation Rate: Long Term Average\n")
 
-    }else if(Average_Maturation_Rate == "SelectNumberCompleteBroods" ){
+    }else if(M$Average_Maturation_Rate == "SelectNumberCompleteBroods" ){
     
         cat(paste("Selected to use the last", M$LastCompleteBroodsUsed,"Brood Years \n"))
     
     }
 
 
-    if(MeanMatType=="ArithmeticMean"){
+    if(M$MeanMatType=="ArithmeticMean"){
     
         cat("Arithmetic Average Maturity Rates \n")
     
@@ -145,37 +172,37 @@ StartCohortAnalysis_Click <- function(M){
     
     }
 
-    if(PNVAlgorithm=="StockSpecific"){
+    if(M$PNVAlgorithm=="StockSpecific"){
 
         cat("Proportion Not Vulnerable setting: Stock Specific \n")
 
-    }else if(PNVAlgorithm=="FisherySpecific"){
+    }else if(M$PNVAlgorithm=="FisherySpecific"){
 
         cat("Proportion Not Vulnerable setting: Fishery Specific \n")
 
     }
 
-    if(ShakerMethod == 1){
+    if(M$ShakerMethod == 1){
 
         cat("Using Shaker Method 1 \n")
     
-    }else if(ShakerMethod == 4){
+    }else if(M$ShakerMethod == 4){
     
         cat("Using Shaker Method 4 \n")
     
     }
 
-    if(IncompleteYearAlgorithm=="New"){
+    if(M$IncompleteYearAlgorithm=="New"){
 
         cat("Use new incomplete brood year algorithm")
 
-    }else if(IncompleteYearAlgorithm=="Historic"){
+    }else if(M$IncompleteYearAlgorithm=="Historic"){
 
         cat("Use historic incomplete brood year algorithm")
 
     }
     
-    if(RoundRecoveriesByTagCode== TRUE){
+    if(M$RoundRecoveriesByTagCode== TRUE){
        
         cat("Round recoveries as in CAS CFiles \n")
         M$isReplicateCohShak <- TRUE
@@ -298,6 +325,27 @@ StartCohortAnalysis_Click <- function(M){
 }
 
 
+
+
+#' @title CalculateButton_Click 
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list. Otput of StartCohortAnalysis_Click()
+#'
+#' @details
+#'
+#' @return A list containing all initial M items plus additional output from MainSub
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 CalculateButton_Click  <- function(M){(
 
    do.call(file.remove, list(list.files("../logs", full.names = TRUE)))
@@ -435,8 +483,26 @@ CalculateButton_Click  <- function(M){(
 
 
 
-#sub main routine
-mainERA<-function(M){
+#' @title MainSub 
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list. Output of StartCohortAnalysis_Click()
+#'
+#' @details
+#'
+#' @return A list ??? maybe something else? 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
+MainSub<-function(M){
 
 
     NumStocks<-length(M$ERAStockArray)

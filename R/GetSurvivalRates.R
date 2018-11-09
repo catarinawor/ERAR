@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetSurvivalRates
+#'
+#' @description  GetSurvivalRates
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetSurvivalRates <- function(){
 
     isOK = FALSE
