@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetCASStocks
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetCASStocks <- function(curr_stk,dbse){
 
 	#curr_stk=CurrentStock

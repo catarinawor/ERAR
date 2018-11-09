@@ -13,15 +13,16 @@
 
 #' @title GetERAFisheries
 #'
-#' @description  
+#' @description  Only used if the model is set to replicate Coshak.  Retrieves the ERA fishery information from the 
+#' database.
 #' 
 #' 
 #'
-#' @param M A list with inital settings to be used in the ERA
+#' @param M A list passed to StartCohortAnalysis_Click and appended to the output of GetPSCFisheries
 #'
 #' @details
 #'
-#' @return A list 
+#' @return A list including the following objects: NumberERAFisheries, ERAFisheryNumber, and ERAFisheryName 
 #' 
 #' 
 #' @export
@@ -34,14 +35,11 @@ GetERAFisheries <- function(M){
 
 	#    'Get number of ERAFisheries
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
-   # ERASQL <- "SELECT MAX(ID) from ERA_ERAFishery"
-
-    #NumberERAFisheries <-  RODBC::sqlQuery( dta , query = ERASQL )[1,1]
-
-    #    'Get name,number,gear of ERAFisheries
-   
+  
+    #    'Get name,number,gear of ERAFisheries 
     ERASQL2 <- "SELECT ID,Name from ERA_ERAFishery"
-	  
+    df1 <-  RODBC::sqlQuery( dta , query = ERASQL2)
+
     NumberERAFisheries <- nrow(df1)
 	names(df1) <- c("ERAFisheryNumber","ERAFisheryName")
 

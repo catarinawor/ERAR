@@ -15,17 +15,16 @@
 
 #' @title GetPSCFisheries
 #'
-#' @description  
+#' @description  Retrieves the PSC fishery information from the database.
 #' 
 #' 
 #'
-#' @param M A list passed to MainSub
+#' @param M A list passed to StartCohortAnalysis_Click
 #'
 #' @details
 #'
-#' @return D: A list containing all initial settings contained in M and the folowing objects NumberPSCFisheries (double),
+#' @return D: A list containing the folowing objects NumberPSCFisheries (double),
 #' PSCFisheryNumber (vector), PSCFisheryName (vector), PSCFisheryGear (vector).
-#' 
 #' 
 #' 
 #' @export
@@ -35,14 +34,16 @@
 #' 
 GetPSCFisheries <- function(M){
 
-
+    #========================================================
+    #TODO: Add compatibility with DGM data output
+    #========================================================
 
 
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
     
     #'Get name,number,gear of PSCFisheries
     
-    ERASQL2 = "SELECT ID,Name,Gear from ERA_PSCFishery"
+    ERASQL2 = "SELECT ID, Name, Gear from ERA_PSCFishery"
     df1 <-  RODBC::sqlQuery( dta , query = ERASQL2)
     names(df1) <- c("PSCFisheryNumber","PSCFisheryName","PSCFisheryGear")
             

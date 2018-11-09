@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetFirstAndLastBY
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetFirstAndLastBY <- function(dbse,CASStockString,LastCalendarYear,OceanStartAge){
 
 

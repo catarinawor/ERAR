@@ -8,9 +8,27 @@
 #=======================================================
 
 
-#source(utils.R)
 
 
+#' @title GetMeanLength
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetMeanLength <- function(){
 
 #'Get MeanLength,StandardDeviation for current ERAStock

@@ -11,6 +11,25 @@
 #source(utils.R)
 
 
+#' @title GetIMData
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetIMData <- function(){
 
     # ReDimension Incidental Mortality variables

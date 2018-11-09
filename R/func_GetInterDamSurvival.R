@@ -11,6 +11,26 @@
 #source(utils.R)
 
 
+
+#' @title GetInterDamSurvival
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetInterDamSurvival <- function(){
 
       #'Set default InterDamSurvival Rate to 1 for each year, change below if stock has rates in InterDamSurvival table

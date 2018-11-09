@@ -3,6 +3,7 @@
 #Translated from VB ERA CIS code
 #November 2018
 #Author: Catarina Wor
+
 #=======================================================
 
 #=======================================================
@@ -13,16 +14,18 @@
 
 #' @title GetERAStocks
 #'
-#' @description  
+#' @description  I think this function is supposed to chech which stocks were selected by the user? Not super sure. 
+#' but this is what the function is doing right now. 
 #' 
 #' 
 #'
-#' @param M A list passed to MainSub
+#' @param M A list passed to StartCohortAnalysis_Click and appended to teh outputs of GetPSCFisheries and 
+#'  GetCalendarYears
 #'
 #' @details
 #'
-#' @return D: A list 
-#' 
+#' @return A list with one object : ERAStockTable: a vector listing all ERA stock acronyms and StockListBox,
+#'  which stocks were selected by the user.
 #' 
 #' 
 #' @export
@@ -39,9 +42,11 @@ GetERAStocks <- function(M){
 
 	ERAStockTable <-  RODBC::sqlQuery( dta , query = ERASQL )
     
-	names(ERAStockTable) <- "ERAStockAcronym" 
+	names(ERAStockTable) <- "ERAStockAcronym"
 
-	D <- list(ERAStockTable=ERAStockTable)
+    StockListBox <- match(M$StockListView,ERAStockTable[,1])
+
+	D <- list(ERAStockTable=ERAStockTable,StockListBox=StockListBox)
 	return(D)
 
 

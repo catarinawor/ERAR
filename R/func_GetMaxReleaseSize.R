@@ -8,9 +8,26 @@
 #=======================================================
 
 
-#source(utils.R)
 
-
+#' @title GetMaxReleaseSize
+#'
+#' @description  
+#' 
+#' 
+#'
+#' @param M A list passed to MainSub
+#'
+#' @details
+#'
+#' @return D: A list 
+#' 
+#' 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
 GetMaxReleaseSize <- function(curr_stk){
 
 

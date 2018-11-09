@@ -13,17 +13,16 @@
 
 #' @title GetCalendarYears
 #'
-#' @description  
+#' @description  Check which years have incidental mortality data available, and trim Calendar years available in
+#'  the database to just those that are equal or lower that the finalyera set by the user and has incidental mortality data 
+#' available.
 #' 
 #' 
-#'
-#' @param M A list passed to MainSub
+#' @param M A list passed to StartCohortAnalysis_Click
 #'
 #' @details
 #'
-#' @return D: A list containing all initial settings contained in M and the folowing objects NumberPSCFisheries (double),
-#' PSCFisheryNumber (vector), PSCFisheryName (vector), PSCFisheryGear (vector).
-#' 
+#' @return D: A list containing the following object: LastCalendarYear and RunYearList
 #' 
 #' 
 #' @export
@@ -36,19 +35,11 @@ GetCalendarYears <- function(M){
 	#make sure to select calendar years for which there is Incidental mortality data
 	#the original function also checks the final year with the user.
 
-
-
-	nonIMPSCfisheries<-c("ESCAPEMENT","XCA ESC STRAY","XUS ESC STRAY")
-
-	names(M)
-
+	nonIMPSCfisheries <- c("ESCAPEMENT","XCA ESC STRAY","XUS ESC STRAY")
 
 	NumberIMPSCFisheries <- M$NumberPSCFisheries - sum(!is.na(match(M$PSCFisheryName,nonIMPSCfisheries)))
 
-
-
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
-
 
     #which calendar years have Im data and what is the total number of fisheries
 	ERASQL0 <- "SELECT Count(ERA_IMInputs.PSCFishery) AS CountOfPSCFishery, ERA_IMInputs.CalendarYear
@@ -59,11 +50,9 @@ GetCalendarYears <- function(M){
     #which years have recovery data
     ERASQL <- "SELECT ERA_CWDBRecovery.RunYear FROM ERA_CWDBRecovery GROUP BY ERA_CWDBRecovery.RunYear"
 
-    df1 <-  RODBC::sqlQuery( dta , query = ERASQL )
-
-    head( df0)
+    df1 <- RODBC::sqlQuery( dta , query = ERASQL )
    
-	ERAyear<-df0$CalendarYear[df0$CountOfPSCFishery[which(df0$CalendarYear==df1[,1])]==NumberIMPSCFisheries]
+	ERAyear <- df0$CalendarYear[df0$CountOfPSCFishery[which(df0$CalendarYear==df1[,1])]==NumberIMPSCFisheries]
 
     LastCalendarYear<-max(ERAyear[ERAyear<=M$MaxCalendarYear])
    
@@ -77,7 +66,7 @@ GetCalendarYears <- function(M){
    	}
 
 
-	names(M)
+	
 
 	D <- list(LastCalendarYear=LastCalendarYear,RunYearList=ERAYear)
 	return(D)

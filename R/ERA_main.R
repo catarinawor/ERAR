@@ -91,6 +91,7 @@
 M <- list(
     isCombineAge2And3=c(TRUE,
     isCombineAge5And6=FALSE,
+    isReplicateCohShak = FALSE,
     StockListView =c("HAR","ATN"),
     datbse="../data/CIS2018_Pilot_Small.accdb",
     ArithmeticMeanFlag = TRUE,
@@ -125,17 +126,18 @@ for(i in 1:length(funcfiles)){
 
 #' @title StartCohortAnalysis_Click
 #'
-#' @description  
-#' 
-#' 
+#' @description  This function writes the Settings log file, i.e.: which ERA options did you choose for
+#'  Average_Maturation_Rate, MeanMatType,PNVAlgorithm,ShakerMethod, IncompleteYearAlgorithm, and 
+#' RoundRecoveriesByTagCode. It also retrieves additional data from the database using the following sub 
+#' routines: GetPSCFisheries, GetERAFisheries, GetCalendarYears, GetERAStocks.
+#'    
 #'
 #' @param M A list with inital settings to be used in the ERA
 #'
 #' @details
 #'
-#' @return A list containing all initial settings contained in M plus additional data gathered from other subfunctions:
-#'   GetPSCFisheries(), GetERAFisheries(), GetCalendarYears(M2), GetERAStocks(M2)
-#' 
+#' @return A list containing all initial settings contained in M plus additional data gathered from other 
+#' subfunctions: GetPSCFisheries, GetERAFisheries, GetCalendarYears, GetERAStocks
 #' 
 #' 
 #' @export
@@ -146,6 +148,7 @@ for(i in 1:length(funcfiles)){
 StartCohortAnalysis_Click <- function(M){
 
     #=====================================
+
 
 
     sink("../logs/Settings.log")
@@ -225,12 +228,12 @@ StartCohortAnalysis_Click <- function(M){
 
     if(M$isReplicateCohShak){
 
-        d1<-GetERAFisheries(M2)
+        d1 <- GetERAFisheries(M2)
         M2 <- append(M2,d1)
 
     }
 
-    d2 <-GetCalendarYears(M2)
+    d2 <- GetCalendarYears(M2)
     M2 <- append(M2,d2)
 
     d3 <- GetERAStocks(M2)

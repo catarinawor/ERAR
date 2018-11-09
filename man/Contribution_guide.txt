@@ -17,9 +17,13 @@ If you want to review code/ suggest coding ettiquete
 
 
 #========================================================================
-Guidelines on writing codes
+Guidelines on writing code
 
 This project is designed to be a direct translation of the CIS version of the ERA. Each Sub in the VB code should correspond to it's own function in R.
+
+Files that contain functions must include the prefix  func_
+
+no spaces allowed in file names
 
 Document as you go: I have added templates of an R-package like help (Stolen from MFolkes/ctctools). Document each function as you write and review them. 
 
