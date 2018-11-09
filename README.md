@@ -15,6 +15,8 @@ Oliver Miler <br />
 Catarina Wor<br />
 
 
+**Do you want to help? check the man/Contribution_guide.txt**
+
 
 
 
