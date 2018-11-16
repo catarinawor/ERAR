@@ -13,11 +13,13 @@
 
 #' @title GetFirstAndLastBY
 #'
-#' @description  
+#' @description  Get first and last brood years for the ERAstock
 #' 
 #' 
 #'
-#' @param M A list passed to MainSub
+#' @param curr_stk A string specifying the current ERAstock 
+#' 
+#' @param dbse  database location, defined in M 
 #'
 #' @details
 #'
@@ -35,10 +37,10 @@ GetFirstAndLastBY <- function(dbse,CASStockString,LastCalendarYear,OceanStartAge
 
     dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path   
 
-        df2 <- RODBC::sqlFetch(dta, "ERA_WireTagCode")
+    df2 <- RODBC::sqlFetch(dta, "ERA_WireTagCode")
     ERASQL <- paste0("SELECT Min(BroodYear) AS MinOfBroodYear, Max(BroodYear) AS MaxOfBroodYear FROM ERA_WireTagCode WHERE CASStock IN ('", as.character(CASStockString[[1]]) ,"') AND NOT ExcludeTagCodeFromERA = (-1)")
     
-    (df1 <- sqlQuery( dta , query = ERASQL ))
+    df1 <- sqlQuery( dta , query = ERASQL )
     
     erro<-0
 
@@ -46,15 +48,11 @@ GetFirstAndLastBY <- function(dbse,CASStockString,LastCalendarYear,OceanStartAge
 
     LastAvailableBY<-df1[1,2]
     
-
-
-#
-
-    FirstBY<-min(df2$BroodYear[df2$CASStock== as.character(CASStockString)&df2$ExcludeTagCodeFromERA!=-1])
-    LastAvailableBY<-max(df2$BroodYear[df2$CASStock== as.character(CASStockString)&df2$ExcludeTagCodeFromERA!=-1])
-    
     if(is.na( FirstBY)|is.na(LastAvailableBY)){
-        print(paste("please open ERA_CASStockToERAStockMapping and see if " , CASStockString , " is missing in the CASStock field (column).  Program is going to stop"))
+
+        sink("../GetFirstAndLastBY.log")
+        cat(paste("please open ERA_CASStockToERAStockMapping and see if " , CASStockString , " is missing in the CASStock field (column).  Program is going to stop"))
+        sink()
         erro<-1
 
     }
@@ -70,7 +68,7 @@ GetFirstAndLastBY <- function(dbse,CASStockString,LastCalendarYear,OceanStartAge
     #    CISDataReader.Read()
 	
 	# last brood to run based on user-selected LastCalendarYear.  The last year in the listbox is determined by the last year of IM data.
-	LastPossibleBY<- LastCalendarYear - OceanStartAge
+	LastPossibleBY<- M$LastCalendarYear - OceanStartAge
     
     #set LastBy to lesser of LastAvailableBY or LastPossibleBY
     if(LastAvailableBY < LastPossibleBY){

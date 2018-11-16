@@ -13,7 +13,7 @@
 
 #' @title GetERAFisheries
 #'
-#' @description  Only used if the model is set to replicate Coshak.  Retrieves the ERA fishery information from the 
+#' @description  Only used if the model is set to replicate Coshak (CAS).  Retrieves the ERA fishery information from the 
 #' database.
 #' 
 #' 

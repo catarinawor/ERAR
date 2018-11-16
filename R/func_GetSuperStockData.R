@@ -15,15 +15,16 @@
 
 #' @title GetSuperStockData
 #'
-#' @description  
+#' @description  Get Terminal Net Switch Age, OceanStartAge, and MaxAge for the ERAstock
 #' 
 #' 
-#'
-#' @param M A list passed to MainSub
+#' @param curr_stk A string specifying the current ERAstock 
+#' 
+#' @param dbse  database location, defined in M 
 #'
 #' @details
 #'
-#' @return D: A list 
+#' @return D: A list Terminal Net Switch Age, OceanStartAge, and MaxAge for the current ERA stock
 #' 
 #' 
 #' 

@@ -13,15 +13,17 @@
 
 #' @title GetCASStocks
 #'
-#' @description  
+#' @description  Get the array of CASStocks corresponding to the current ERAStock (e.g. ANB,ACI,ALP,ADM,AHC for ERA stock AKS)
 #' 
 #' 
 #'
-#' @param M A list passed to MainSub
+#' @param curr_stk A string specifying the current ERAstock 
+#' 
+#' @param dbse  database location, defined in M 
 #'
-#' @details
+#' @details 
 #'
-#' @return D: A list 
+#' @return CASStockString: a string or vector
 #' 
 #' 
 #' 
@@ -30,7 +32,7 @@
 #' @examples
 #' 
 #' 
-GetCASStocks <- function(curr_stk,dbse){
+GetCASStocks <- function(curr_stk=CurrentStock,dbse=M$datbse){
 
 	#curr_stk=CurrentStock
 	#dbse=M$datbse
@@ -38,10 +40,9 @@ GetCASStocks <- function(curr_stk,dbse){
 	require(RODBC)
 
 	dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path
-	#df1 <- RODBC::sqlFetch(dta, "ERA_CASStockToERAStockMapping")   #loads the table called 'bar' in the original Access file
+	
 
-
-	(ERASQL <- paste0("Select CASStock from ERA_CASStockToERAStockMapping Where ERAStock = '",curr_stk, "'"))
+	ERASQL <- paste0("Select CASStock from ERA_CASStockToERAStockMapping Where ERAStock = '",curr_stk, "'")
 
 	#  single quotes need to exist. 
 
@@ -52,11 +53,7 @@ GetCASStocks <- function(curr_stk,dbse){
 	# 'Get the array of CASStocks corresponding to the current ERAStock (e.g. ANB,ACI,ALP,ADM,AHC for ERA stock AKS)
 	#CASStockString <- df1$CASStock[df1$ERAStock==curr_stk]
 
-	#read sql query from file WITH variables and cleaning
-	#.q <- read_sql("GetCASStocksSQLquery.sql")
-	#if needs to change code
-  	#.q <- inject_filter("AND C.SPECIES_CODE IN", curr_stk, sql_code = .q)
-
+	
 
 
 	# 'Get the array of CASStocks corresponding to the current ERAStock (e.g. ANB,ACI,ALP,ADM,AHC for ERA stock AKS)
@@ -78,24 +75,6 @@ GetCASStocks <- function(curr_stk,dbse){
 	 
 
 } 
-
-
-
-#Fom Gf plots  inst/SQL get data
-
-#' @ export
-	#' @rdname get_data
-	##get_iphc_sets <- function(species, usability = NULL) {
-	##  .q <- read_sql("get-iphc-set-level.sql")
-	##  .q <- inject_filter("AND C.SPECIES_CODE IN", species, sql_code = .q)
-	##  .d <- run_sql("GFBioSQL", .q)
-	##  .d$species <- tolower(.d$species)
-	###
-	###    if (!is.null(usability)) {
-	###     .d <- filter(.d, usability_code %in% usability)
-	###   }
-	##  as_tibble(.d)
-	##}
 
 
 

@@ -569,7 +569,7 @@ MainSub<-function(M){
         M$isTraceByCalendarYr <- FALSE
         M$traceThisShakerMethod <- "C"
 
-        if(isTraceCalc){
+        if(M$isTraceCalc){
 
         	traceThisYear <- 1981
             traceThisFishery <- 58
@@ -598,13 +598,12 @@ MainSub<-function(M){
             debug_matShakersID <- list()
             debug_terminalCatchID <- list()
 
-
         }
 
         for(ShakCalcFlg in 1:2){
 
             #to be deleted
-            ShakCalcFlg<- 1            
+            #ShakCalcFlg<- 1            
 
         	#loop through once using the brood year method and then again using the calendar year method
 
@@ -633,7 +632,9 @@ MainSub<-function(M){
             
             #update stock label as progress is made - use this inestead of progerss bar
             ERAStockLabel.Text <- paste("Stock:", CurrentStock, "(", ERAStock , "of", NumStocks, ") Shaker Method:", ShakerMethod)
-            print(ERAStockLabel.Text)
+            sink("../logs/MainSub.log")
+            cat(ERAStockLabel.Text)
+            sink()
             #ERAStockLabel.Visible <- TRUE
             #lblStatus.Visible <- FALSE
 
@@ -641,6 +642,7 @@ MainSub<-function(M){
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
             D<-GetSuperStockData(CurrentStock,M$datbse)
+            
             TermNetSwitchAge <- D$TermNetSwitchAge
             OceanStartAge  <- D$OceanStartAge 
             MaxAge  <- D$MaxAge 
@@ -651,7 +653,11 @@ MainSub<-function(M){
             	
             	if(D$OceanStartAge != 3){
             		
-            		print(paste("Coshak will NOT combine age 2 and 3 for",CurrentStock, "if OceanStartAge in SuperStock table = 2.  Hint:  Look in ERA_Stock to find the corresponding SuperStock."))
+                    combineage23log <- paste0("../logs/",CurrentStock,"_CombineAge2And3.log")
+                    sink(combineage23log)
+                    cat(paste("Coshak will NOT combine age 2 and 3 for",CurrentStock, "if OceanStartAge in SuperStock table = 2.  Hint:  Look in ERA_Stock to find the corresponding SuperStock."))
+                    sink()
+            		
             		M$isCombineAge2And3[ERAStock] <- FALSE
             	
             	}else if(!M$isCombineAge5And6[ERAStock]){
@@ -667,8 +673,12 @@ MainSub<-function(M){
 
             if(M$isCombineAge5And6[ERAStock]){
             	if(D$OceanStartAge!= 2){
-            		 print(paste("Coshak will NOT combine age 5 and 6 ", CurrentStock, " if OceanStartAge in SuperStock table = 3.  Hint:  Look in ERA_Stock to find the corresponding SuperStock."))
-            		M$isCombineAge5And6[ERAStock] = FALSE
+
+                    combineage56log <- paste0("../logs/",CurrentStock,"_CombineAge5And6.log")
+                    sink(combineage56log)
+                    cat(paste("Coshak will NOT combine age 5 and 6 ", CurrentStock, " if OceanStartAge in SuperStock table = 3.  Hint:  Look in ERA_Stock to find the corresponding SuperStock.\n"))
+                    sink()
+                
             	}else if(!M$isCombineAge2And3[ERAStock]){
 
             		if(M$ShakCalcFlg == 1){
@@ -681,16 +691,21 @@ MainSub<-function(M){
             }
 
             if(M$isCombineAge2And3[ERAStock]& M$isCombineAge5And6[ERAStock]){
-                if(ShakCalcFlg == 1){
+                if(M$ShakCalcFlg == 1){
                   # UserSettings = SaveSettings & "Combine age 2 & 3; Combine age 5 & 6"  
                 }
             }
 
-            print("Get First and Last Brood Year")
+
+            sink("../logs/MainSub.log")
+            cat("Get First and Last Brood Year\n")
+            sink()
+           
             GetFirstAndLastBY(dbse=M$datbse,
                             CASStockString=CASStockString,
-                            LastCalendarYear,
+                            LastCalendarYear=LastCalendarYear,
                             OceanStartAge=D$OceanStartAge)
+            
             GetMaxReleaseSize()
             RedimensionArrays()
 
