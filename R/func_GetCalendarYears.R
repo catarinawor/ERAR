@@ -13,9 +13,8 @@
 
 #' @title GetCalendarYears
 #'
-#' @description  Check which years have incidental mortality data available, and trim Calendar years available in
-#'  the database to just those that are equal or lower that the final year set by the user and has incidental mortality data 
-#' available.
+#' @description   Check calendar years available in the database and which years have incidental mortality data available,
+#' compare the two and return the overlap as the years to be used in the following analysis. return warning log if years do not match
 #' 
 #' 
 #' @param M A list passed to StartCohortAnalysis_Click
@@ -46,23 +45,26 @@ GetCalendarYears <- function(M){
 
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
 
+
     #which calendar years have Im data and what is the total number of fisheries
 	ERASQL0 <- "SELECT Count(ERA_IMInputs.PSCFishery) AS CountOfPSCFishery, ERA_IMInputs.CalendarYear
 	FROM ERA_IMInputs GROUP BY ERA_IMInputs.CalendarYear"
 
     df0 <-  RODBC::sqlQuery( dta , query = ERASQL0 )
 
+
     #which years have recovery data
     ERASQL <- "SELECT ERA_CWDBRecovery.RunYear FROM ERA_CWDBRecovery GROUP BY ERA_CWDBRecovery.RunYear"
 
     df1 <- RODBC::sqlQuery( dta , query = ERASQL )
-   
-	ERAyear <- df0$CalendarYear[df0$CountOfPSCFishery[which(df0$CalendarYear==df1[,1])]==NumberIMPSCFisheries]
 
-    LastCalendarYear<-max(ERAyear[ERAyear<=M$MaxCalendarYear])
+   
+	IMyear <- df0$CalendarYear[df0$CountOfPSCFishery[which(df0$CalendarYear==df1[,1])]==NumberIMPSCFisheries]
+
+    LastCalendarYear<-max(IMyear[IMyear<=M$MaxCalendarYear])
    
 
-   	if(length(ERAyear[ERAyear<M$MaxCalendarYear])<length(df0$CalendarYear[df0$CalendarYear<M$MaxCalendarYear])){
+   	if(length(IMyear[IMyear<M$MaxCalendarYear])<length(df0$CalendarYear[df0$CalendarYear<M$MaxCalendarYear])){
 
    		sink("../logs/IncidentalMortalityMissing.log")
    		cat("ERA_IMInputs has fewer years than ERA_CWDBRecovery.  This may affect Alaska and Canada where there is an extra year of recovery data.  Meanwhile, only years in ERA_IMInputs will be used.\n")
@@ -73,7 +75,7 @@ GetCalendarYears <- function(M){
 
 	
 
-	D <- list(LastYearCheckedListBox=LastCalendarYear,RunYearList=ERAYear)
+	D <- list(LastYearCheckedListBox=LastCalendarYear,RunYearList=IMyear)
 	return(D)
 
 	#Original ERA code

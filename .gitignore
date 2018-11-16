@@ -45,29 +45,9 @@ rsconnect/
 *.pdf
 
 
-
-
 #Exclude all the data - NO data goes on Github
 data/*.*
 
 
-
-# Latex Stuff #
-###############
-*.aux
-*.nav
-*.out
-*.snm
-*.synctex.gz
-*.toc
-*.vrb
-*.top
-*.toi
-*.d
-*.dvi
-*.blg
-*.bbl
-*.fdb_latexmk
-*.fls
-*.log
-
+#log files
+.log

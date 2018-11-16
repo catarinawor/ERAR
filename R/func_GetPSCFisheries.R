@@ -15,7 +15,8 @@
 
 #' @title GetPSCFisheries
 #'
-#' @description  Retrieves the PSC fishery information from the database.
+#' @description  Retrieves the PSC fishery information from the database. Information include 
+#' number of PSC fisheries, the PSC fisheries ID,  fisheries names and gears. 
 #' 
 #' 
 #'

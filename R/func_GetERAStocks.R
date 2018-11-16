@@ -25,7 +25,7 @@
 #' @details
 #'
 #' @return A list with one object : ERAStockTable: a vector listing all ERA stock acronyms and StockListBox,
-#'  which stocks were selected by the user.
+#'  which stock IDs were selected by the user.
 #' 
 #' 
 #' @export
