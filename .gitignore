@@ -50,4 +50,6 @@ data/*.*
 
 
 #log files
-.log
+*.log
+
+ R/handy_develop.R

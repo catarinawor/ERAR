@@ -514,7 +514,7 @@ MainSub<-function(M){
         CurrentStock <- M$ERAStockArray[ERAStock]
         
         #'reset LastCalendarYear to MaxCalendarYear for each stock, LastCalendarYear is adjusted in GETIMDATA for some stocks
-        LastCalendarYear <- M$MaxCalendarYear
+        M$LastCalendarYear <- M$MaxCalendarYear
         
         #'Loop through CalendarYear shaker method and BroodYear Shaker method
 		
@@ -633,20 +633,21 @@ MainSub<-function(M){
             #update stock label as progress is made - use this inestead of progerss bar
             ERAStockLabel.Text <- paste("Stock:", CurrentStock, "(", ERAStock , "of", NumStocks, ") Shaker Method:", ShakerMethod)
             sink("../logs/MainSub.log")
-            cat(ERAStockLabel.Text)
+            cat(paste(ERAStockLabel.Text,"\n"))
             sink()
             #ERAStockLabel.Visible <- TRUE
             #lblStatus.Visible <- FALSE
 
-            CASStockString<-GetCASStocks(curr_stk=CurrentStock,dbse=M$datbse)
+            M$CASStockString<-GetCASStocks(curr_stk=CurrentStock,dbse=M$datbse)
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
             D<-GetSuperStockData(CurrentStock,M$datbse)
             
-            TermNetSwitchAge <- D$TermNetSwitchAge
-            OceanStartAge  <- D$OceanStartAge 
-            MaxAge  <- D$MaxAge 
-            SuperStock  <- D$SuperStock
+            M<-append(M,D)
+            #TermNetSwitchAge <- D$TermNetSwitchAge
+            #OceanStartAge  <- D$OceanStartAge 
+            #MaxAge  <- D$MaxAge 
+            #SuperStock  <- D$SuperStock
 
                 
             if(M$isCombineAge2And3[ERAStock]){
@@ -701,11 +702,10 @@ MainSub<-function(M){
             cat("Get First and Last Brood Year\n")
             sink()
            
-            GetFirstAndLastBY(dbse=M$datbse,
-                            CASStockString=CASStockString,
-                            LastCalendarYear=LastCalendarYear,
-                            OceanStartAge=D$OceanStartAge)
+            D<- GetFirstAndLastBY(M, ERAStock)
             
+            try(if(D$erro ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
+
             GetMaxReleaseSize()
             RedimensionArrays()
 
