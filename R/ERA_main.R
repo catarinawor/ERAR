@@ -509,10 +509,12 @@ MainSub<-function(M){
 
         #' timestep is only used when printing to output table, I think it is redundant with TimePeriod
         TimeStep <- 1 
-            
-        #'set the current stock from the user selected ERAStock array
-        CurrentStock <- M$ERAStockArray[ERAStock]
         
+        D <- list()    
+        #'set the current stock from the user selected ERAStock array
+        D$CurrentStock <- M$ERAStockArray[ERAStock]
+
+
         #'reset LastCalendarYear to MaxCalendarYear for each stock, LastCalendarYear is adjusted in GETIMDATA for some stocks
         M$LastCalendarYear <- M$MaxCalendarYear
         
@@ -554,7 +556,7 @@ MainSub<-function(M){
         #-------------------------------------------------------------------------  
          
         #build a log for fish that are observed to be older than the user set maximum age -- the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock
-        Log_OlderThanMaxAge_ID <- paste0(CurrentStock,"_OlderThanMaxAge.log")
+        Log_OlderThanMaxAge_ID <- paste0(D$CurrentStock,"_OlderThanMaxAge.log")
         sink(Log_OlderThanMaxAge_ID)
         cat("the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock.\n")
         cat("ShakerMethod BY age fishery \n")
@@ -621,29 +623,28 @@ MainSub<-function(M){
          	}
 
          	#reset CASStockString between shaker methods'
-            CASStockString <- NA
+            #CASStockString <- NA
                 
             #reset LastCompleteBroodYear to nothing between shaker methods and stocks
-
-            LastCompleteBroodYear <- NA
+            #LastCompleteBroodYear <- NA
 
             #reset pass between shaker methods and stocks
-            pass <- 0
+            #pass <- 0
             
             #update stock label as progress is made - use this inestead of progerss bar
-            ERAStockLabel.Text <- paste("Stock:", CurrentStock, "(", ERAStock , "of", NumStocks, ") Shaker Method:", ShakerMethod)
+            ERAStockLabel.Text <- paste("Stock:", D$CurrentStock, "(", ERAStock , "of", M$NumStocks, ") Shaker Method:", ShakerMethod)
             sink("../logs/MainSub.log")
             cat(paste(ERAStockLabel.Text,"\n"))
             sink()
             #ERAStockLabel.Visible <- TRUE
             #lblStatus.Visible <- FALSE
 
-            M$CASStockString<-GetCASStocks(curr_stk=CurrentStock,dbse=M$datbse)
+            D$CASStockString<-GetCASStocks(curr_stk=D$CurrentStock,dbse=M$datbse)
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
-            D<-GetSuperStockData(CurrentStock,M$datbse)
+            D1<-GetSuperStockData(CurrentStock,M$datbse)
             
-            M<-append(M,D)
+            D<-append(D,D1)
             #TermNetSwitchAge <- D$TermNetSwitchAge
             #OceanStartAge  <- D$OceanStartAge 
             #MaxAge  <- D$MaxAge 
@@ -654,9 +655,9 @@ MainSub<-function(M){
             	
             	if(D$OceanStartAge != 3){
             		
-                    combineage23log <- paste0("../logs/",CurrentStock,"_CombineAge2And3.log")
+                    combineage23log <- paste0("../logs/",D$CurrentStock,"_CombineAge2And3.log")
                     sink(combineage23log)
-                    cat(paste("Coshak will NOT combine age 2 and 3 for",CurrentStock, "if OceanStartAge in SuperStock table = 2.  Hint:  Look in ERA_Stock to find the corresponding SuperStock."))
+                    cat(paste("Coshak will NOT combine age 2 and 3 for",D$CurrentStock, "if OceanStartAge in SuperStock table = 2.  Hint:  Look in ERA_Stock to find the corresponding SuperStock."))
                     sink()
             		
             		M$isCombineAge2And3[ERAStock] <- FALSE
@@ -675,9 +676,9 @@ MainSub<-function(M){
             if(M$isCombineAge5And6[ERAStock]){
             	if(D$OceanStartAge!= 2){
 
-                    combineage56log <- paste0("../logs/",CurrentStock,"_CombineAge5And6.log")
+                    combineage56log <- paste0("../logs/",D$CurrentStock,"_CombineAge5And6.log")
                     sink(combineage56log)
-                    cat(paste("Coshak will NOT combine age 5 and 6 ", CurrentStock, " if OceanStartAge in SuperStock table = 3.  Hint:  Look in ERA_Stock to find the corresponding SuperStock.\n"))
+                    cat(paste("Coshak will NOT combine age 5 and 6 ", D$CurrentStock, " if OceanStartAge in SuperStock table = 3.  Hint:  Look in ERA_Stock to find the corresponding SuperStock.\n"))
                     sink()
                 
             	}else if(!M$isCombineAge2And3[ERAStock]){
@@ -702,11 +703,14 @@ MainSub<-function(M){
             cat("Get First and Last Brood Year\n")
             sink()
            
-            D<- GetFirstAndLastBY(M, ERAStock)
-            
-            try(if(D$erro ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
+            D1 <- GetFirstAndLastBY(M, ERAStock)
+            try(if(D1$erro ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
+            D <- append(D,D1)
 
-            GetMaxReleaseSize()
+
+            D1 <- GetMaxReleaseSize(D,M)
+            try(if(D1$erro == 1 ) stop(" MainSub stopped check  ../GetMaxReleaseSize.log"))            
+
             RedimensionArrays()
 
             print("Get Tagged Release By Brood")

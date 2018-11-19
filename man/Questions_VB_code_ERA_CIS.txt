@@ -6,5 +6,10 @@
 
 
 
+#NEED TO TEST WITH A STOCK HAS MORE THAN ONE casstRING AS A STOCK
+
+#On GetMaxReleaseSize - this one is weird. is this maximum number of releases??
+
+
 
    
