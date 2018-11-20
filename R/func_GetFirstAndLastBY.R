@@ -32,12 +32,12 @@
 #' @examples
 #' 
 #' 
-GetFirstAndLastBY <- function(M,ERAstock){
+GetFirstAndLastBY <- function(D,M,ERAstock){
 #dbse,CASStockString,LastCalendarYear,OceanStartAge
 
     dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path   
 
-    ERASQL <- paste0("SELECT Min(BroodYear) AS MinOfBroodYear, Max(BroodYear) AS MaxOfBroodYear FROM ERA_WireTagCode WHERE CASStock IN ('", as.character(M$CASStockString[[1]]) ,"') AND NOT ExcludeTagCodeFromERA = (-1)")
+    ERASQL <- paste0("SELECT Min(BroodYear) AS MinOfBroodYear, Max(BroodYear) AS MaxOfBroodYear FROM ERA_WireTagCode WHERE CASStock IN ('", as.character(D$CASStockString[[1]]) ,"') AND NOT ExcludeTagCodeFromERA = (-1)")
     
     df1 <- sqlQuery( dta , query = ERASQL )
     
@@ -67,7 +67,7 @@ GetFirstAndLastBY <- function(M,ERAstock){
     #    CISDataReader.Read()
 	
 	# last brood to run based on user-selected LastCalendarYear.  The last year in the listbox is determined by the last year of IM data.
-	LastPossibleBY<- M$LastCalendarYear - M$OceanStartAge
+	LastPossibleBY<- M$LastCalendarYear - D$OceanStartAge
     
     #set LastBy to lesser of LastAvailableBY or LastPossibleBY
     if(LastAvailableBY < LastPossibleBY){
@@ -78,13 +78,13 @@ GetFirstAndLastBY <- function(M,ERAstock){
     
 
     #'find youngest age and compare with OceanStartAge
-    ERASQL2 = paste0("SELECT Min(age) FROM ERA_CWDBRecovery as r INNER JOIN ERA_WireTagCode as t ON r.TagCode = t.TagCode  WHERE CASStock IN ('",M$CASStockString[[1]] , "')")
+    ERASQL2 = paste0("SELECT Min(age) FROM ERA_CWDBRecovery as r INNER JOIN ERA_WireTagCode as t ON r.TagCode = t.TagCode  WHERE CASStock IN ('",D$CASStockString[[1]] , "')")
     
     df2 <- sqlQuery( dta , query = ERASQL2 )
 
     youngestAge <- df2[[1]]
 
-    if(youngestAge < M$OceanStartAge& !M$isCombineAge2And3[ERAStock]){
+    if(youngestAge < D$OceanStartAge& !M$isCombineAge2And3[ERAStock]){
         if(youngestAge == 1){
             sink("../GetFirstAndLastBY.log",append = TRUE)
             cat(paste(M$ShakerMethod, youngestAge,  "will not be used in Exploitation Rate Analysis.\n"))

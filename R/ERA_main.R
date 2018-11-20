@@ -121,6 +121,12 @@ for(i in 1:length(funcfiles)){
 }
 
 
+M2<-StartCohortAnalysis_Click(M)
+
+M<-append(M,M2)
+
+
+CalculateButton_Click(M)
 
 
 
@@ -197,11 +203,11 @@ StartCohortAnalysis_Click <- function(M){
 
     if(M$IncompleteYearAlgorithm=="New"){
 
-        cat("Use new incomplete brood year algorithm")
+        cat("Use new incomplete brood year algorithm\n")
 
     }else if(M$IncompleteYearAlgorithm=="Historic"){
 
-        cat("Use historic incomplete brood year algorithm")
+        cat("Use historic incomplete brood year algorithm\n")
 
     }
     
@@ -212,7 +218,7 @@ StartCohortAnalysis_Click <- function(M){
 
     }else{
 
-        cat("Do NOT round recoveries")
+        cat("Do NOT round recoveries\n")
         M$isReplicateCohShak <- FALSE
 
 
@@ -347,7 +353,7 @@ StartCohortAnalysis_Click <- function(M){
 #' @examples
 #' 
 #' 
-CalculateButton_Click  <- function(M){(
+CalculateButton_Click  <- function(M){
 
    
 
@@ -360,7 +366,7 @@ CalculateButton_Click  <- function(M){(
 
     }
 
-    if(is.na(M$StockListBox)){
+    if(is.na(sum(M$StockListBox))){
 
         sink("../logs/StockListError.log")
         cat("Error: You must select at least one stock before continuing.\n")
@@ -393,12 +399,12 @@ CalculateButton_Click  <- function(M){(
     NumStocks <- length(ERAStockArray)
 
 
-    D <-list(     
+    M2 <-list(     
         ERAStockArray=ERAStockArray, #array of Stock names (acronyms)
         NumStocks = NumStocks    
     )
     
-    M<-append(M,D)
+    M<-append(M,M2)
 
     D1<- MainSub(M)
     
@@ -633,7 +639,8 @@ MainSub<-function(M){
             
             #update stock label as progress is made - use this inestead of progerss bar
             ERAStockLabel.Text <- paste("Stock:", D$CurrentStock, "(", ERAStock , "of", M$NumStocks, ") Shaker Method:", ShakerMethod)
-            sink("../logs/MainSub.log")
+            MainSublog <- paste0("../logs/",D$CurrentStock,"_MainSub.log")
+            sink(MainSublog)
             cat(paste(ERAStockLabel.Text,"\n"))
             sink()
             #ERAStockLabel.Visible <- TRUE
@@ -642,7 +649,7 @@ MainSub<-function(M){
             D$CASStockString<-GetCASStocks(curr_stk=D$CurrentStock,dbse=M$datbse)
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
-            D1<-GetSuperStockData(CurrentStock,M$datbse)
+            D1<-GetSuperStockData(curr_stk=D$CurrentStock,dbse=M$datbse)
             
             D<-append(D,D1)
             #TermNetSwitchAge <- D$TermNetSwitchAge
@@ -698,23 +705,29 @@ MainSub<-function(M){
                 }
             }
 
-
             sink("../logs/MainSub.log")
             cat("Get First and Last Brood Year\n")
             sink()
            
-            D1 <- GetFirstAndLastBY(M, ERAStock)
+            D1 <- GetFirstAndLastBY(D,M, ERAStock)
             try(if(D1$erro ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
             D <- append(D,D1)
 
 
             D1 <- GetMaxReleaseSize(D,M)
             try(if(D1$erro == 1 ) stop(" MainSub stopped check  ../GetMaxReleaseSize.log"))            
+            D <- append(D,D1)
 
-            RedimensionArrays()
+            #RedimensionArrays()
 
-            print("Get Tagged Release By Brood")
-            GetTaggedReleaseByBrood()
+            sink(MainSublog, append=TRUE)
+            cat("Get Tagged Release By Brood...")
+            sink()
+
+        
+            D1 <- GetTaggedReleaseByBrood(D,M)
+            D <- append(D,D1)
+
             GetInterDamSurvival()
             GetSurvivalRates()
             GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates() #get within by flag, average mat rates, PNVregion

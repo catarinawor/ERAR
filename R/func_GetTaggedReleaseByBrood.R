@@ -30,22 +30,31 @@
 #' @examples
 #' 
 #' 
-GetTaggedReleaseByBrood <- function(){
+GetTaggedReleaseByBrood <- function(D,M){
 
     #read from database
-    ERASQL = "SELECT BroodYear, SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count))as CWTRelease, SUM(CWTMark1Count+IIf(ISNULL(CWTMark2Count),0,CWTMark2Count)) + Sum(IIF(ISNULL(NonCWTMark1Count),0,NonCWTMark1Count)+IIF(ISNULL(NonCWTMark2Count),0,NonCWTMark2Count)) as TotalRelease FROM ERA_WireTagCode WHERE CASStock IN (" & CASStockString & ") and BroodYear <= " & LastBY & " AND NOT ExcludeTagCodeFromERA = -1" & " Group By BroodYear"
-    #object that is supposed to store read in data
-    CISDataReader 
 
-    for (i in 1:length(CISDataReader[1])) {
+    #establish connection with database
+    dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
-        BroodYear <- CISDataReader[1]
-        CWTRelease[BroodYear] <- CISDataReader[2]
-        TotalRelease[BroodYear] <- CISDataReader[3]
+     ERASQL = paste0("SELECT BroodYear, SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count))as CWTRelease, SUM(CWTMark1Count+IIf(ISNULL(CWTMark2Count),0,CWTMark2Count)) + Sum(IIF(ISNULL(NonCWTMark1Count),0,NonCWTMark1Count)+IIF(ISNULL(NonCWTMark2Count),0,NonCWTMark2Count)) as TotalRelease FROM ERA_WireTagCode WHERE CASStock IN ('", D$CASStockString[[1]], "') and BroodYear <= " , D$LastBY, " AND NOT ExcludeTagCodeFromERA = -1" , " Group By BroodYear")
+
+       df1 <- sqlQuery( dta , query = ERASQL )
+      #object that is supposed to store read in data
+
+
+   
+        
         #expansion up to the largest release size across all brood years for a stock
-        RelRatio[BroodYear] = MaxRelease / CWTRelease[BroodYear]
+        RelRatio <- D$MaxRelease / df1$CWTRelease
     
-    }
+    
+    return(list(RelRatio=RelRatio, BroodYear=df1$BroodYear, CWTRelease=df1$CWTRelease, TotalRelease=df1$TotalRelease))
+
+    
+
+    #Original Vb code
+    #========================================================================================
     #Dim BroodYear As Integer
     #    'obtain total Tagged Release for each brood year
     #    ERASQL = "SELECT BroodYear, SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count))as CWTRelease, SUM(CWTMark1Count+IIf(ISNULL(CWTMark2Count),0,CWTMark2Count)) + Sum(IIF(ISNULL(NonCWTMark1Count),0,NonCWTMark1Count)+IIF(ISNULL(NonCWTMark2Count),0,NonCWTMark2Count)) as TotalRelease FROM ERA_WireTagCode WHERE CASStock IN (" & CASStockString & ") and BroodYear <= " & LastBY & " AND NOT ExcludeTagCodeFromERA = -1" & " Group By BroodYear"
@@ -59,7 +68,6 @@ GetTaggedReleaseByBrood <- function(){
     #        RelRatio(BroodYear) = MaxRelease / CWTRelease(BroodYear)
     #    Loop
     #    CISDataReader.Close()
-
 
 }
 

@@ -36,19 +36,20 @@ GetMaxReleaseSize <- function(D,M){
      #   'original CIS code includes nonCWTMarkCount in MaxRelease but not in CWTRelease(BroodYear)
 
      #establish connection with database
-     dta <- RODBC::odbcConnectAccess2007(dbse)      
+     dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
 
-     if(!isReplicateCohShak){
+     if(!M$isReplicateCohShak){
           #'Coshak do not include nonCWTMarkCount in both MaxRelease and CWTRelease(BroodYear) 
      	ERASQL = paste0("SELECT Max(CWTRelease) FROM (SELECT BroodYear,SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count)) as CWTRelease,SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count)) + Sum(NonCWTMark1Count+IIF(ISNULL(NonCWTMark2Count),0,NonCWTMark2Count)) FROM ERA_WireTagCode WHERE CASStock IN ('",D$CASStockString[[1]] , "') and BroodYear <= ", D$LastBY, " AND NOT ExcludeTagCodeFromERA = -1" , " Group By BroodYear)")
 
      }else{
-     	 ERASQL = paste0("SELECT Max(CWTRelease) FROM (SELECT BroodYear,SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count)) as CWTRelease FROM ERA_WireTagCode WHERE CASStock IN ('" , D$CASStockString[[1]] , "') and BroodYear <= " , D$LastBY , " AND NOT ExcludeTagCodeFromERA = -1", " Group By BroodYear)"
+     	 ERASQL = paste0("SELECT Max(CWTRelease) FROM (SELECT BroodYear,SUM(CWTMark1Count+IIF(ISNULL(CWTMark2Count),0,CWTMark2Count)) as CWTRelease FROM ERA_WireTagCode WHERE CASStock IN ('" , D$CASStockString[[1]] , "') and BroodYear <= " , D$LastBY , " AND NOT ExcludeTagCodeFromERA = -1", " Group By BroodYear)")
 
      }
 
      df1 <- sqlQuery( dta , query = ERASQL )
+       MaxReleaseErr <- 0
 
 
      MaxRelease <- df1[[1]]
@@ -58,7 +59,7 @@ GetMaxReleaseSize <- function(D,M){
           sink(logname)
           cat(paste("please open ERA_CASStockToERAStockMapping and see if ", D$CASStockString[[1]] ," is missing in the CASStock field (column).  Program is going to stop"))
           sink()
-          MaxReleaseErr<-1
+          MaxReleaseErr <- 1
      }
      
     

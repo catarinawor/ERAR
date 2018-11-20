@@ -32,24 +32,25 @@
 #' @examples
 #' 
 #' 
-RedimensionArrays <- function(){
+RedimensionArrays <- function(D,M){
 
 	#Redimension variables with correct number of BroodYear,Age, and Fishery dimensions
+	#I think this function might be useless for the R vession. Will return to it if there is need. 
 
-	AverageMatRate <- numeric(length = MaxAge)
- 	AverageAEQ <- numeric(length = MaxAge)
-    CompleteBYFlag <- logical(length = LastBY)
- 	MissingBroodYearFlag <-logical(length = LastBY)
- 	CWTRelease <- numeric(length = LastBY)
- 	TotalRelease <- numeric(length = LastBY)
- 	RelRatio <- numeric(length=LastBY)
- 	Escape <- matrix(NA,nrow = LastBY, ncol=MaxAge)
- 	EscStray_CA <- matrix(NA, nrow = LastBY, ncol = MaxAge)
- 	EscStray_US <- matrix(NA,nrow = LastBY, ncol =MaxAge)
- 	TotalMortalities <- array(NA,dim = c(NumberPSCFisheries, MaxAge, LastBY))
-	TotalMortalityHarvestRate <- array(NA, dim = c(NumberPSCFisheries, MaxAge, LastBY))
- 	CohortAfterNaturalMortality <- matrix(NA, nrow=LastBY, ncol=MaxAge)
-
+	D1<-list(AverageMatRate = vector(mode="numeric",length = D$MaxAge),
+ 				AverageAEQ = vector(mode="numeric",length = D$MaxAge),
+   				CompleteBYFlag = vector(length = D$LastBY),
+ 				MissingBroodYearFlag = vector(length = D$LastBY),
+ 				CWTRelease = vector(length = D$LastBY),
+ 				TotalRelease = vector(length = D$LastBY),
+ 				RelRatio = vector(length = D$LastBY),
+ 				Escape = matrix(NA,nrow = D$LastBY, ncol=D$MaxAge),
+ 				EscStray_CA = matrix(NA, nrow = D$LastBY, ncol=D$MaxAge),
+ 				EscStray_US = matrix(NA,nrow = D$LastBY, ncol=D$MaxAge),
+ 				TotalMortalities = array(NA,dim = c(M$NumberPSCFisheries, D$MaxAge, D$LastBY)),
+				TotalMortalityHarvestRate = array(NA, dim = c(M$NumberPSCFisheries, D$MaxAge, D$LastBY)),
+ 				CohortAfterNaturalMortality = matrix(NA, nrow= D$LastBY, ncol=D$MaxAge) 
+ 				)
  	TerminalRun <- matrix(NA,nrow = LastBY, ncol = MaxAge)
  	terminal <- matrix(NA, nrow = NumberPSCFisheries, ncol = MaxAge)
 	SurvivalRate <- numeric(length = MaxAge + 1)
@@ -117,91 +118,92 @@ RedimensionArrays <- function(){
 	ExtraLegalCNRDropoffs <- array(NA,dim=c(NumberPSCFisheries, MaxAge, LastBY))
  	AdultInterDamSurvivalRate <- numeric(LastBY + MaxAge)
  	JackInterDamSurvivalRate <- numeric(LastBY + MaxAge)
+	
+	#Sub RedimensionArrays()
+	#       'Redimension variables with correct number of BroodYear,Age, and Fishery dimensions
+	#       ReDim AverageMatRate(MaxAge)
+	#       ReDim AverageAEQ(MaxAge)
+	#       ReDim CompleteBYFlag(LastBY)
+	#       ReDim MissingBroodYearFlag(LastBY)
+	#       ReDim CWTRelease(LastBY)
+	#       ReDim TotalRelease(LastBY)
+	#       ReDim RelRatio(LastBY)
+	#       ReDim Escape(LastBY, MaxAge)
+	#       ReDim EscStray_CA(LastBY, MaxAge)
+	#       ReDim EscStray_US(LastBY, MaxAge)
+	#       ReDim TotalMortalities(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim TotalMortalityHarvestRate(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim CohortAfterNaturalMortality(LastBY, MaxAge)
+	#       ReDim TerminalRun(LastBY, MaxAge)
+	#       ReDim terminal(NumberPSCFisheries, MaxAge)
+	#       ReDim SurvivalRate(MaxAge + 1)
+	#       ReDim LastAge(LastBY)
+	#       ReDim Cohort(LastBY, MaxAge + 1)
+	#       ReDim MatRate(LastBY, MaxAge)
+	#       ReDim AEQ(LastBY, MaxAge + 1)
+	#       'landed catch variables
+	#       If isReplicateCohShak = False Then
+	#           ReDim LandedCatch(NumberPSCFisheries, 7, LastBY)
+	#       Else
+	#           ReDim LandedCatch(NumberERAFisheries, 7, LastBY)
+	#       End If
+	#
 
- #Sub RedimensionArrays()
- #       'Redimension variables with correct number of BroodYear,Age, and Fishery dimensions
- #       ReDim AverageMatRate(MaxAge)
- #       ReDim AverageAEQ(MaxAge)
- #       ReDim CompleteBYFlag(LastBY)
- #       ReDim MissingBroodYearFlag(LastBY)
- #       ReDim CWTRelease(LastBY)
- #       ReDim TotalRelease(LastBY)
- #       ReDim RelRatio(LastBY)
- #       ReDim Escape(LastBY, MaxAge)
- #       ReDim EscStray_CA(LastBY, MaxAge)
- #       ReDim EscStray_US(LastBY, MaxAge)
- #       ReDim TotalMortalities(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim TotalMortalityHarvestRate(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim CohortAfterNaturalMortality(LastBY, MaxAge)
- #       ReDim TerminalRun(LastBY, MaxAge)
- #       ReDim terminal(NumberPSCFisheries, MaxAge)
- #       ReDim SurvivalRate(MaxAge + 1)
- #       ReDim LastAge(LastBY)
- #       ReDim Cohort(LastBY, MaxAge + 1)
- #       ReDim MatRate(LastBY, MaxAge)
- #       ReDim AEQ(LastBY, MaxAge + 1)
- #       'landed catch variables
- #       If isReplicateCohShak = False Then
- #           ReDim LandedCatch(NumberPSCFisheries, 7, LastBY)
- #       Else
- #           ReDim LandedCatch(NumberERAFisheries, 7, LastBY)
- #       End If
-
- #       ReDim LegalDropoffMortality(NumberPSCFisheries, 7, LastBY)
- #       ReDim TotalTerminalLandedCatch(LastBY, MaxAge)
- #       ReDim TotalLandedCatch(LastBY, MaxAge)
- #       ReDim TotalLandedCatch_ByFishery(LastBY, NumberPSCFisheries)
- #       ReDim LandedCatchHarvestRate(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim AEQPreTermLandedCatch(LastBY, MaxAge)
- #       ReDim AEQLandedCatchPreTermER(LastBY, MaxAge)
- #       ReDim LandedCatchTermER(LastBY, MaxAge)
- #       ReDim AEQLandedCatchTotER(LastBY, MaxAge)
- #       ReDim TotalMortTermER(LastBY, MaxAge)
- #       ReDim AEQTotalMortTotER(LastBY, MaxAge)
- #       ReDim AEQTotalMortPreTermER(LastBY, MaxAge)
- #       ReDim PreTermIncidentalMortalities(LastBY, MaxAge)
- #       ReDim AEQPreTermTotalMorts(LastBY, MaxAge)
- #       ReDim AEQLandedCatchTotalRun(LastBY)
- #       ReDim AEQTotalMortTotalRun(LastBY)
- #       ReDim LandedCatchTerminalRun(LastBY)
- #       ReDim TotalMortTerminalRun(LastBY)
- #       ReDim AEQPreTermLandedCatchAllAges(LastBY)
- #       ReDim AEQPreTermTotalMortsAllAges(LastBY)
- #       ReDim TerminalLandedCatchAllAges(LastBY)
- #       ReDim TerminalTotalMortsAllAges(LastBY)
- #       ReDim AEQLandedCatchAllAgesPreTermER(LastBY)
- #       ReDim AEQTotalMortAllAgesPreTermER(LastBY)
- #       ReDim LandedCatchAllAgesTerminalER(LastBY)
- #       ReDim TotalMortAllAgesTerminalER(LastBY)
- #       ReDim AEQLandedCatchAllAgesTotalER(LastBY)
- #       ReDim AEQTotalMortsAllAgesTotalER(LastBY)
- #       'shaker variables
- #       ReDim TotalTerminalLegalDropoffs(LastBY, MaxAge)
- #       ReDim TotalTerminalShakers(LastBY, MaxAge)
- #       ReDim TotalTerminalShakerDropoffs(LastBY, MaxAge)
- #       ReDim TotalLegalDropoffs(LastBY, MaxAge)
- #       ReDim TotalSublegalShakerDropoffs(LastBY, MaxAge)
- #       ReDim TotalSublegalShakers(LastBY, MaxAge)
- #       'cnr variables
- #       ReDim TotalCNR(LastBY, MaxAge)
- #       ReDim TotalTerminalCNR(LastBY, MaxAge)
- #       ReDim LegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim SubLegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim LegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim SubLegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim TotalCNRLegal(LastBY, MaxAge)
- #       ReDim TotalCNRLegalDropoffs(LastBY, MaxAge)
- #       ReDim TotalCNRSubLegal(LastBY, MaxAge)
- #       ReDim TotalCNRSubLegalDropoffs(LastBY, MaxAge)
- #       ReDim TotalTerminalCNRLegal(LastBY, MaxAge)
- #       ReDim TotalTerminalCNRLegalDropoffs(LastBY, MaxAge)
- #       ReDim TotalTerminalCNRSubLegal(LastBY, MaxAge)
- #       ReDim TotalTerminalCNRSubLegalDropoffs(LastBY, MaxAge)
- #       ReDim ExtraLegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim ExtraLegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
- #       ReDim AdultInterDamSurvivalRate(LastBY + MaxAge)
- #       ReDim JackInterDamSurvivalRate(LastBY + MaxAge)
- #   End Sub
+	#       ReDim LegalDropoffMortality(NumberPSCFisheries, 7, LastBY)
+	#       ReDim TotalTerminalLandedCatch(LastBY, MaxAge)
+	#       ReDim TotalLandedCatch(LastBY, MaxAge)
+	#       ReDim TotalLandedCatch_ByFishery(LastBY, NumberPSCFisheries)
+	#       ReDim LandedCatchHarvestRate(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim AEQPreTermLandedCatch(LastBY, MaxAge)
+	#       ReDim AEQLandedCatchPreTermER(LastBY, MaxAge)
+	#       ReDim LandedCatchTermER(LastBY, MaxAge)
+	#       ReDim AEQLandedCatchTotER(LastBY, MaxAge)
+	#       ReDim TotalMortTermER(LastBY, MaxAge)
+	#       ReDim AEQTotalMortTotER(LastBY, MaxAge)
+	#       ReDim AEQTotalMortPreTermER(LastBY, MaxAge)
+	#       ReDim PreTermIncidentalMortalities(LastBY, MaxAge)
+	#       ReDim AEQPreTermTotalMorts(LastBY, MaxAge)
+	#       ReDim AEQLandedCatchTotalRun(LastBY)
+	#       ReDim AEQTotalMortTotalRun(LastBY)
+	#       ReDim LandedCatchTerminalRun(LastBY)
+	#       ReDim TotalMortTerminalRun(LastBY)
+	#       ReDim AEQPreTermLandedCatchAllAges(LastBY)
+	#       ReDim AEQPreTermTotalMortsAllAges(LastBY)
+	#       ReDim TerminalLandedCatchAllAges(LastBY)
+	#       ReDim TerminalTotalMortsAllAges(LastBY)
+	#       ReDim AEQLandedCatchAllAgesPreTermER(LastBY)
+	#       ReDim AEQTotalMortAllAgesPreTermER(LastBY)
+	#       ReDim LandedCatchAllAgesTerminalER(LastBY)
+	#       ReDim TotalMortAllAgesTerminalER(LastBY)
+	#       ReDim AEQLandedCatchAllAgesTotalER(LastBY)
+	#       ReDim AEQTotalMortsAllAgesTotalER(LastBY)
+	#       'shaker variables
+	#       ReDim TotalTerminalLegalDropoffs(LastBY, MaxAge)
+	#       ReDim TotalTerminalShakers(LastBY, MaxAge)
+	#       ReDim TotalTerminalShakerDropoffs(LastBY, MaxAge)
+	#       ReDim TotalLegalDropoffs(LastBY, MaxAge)
+	#       ReDim TotalSublegalShakerDropoffs(LastBY, MaxAge)
+	#       ReDim TotalSublegalShakers(LastBY, MaxAge)
+	#       'cnr variables
+	#       ReDim TotalCNR(LastBY, MaxAge)
+	#       ReDim TotalTerminalCNR(LastBY, MaxAge)
+	#       ReDim LegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim SubLegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim LegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim SubLegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim TotalCNRLegal(LastBY, MaxAge)
+	#       ReDim TotalCNRLegalDropoffs(LastBY, MaxAge)
+	#       ReDim TotalCNRSubLegal(LastBY, MaxAge)
+	#       ReDim TotalCNRSubLegalDropoffs(LastBY, MaxAge)
+	#       ReDim TotalTerminalCNRLegal(LastBY, MaxAge)
+	#       ReDim TotalTerminalCNRLegalDropoffs(LastBY, MaxAge)
+	#       ReDim TotalTerminalCNRSubLegal(LastBY, MaxAge)
+	#       ReDim TotalTerminalCNRSubLegalDropoffs(LastBY, MaxAge)
+	#       ReDim ExtraLegalCNRMortality(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim ExtraLegalCNRDropoffs(NumberPSCFisheries, MaxAge, LastBY)
+	#       ReDim AdultInterDamSurvivalRate(LastBY + MaxAge)
+	#       ReDim JackInterDamSurvivalRate(LastBY + MaxAge)
+	#   End Sub
 }
 
 
