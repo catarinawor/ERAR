@@ -18,10 +18,11 @@
 #' 
 #'
 #' @param M A list passed to MainSub
+#' @param D A list with stock specific information after  GetMaxReleaseSize 
 #'
 #' @details
 #'
-#' @return D: A list 
+#' @return A list containing information on RelRatioo, BroodYear, CWTRelease, and TotalRelease
 #' 
 #' 
 #' 

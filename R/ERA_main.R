@@ -728,8 +728,11 @@ MainSub<-function(M){
             D1 <- GetTaggedReleaseByBrood(D,M)
             D <- append(D,D1)
 
-            GetInterDamSurvival()
+            D1 <- GetInterDamSurvival(D,M)
+            D <- append(D,D1)
+
             GetSurvivalRates()
+
             GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates() #get within by flag, average mat rates, PNVregion
             
             print(" Get PSL Data")
@@ -740,11 +743,7 @@ MainSub<-function(M){
                 GetSizeLimitLengthVulnerable()
                 CreatePNV()
             }
-            #        Call GetMeanLength()
-            #        Call GetSizeLimitLengthVulnerable()
-            #        Call CreatePNV()
-            #    End If
-            #    Call SetTerminalFishery()
+           
 
             #lblStatus.Text = " Get First and Last Brood Year"
             #    lblStatus.Visible = True

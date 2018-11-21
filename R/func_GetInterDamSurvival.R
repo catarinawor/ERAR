@@ -14,15 +14,17 @@
 
 #' @title GetInterDamSurvival
 #'
-#' @description  
+#' @description  This function retrieves the inter dam survival for a specific ERA stock, if inter dam survival datadoes not exist (i.e. no dams), then sets the interdam to 1
 #' 
 #' 
 #'
 #' @param M A list passed to MainSub
+#' 
+#' @param D A list with stock specific information after  GetTaggedReleaseByBrood 
 #'
 #' @details
 #'
-#' @return D: A list 
+#' @return D: A list containing informaton on CalendarYear, AdultInterDamSurvivalRate, JackInterDamSurvivalRate 
 #' 
 #' 
 #' 

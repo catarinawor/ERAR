@@ -17,13 +17,13 @@
 #' 
 #' 
 #'
-#' @param curr_stk A string specifying the current ERAstock 
-#' 
-#' @param dbse  database location, defined in M 
+#' @param M A list passed to MainSub
+#' @param D A list with stock specific information after  GetMaxReleaseSize
+#' @param ERAstock Counter for loop over all ERA stocks
 #'
 #' @details
 #'
-#' @return D: A list 
+#' @return A list that includes: ERA stock specific youngestAge, FirstBY, LastAvailableBY,LastPossibleBY ,LastBY. TThe list also contaisn an error (erro) integer indicating wether or not the CASStockString is present in the data base. 
 #' 
 #' 
 #' 

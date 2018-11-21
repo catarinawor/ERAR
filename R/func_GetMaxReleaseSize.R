@@ -11,15 +11,17 @@
 
 #' @title GetMaxReleaseSize
 #'
-#' @description  
+#' @description  Returns the maximum amount (counts) amount of releases for each stock
 #' 
 #' 
 #'
 #' @param M A list passed to MainSub
+#' @param D A list with stock specific information after GetFirstAndLastBY
+#' 
 #'
 #' @details
 #'
-#' @return D: A list 
+#' @return  A list contining the MaxRelease, the maximum amount of tags released for a stock in the time series and MaxReleaseErr, sn integer that indicates if the CASStockString is present on the database  
 #' 
 #' 
 #' 

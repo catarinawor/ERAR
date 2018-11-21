@@ -31,7 +31,7 @@
 #' @examples
 #' 
 #' 
-GetSurvivalRates <- function(){
+GetSurvivalRates <- function(M,D){
 
     isOK = FALSE
     #Get Survival Rates for current ERAStock
