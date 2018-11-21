@@ -509,15 +509,15 @@ MainSub<-function(M){
  		#read in or refresh all user and database specified inputs
  		# Me.Refresh() 
 
-
- 		#set TimePeriod to 1 for now, adjust code later when timesteps are functional
-        TimePeriod <- 1
-
-        #' timestep is only used when printing to output table, I think it is redundant with TimePeriod
-        TimeStep <- 1 
-        
         D <- list()    
         #'set the current stock from the user selected ERAStock array
+
+        #set TimePeriod to 1 for now, adjust code later when timesteps are functional
+        D$TimePeriod <- 1
+
+        #' timestep is only used when printing to output table, I think it is redundant with TimePeriod
+        D$TimeStep <- 1 
+        
         D$CurrentStock <- M$ERAStockArray[ERAStock]
 
 

@@ -36,32 +36,38 @@ GetInterDamSurvival <- function(D,M){
     
 
       #'Set default InterDamSurvival Rate to 1 for each year, change below if stock has rates in InterDamSurvival table
-    AdultInterDamSurvivalRate <- NULL
-    JackInterDamSurvivalRate <- NULL
+        AdultInterDamSurvivalRate <- numeric(length=length((D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge)))+1
+        JackInterDamSurvivalRate <-numeric(length=length((D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge)))+1
 
-        for(CalendarYear in (D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge)){
-            AdultInterDamSurvivalRate[CalendarYear] <- 1
-            JackInterDamSurvivalRate[CalendarYear] <- 1
-        }
-        
+       
         #Get InterDamSurvival Rates for each stock
-        ERASQL = "SELECT CalendarYear, AdultInterDamSurvivalRate,JackInterDamSurvivalRate FROM ERA_Stock INNER JOIN InterDamSurvival ON ERA_Stock.SuperStock = InterDamSurvival.SuperStock WHERE ERAStock = '" , D$CurrentStock ,"' and TimePeriod ='" , M$TimePeriod , "' and CalendarYear <=", D$LastBY + D$MaxAge
+        ERASQL = paste0("SELECT CalendarYear, AdultInterDamSurvivalRate, JackInterDamSurvivalRate FROM ERA_Stock INNER JOIN InterDamSurvival ON ERA_Stock.SuperStock = InterDamSurvival.SuperStock WHERE ERAStock = '" , D$CurrentStock ,"' and TimePeriod ='", D$TimePeriod, "' and CalendarYear <= ", D$LastBY + D$MaxAge)
+        
+        df1 <- sqlQuery( dta , query = ERASQL )
+
+        nrow(df1)
+        if( nrow(df1)==0){
+                nome<-"GetInterDamSurvival.log"
+                sink(nome, append=T)
+                cat(paste("cannot find interdam survival rate for " ,D$CurrentStock ," in InterDamSurvival table"))
+                sink()
+
+            return(list( CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
+            AdultInterDamSurvivalRate = AdultInterDamSurvivalRate,
+            JackInterDamSurvivalRate =JackInterDamSurvivalRate))
+
+        }else{
+            return(list( CalendarYear =df1[,1],
+            AdultInterDamSurvivalRate = df1[,2],
+            JackInterDamSurvivalRate =df1[,3]))
+
+        }
+
         #read from database
         #ERACommand = New OleDbCommand(ERASQL, CISDBConnection)
         #CISDataReader = ERACommand.ExecuteReader()
         
-        for (i in 1:(length(CISDataReader[0]))){
-             
-            CalendarYear = CISDataReader[1]
-            AdultInterDamSurvivalRate[CalendarYear] = CISDataReader[2]
-            JackInterDamSurvivalRate[CalendarYear] = CISDataReader[3]
-
-            if(is.na(AdultInterDamSurvivalRate)){
-                print(paste("cannot find interdam survival rate for " ,CurrentStock ," in InterDamSurvival table"))
-            }
-
-        }
-
+        
 
 
         #original Vb version of the ERA
@@ -88,6 +94,10 @@ GetInterDamSurvival <- function(D,M){
         #CISDataReader.Close()
         
 }
+
+
+ 
+
 
 
 
