@@ -721,7 +721,7 @@ MainSub<-function(M){
             #RedimensionArrays()
 
             sink(MainSublog, append=TRUE)
-            cat("Get Tagged Release By Brood...")
+            cat("Get Tagged Release By Brood... \n")
             sink()
 
         
@@ -731,13 +731,23 @@ MainSub<-function(M){
             D1 <- GetInterDamSurvival(D,M)
             D <- append(D,D1)
 
-            GetSurvivalRates()
+            D1 <- GetSurvivalRates(D,M)
+            try(if(!D1$isOK ) stop(" MainSub stopped check  ../logs/GetSurvivalRates.log"))            
+            D <- append(D,D1)
+           
 
-            GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates() #get within by flag, average mat rates, PNVregion
+            D1<-GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates(D, M) #get within by flag, average mat rates, PNVregion
+            try(if(!D1$longerr ) stop(" MainSub stopped check  ../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates.log"))     
+            D <- append(D,D1)  
             
-            print(" Get PSL Data")
+            sink(MainSublog, append=TRUE)
+            cat("Get PSL Data\n")
+            sink()
+         
             
-            GetIMData(CurrentStock, PNVRegion)
+            GetIMData(D,M)
+         
+
             if(StockSpecificPNV){
                 GetMeanLength()
                 GetSizeLimitLengthVulnerable()
