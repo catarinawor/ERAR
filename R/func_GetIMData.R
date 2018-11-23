@@ -34,7 +34,7 @@
 #' @importFrom tidyr spread
 #' 
 #' 
-GetIMData <- function(){
+GetIMData <- function(D,M){
 
     # ReDimension Incidental Mortality variables
     #Coshak PSL file has 1 more year of data than recoveries
@@ -42,35 +42,8 @@ GetIMData <- function(){
     PNV <- list() #array(NA, dim = c(M$LastCalendarYear + 1, M$NumberPSCFisheries, D$MaxAge))
     PV <- list()  #array(NA, dim = c(M$LastCalendarYear + 1, M$NumberPSCFisheries, D$MaxAge))
     
-    LegalCatchabilityCoefficient < -matrix(NA, nrow = D$MaxAge, ncol = M$NumberPSCFisheries)
-    SubLegalCatchabilityCoeifficient <- matrix(NA, nrow = D$MaxAge, ncol = M$NumberPSCFisheries)
-    CNRMethod <- matrix(NA, nrow = M$LastCalendarYear + 1, ncol = M$NumberPSCFisheries)
-    RetentionMethod <- matrix(NA, nrow = M$LastCalendarYear + 1, ncol = M$NumberPSCFisheries)
-    CNRLegalEncounterEst <- matrix(NA,nrow = M$LastCalendarYear + 1, ncol = M$NumberPSCFisheries)
-    #CNRSubLegalEncounterEst <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #CNRExtraLegalEncounterEst <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #LandedCatchEst < -matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #LegalShakerEst <-matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #SubLegalShakerEst <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #ExtraLegalShakerEst <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #MonitoredLegalCatch <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #MonitoredLegalReleases < -matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #SeasonUnits <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #SeasonLength <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #CNRSeasonLength <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #CNRSeasonLength <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #RetentionEffort <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #CNREffort <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #Reavailability <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #SublegalIMRate <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #LegalIMRate <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #ExtraLegalIMRate <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #DropoffRate <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #LegalSelectivityFactor <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #SublegalSelectivityFactor <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
-    #ExtraLegalSelectivityFactor <- matrix(NA, nrow = LastCalendarYear + 1, ncol = NumberPSCFisheries)
     
-    LastIMDataYear <- 0
+   
     #Read in data from ERA_IMInputs table based on the PNVRegion of the stock,  Terminal fisheries are specific to a PNVRegion, Preterminal fisheries data is from PNVRegion 1 ("All") 
     #only get values <= LastCalendarYear unless when emulating Coshak
     #    Dim CalendarYear, PSCFishery As Integer
@@ -85,39 +58,25 @@ GetIMData <- function(){
     df1 <- sqlQuery( dta , query = ERASQL )
 
 
-    names(df1)
-    dim(df1)
-    summary(df1)
-    head(df1)
-
-
     PSCFishery <- df1$PSCFishery
     CalendarYear <- df1$CalendarYear
 
-    length(unique(PSCFishery))
-    length(unique(CalendarYear))
+    SublegalIMRate <- tidyr::spread(df1[,c("SublegalIMRate","CalendarYear","PSCFishery")],key=PSCFishery,value=SublegalIMRate)
     
-    head(df1[,c("SublegalIMRate","CalendarYear","PSCFishery")])
-
-
-    SublegalIMRate<-tidyr::spread(df1[,c("SublegalIMRate","CalendarYear","PSCFishery")],key=PSCFishery,value=SublegalIMRate)
-    
-
     LegalIMRate <- tidyr::spread(df1[,c("LegalIMRate","CalendarYear","PSCFishery")],key=PSCFishery,value=LegalIMRate)
 
-   
     DropoffRate <- tidyr::spread(df1[,c("DropoffRate","CalendarYear","PSCFishery")],key=PSCFishery,value= DropoffRate)
     
     df1$ExtraLegalIMRate[is.na(df1$ExtraLegalIMRate)] <- 0
     ExtraLegalIMRate <-  tidyr::spread(df1[,c("ExtraLegalIMRate","CalendarYear","PSCFishery")],key=PSCFishery,value=ExtraLegalIMRate)
 
-    CNRMethod <-  tidyr::spread(df1[,c("NRMethod","CalendarYear","PSCFishery")],key=PSCFishery,value=NRMethod )
+    CNRMethod <-  tidyr::spread(df1[,c("CNRMethod","CalendarYear","PSCFishery")],key=PSCFishery,value=CNRMethod )
    
     df1$RetentionMethod[is.na(df1$RetentionMethod)] <- 0  
     RetentionMethod <- tidyr::spread(df1[,c("RetentionMethod","CalendarYear","PSCFishery")],key=PSCFishery,value= RetentionMethod )
 
-    df1$NRLegalEncounterEst[is.na(df1$NRLegalEncounterEst)] <- 0
-    NRLegalEncounterEst <- tidyr::spread(df1[,c("NRLegalEncounterEst","CalendarYear","PSCFishery")],key=PSCFishery,value= NRLegalEncounterEst )
+    df1$CNRLegalEncounterEst[is.na(df1$CNRLegalEncounterEst)] <- 0
+    CNRLegalEncounterEst <- tidyr::spread(df1[,c("CNRLegalEncounterEst","CalendarYear","PSCFishery")],key=PSCFishery,value= CNRLegalEncounterEst )
 
     df1$CNRSubLegalEncounterEst[is.na(df1$CNRSubLegalEncounterEst)] <- 0 
     CNRSubLegalEncounterEst <- df1$CNRSubLegalEncounterEst
@@ -147,7 +106,7 @@ GetIMData <- function(){
     ExtraLegalSelectivityFactor <-  tidyr::spread(df1[,c("ExtraLegalSelectivityFactor","CalendarYear","PSCFishery")],key=PSCFishery,value=ExtraLegalSelectivityFactor )
 
     df1$MonitoredLegalCatch[is.na(df1$MonitoredLegalCatch)] <- 0
-    MonitoredLegalCatch <-  tidyr::spread(df1[,c(" MonitoredLegalCatch","CalendarYear","PSCFishery")],key=PSCFishery,value=  MonitoredLegalCatch )
+    MonitoredLegalCatch <-  tidyr::spread(df1[,c("MonitoredLegalCatch","CalendarYear","PSCFishery")],key=PSCFishery,value=  MonitoredLegalCatch )
 
     df1$MonitoredLegalReleases[is.na(df1$MonitoredLegalReleases)] <- 0
     MonitoredLegalReleases <-  tidyr::spread(df1[,c("MonitoredLegalReleases","CalendarYear","PSCFishery")],key=PSCFishery,value= MonitoredLegalReleases )
@@ -162,7 +121,7 @@ GetIMData <- function(){
     CNRSeasonLength <-  tidyr::spread(df1[,c("CNRSeasonLength","CalendarYear","PSCFishery")],key=PSCFishery,value= CNRSeasonLength  )
 
     df1$RetentionEffort[is.na(df1$RetentionEffort)] <- 0
-    RetentionEffort <-  tidyr::spread(df1[,c("RetentionEffor","CalendarYear","PSCFishery")],key=PSCFishery,value=RetentionEffor )
+    RetentionEffort <-  tidyr::spread(df1[,c("RetentionEffort","CalendarYear","PSCFishery")],key=PSCFishery,value=RetentionEffort )
 
     df1$CNREffort[is.na(df1$CNREffort)] <- 0
     CNREffort <-  tidyr::spread(df1[,c("CNREffort","CalendarYear","PSCFishery")],key=PSCFishery,value= CNREffort )
@@ -170,19 +129,20 @@ GetIMData <- function(){
     df1$Reavailability[is.na(df1$Reavailability)] <- 0
     Reavailability <- tidyr::spread(df1[,c("Reavailability","CalendarYear","PSCFishery")],key=PSCFishery,value=Reavailability )
 
-    
-tidyr::spread(df1[,c("Reavailability","CalendarYear","PSCFishery")],key=PSCFishery,value=Reavailability )
-    PNV[[1]] <- df1[,32]
-    PNV[[2]] <- df1[,33]
-    PNV[[3]] <- df1[,34]
-    PNV[[4]] <- df1[,35]
+
+
+    PNV[[1]] <- tidyr::spread(df1[,c("Age2PNV","CalendarYear","PSCFishery")],key=PSCFishery,value=Age2PNV )
+    PNV[[2]] <- tidyr::spread(df1[,c("Age3PNV","CalendarYear","PSCFishery")],key=PSCFishery,value=Age3PNV )
+    PNV[[3]] <- tidyr::spread(df1[,c("Age4PNV","CalendarYear","PSCFishery")],key=PSCFishery,value=Age4PNV )
+    PNV[[4]] <- tidyr::spread(df1[,c("Age5PNV","CalendarYear","PSCFishery")],key=PSCFishery,value=Age5PNV )
 
     PV[[1]]<- 1 - PNV[[1]]
     PV[[2]]<- 1 - PNV[[2]]
     PV[[3]]<- 1 - PNV[[3]]
     PV[[4]]<- 1 - PNV[[4]]
 
-    if(CalendarYear > LastIMDataYear){ LastIMDataYear <- CalendarYear }
+
+    LastIMDataYear <- max(CalendarYear) 
 
 
     # 'Assign Age 5 PNV to Age 6 for stocks that go from age 2 to age 6, necessary because we only have PNVs for four ages
@@ -194,49 +154,57 @@ tidyr::spread(df1[,c("Reavailability","CalendarYear","PSCFishery")],key=PSCFishe
 
    
 
-    
-    #'Assign Age 5 PNV to Age 6 for stocks that go from age 2 to age 6, necessary because we only have PNVs for four ages
-    if(OceanStartAge == 2 & MaxAge == 6){
-        #'set to 1960 to speed up the loop
-        for(CY in  1960:LastCalendarYear){ 
-            for( Fish  in 1:NumberPSCFisheries){
-                
-                PNV[CY, Fish, MaxAge] = PNV[CY, Fish, OceanStartAge + 3]
-                PV[CY, Fish, MaxAge] = 1 - PNV[CY, Fish, MaxAge]
+    ERASQL2 = paste0("SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients WHERE ERAStock = '", D$CurrentStock ,"' AND ShakerMethod = '" ,M$ShakerMethod ,"'")
+    df2 <- sqlQuery( dta , query = ERASQL2 )
+     GetIMDataErr <- 0
 
-            }
-        } 
-    } 
-
-
-
-
-
-
-    #Read in data from catchability coefficients
-    #ERASQL = "SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients INNER JOIN PSCtoModelFisheryMapping ON ERA_CatchabilityCoefficients.ModelFishery = PSCtoModelFisheryMapping.ModelFishery WHERE ERAStock = '" & CurrentStock & "' AND ShakerMethod = '" & ShakerMethod & "'"
-    ERASQL = paste0("SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients WHERE ERAStock = '",  D$CurrentStock & "' AND ShakerMethod = '" & ShakerMethod & "'"
-    #read from database
-    #CISDataReader
-    
-    if(nrow(CISDataReader)>0) {
-        for(i in 1:nrow(CISDataReader)){
-
-
-            if(!CISDataReader[2] < MaxAge){
-                PSCFishery = CISDataReader[1]
-            
-                if(CISDataReader[3] == "L"){
-                    LegalCatchabilityCoeifficient[CISDataReader[2], PSCFishery] <- CISDataReader[4]
-                } else{
-                    SubLegalCatchabilityCoeifficient[CISDataReader[2], PSCFishery] <- CISDataReader[4]
-                }
-            } 
-        }
-    }else{
-        
-        print(paste("Catchability coefficients for " , CurrentStock , " is missing in the ERA_CatchabilityCoefficients table.  Program is going to stop."))
+    if(nrow(df2)==0){
+        sink("../logs/GetIMData.log", append=TRUE)
+        cat("Catchability coefficients for ",D$CurrentStock, " is missing in the ERA_CatchabilityCoefficients table.  Program is going to stop.\n")
+        sink()
+        GetIMDataErr <- 1
     }
+    #       
+
+    df2select_L<- df2[df2$Age<D$MaxAge&df2$SizeClass=="L",c("PSCFishery", "Age", "AvgQ")]   
+    LegalCatchabilityCoeifficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
+
+    df2select_S<- df2[df2$Age<D$MaxAge&df2$SizeClass!="L",c("PSCFishery", "Age", "AvgQ")]   
+    SubLegalCatchabilityCoeifficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
+
+    return( list(IM_PSCFishery=PSCFishery,
+        IM_CalendarYear=CalendarYear,
+        SublegalIMRate=SublegalIMRate,
+        LegalIMRate=LegalIMRate,
+        DropoffRate=DropoffRate,
+        ExtraLegalIMRate=ExtraLegalIMRate,
+        CNRMethod=CNRMethod,
+        RetentionMethod=RetentionMethod,
+        CNRLegalEncounterEst=CNRLegalEncounterEst,
+        CNRSubLegalEncounterEst=CNRSubLegalEncounterEst,
+        CNRExtraLegalEncounterEst=CNRExtraLegalEncounterEst,
+        LandedCatchEst=LandedCatchEst,
+        LegalShakerEst=LegalShakerEst,
+        SubLegalShakerEst=SubLegalShakerEst,
+        ExtraLegalShakerEst=ExtraLegalShakerEst,
+        LegalSelectivityFactor=LegalSelectivityFactor,
+        SublegalSelectivityFactor=SublegalSelectivityFactor,
+        ExtraLegalSelectivityFactor=ExtraLegalSelectivityFactor,
+        MonitoredLegalCatch=MonitoredLegalCatch,
+        MonitoredLegalReleases=MonitoredLegalReleases,
+        SeasonUnits=SeasonUnits,
+        SeasonLength=SeasonLength,
+        CNRSeasonLength=CNRSeasonLength,
+        RetentionEffort=RetentionEffort,
+        CNREffort=CNREffort,
+        Reavailability=Reavailability,
+        GetIMDataErr=GetIMDataErr
+        ))
+
+
+
+
+
   
 
 

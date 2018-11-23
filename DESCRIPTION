@@ -8,5 +8,6 @@ Encoding: UTF-8
 LazyData: true
 ByteCompile: true
 Depends: 
-Imports: 
+Imports:
+		RODBC, 
 		tidyr

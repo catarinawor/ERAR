@@ -18,6 +18,8 @@
 #' 
 #'
 #' @param M A list passed to MainSub
+#' 
+#' @param D A list that includes the output of GetMeanLength
 #'
 #' @details
 #'
@@ -30,14 +32,21 @@
 #' @examples
 #' 
 #' 
-GetSizeLimitLengthVulnerable <- function(){
+GetSizeLimitLengthVulnerable <- function(D,M){
+
+
+    dta <- RODBC::odbcConnectAccess2007(M$datbse)         
+
+    ERASQL <-paste0("SELECT CalendarYear, PSCFishery, MinSizeVulnerable, MinSizeLimit, MaxSizeLimit FROM ERA_IMInputs WHERE TimePeriod ='", D$TimePeriod, "'")
+    
+    df1 <- sqlQuery( dta , query = ERASQL )
+
 
     #'get minimum vulnerable lengths and size limits for PSC fisheries
     MinSizeLimit<- matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
     MaxSizeLimit<- matrix(NA,nrow=LastCalendarYear, ncol= NumberPSCFisheries)
     MinSizeVulnerable<- matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
     SizeLimitType <-matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
-    ERASQL = "SELECT CalendarYear, PSCFishery, MinSizeVulnerable, MinSizeLimit, MaxSizeLimit FROM ERA_IMInputs WHERE TimePeriod ='" & TimePeriod & "'"
     #read from database
     
     for (i in 1:length(CISDataReader) ){

@@ -224,7 +224,7 @@ StartCohortAnalysis_Click <- function(M){
 
     }
 
-    cat("If you need to change these settings, please chanbe options in the input list M and re-sun the program.\n")
+    cat("If you need to change these settings, please change options in the input list M and re-sun the program.\n")
 
     sink()
 
@@ -394,18 +394,12 @@ CalculateButton_Click  <- function(M){
         
     }
 
-    ERAStockArray <- as.character(M$ERAStockTable[M$StockListBox,1])
+    M$ERAStockArray <- as.character(M$ERAStockTable[M$StockListBox,1])
     
-    NumStocks <- length(ERAStockArray)
+    M$NumStocks <- length(ERAStockArray)
 
 
-    M2 <-list(     
-        ERAStockArray=ERAStockArray, #array of Stock names (acronyms)
-        NumStocks = NumStocks    
-    )
     
-    M<-append(M,M2)
-
     D1<- MainSub(M)
     
     return(D1)
@@ -715,7 +709,7 @@ MainSub<-function(M){
 
 
             D1 <- GetMaxReleaseSize(D,M)
-            try(if(D1$erro == 1 ) stop(" MainSub stopped check  ../GetMaxReleaseSize.log"))            
+            try(if(D1$MaxReleaseErr == 1 )stop(" MainSub stopped check  ../GetMaxReleaseSize.log"))            
             D <- append(D,D1)
 
             #RedimensionArrays()
@@ -736,8 +730,7 @@ MainSub<-function(M){
             D <- append(D,D1)
            
 
-            D1<-GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates(D, M) #get within by flag, average mat rates, PNVregion
-            try(if(!D1$longerr ) stop(" MainSub stopped check  ../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates.log"))     
+            D1<-GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates(D, M) #get within by flag, average mat rates, PNVregion try(if(D1$longerr ) stop(" MainSub stopped check  ../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates.log"))     
             D <- append(D,D1)  
             
             sink(MainSublog, append=TRUE)
@@ -745,32 +738,18 @@ MainSub<-function(M){
             sink()
          
             
-            GetIMData(D,M)
-         
+            D1 <- GetIMData(D,M)
+            try(if(D1$GetIMDataErr ) stop(" MainSub stopped check  ../logs/GetIMDataErr.log"))     
+            D <- append(D,D1)  
+            
 
             if(StockSpecificPNV){
-                GetMeanLength()
-                GetSizeLimitLengthVulnerable()
+                GetMeanLength(D,M)
+                GetSizeLimitLengthVulnerable(D,M)
                 CreatePNV()
             }
            
 
-            #lblStatus.Text = " Get First and Last Brood Year"
-            #    lblStatus.Visible = True
-            #    Me.Refresh()
-            #    Call GetFirstAndLastBY()
-            #    Call GetMaxReleaseSize()
-            #    Call RedimensionArrays()
-            #    lblStatus.Text = " Get Tagged Release By Brood"
-            #    lblStatus.Visible = True
-            #    Me.Refresh()
-            #    Call GetTaggedReleaseByBrood()
-            #    Call GetInterDamSurvival()
-            #    Call GetSurvivalRates()
-            #    Call GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates() 'get within by flag, average mat rates, PNVregion
-            #    lblStatus.Text = " Get PSL Data"
-            #    lblStatus.Visible = True 
-            
 
             
 
