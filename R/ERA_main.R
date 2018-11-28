@@ -121,9 +121,8 @@ for(i in 1:length(funcfiles)){
 }
 
 
-M2<-StartCohortAnalysis_Click(M)
+M<-StartCohortAnalysis_Click(M)
 
-M<-append(M,M2)
 
 
 CalculateButton_Click(M)
@@ -396,7 +395,7 @@ CalculateButton_Click  <- function(M){
 
     M$ERAStockArray <- as.character(M$ERAStockTable[M$StockListBox,1])
     
-    M$NumStocks <- length(ERAStockArray)
+    M$NumStocks <- length(M$ERAStockArray)
 
 
     
@@ -688,7 +687,7 @@ MainSub<-function(M){
             			#IDK -  what is this line doing? Just resetting the user setting?
             			# this seems unnecessary to me. 
             			#UserSettings = SaveSettings & "Combine age 5 & 6"
-                        M$isCombineAge5And6[ERAStock] = TRUE
+                        M$isCombineAge5And6[ERAStock] <-  TRUE
             		}
             	}
             }
@@ -743,11 +742,33 @@ MainSub<-function(M){
             D <- append(D,D1)  
             
 
-            if(StockSpecificPNV){
-                GetMeanLength(D,M)
-                GetSizeLimitLengthVulnerable(D,M)
-                CreatePNV()
+            if(M$PNVAlgorithm=="StockSpecific"){
+                D1<-GetMeanLength(D,M)
+                D <- append(D,D1)
+
+                D1<-GetSizeLimitLengthVulnerable(D,M)
+                D <- append(D,D1)
+
+                #need to implement this one - there is something wrong with the get mean length function. 
+                D1<-CreatePNV(D,M)
+                D <- append(D,D1)
             }
+
+
+            D1<-SetTerminalFishery(D,M)
+            D <- append(D,D1)
+
+            sink(MainSublog, append=TRUE)
+            cat("Get Landed Catch and Escapement\n")
+            sink()
+            #   lblStatus.Text = " "
+  #              lblStatus.Visible = True
+  #              Me.Refresh()
+  #              If withinBYWeightFlag = True Then
+  #                  Call CalcLandedCatchAndEscapementWithBYWeights()
+  #              Else
+  #                  Call CalcLandedCatchAndEscapement()
+  #              End If
            
 
 

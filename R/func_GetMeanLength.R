@@ -33,6 +33,8 @@
 #' 
 GetMeanLength <- function(D,M){
 
+
+
 #'Get MeanLength,StandardDeviation for current ERAStock
     dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
@@ -43,16 +45,16 @@ GetMeanLength <- function(D,M){
     CY <- df1[,1]
     Age <- df1[,2]
 
-    meanLength <- tidyr::spread(df1[,c("CalendarYear","Age", "MeanLength")],key=CalendarYear,value= Age  )
-    lengthstDev <- tidyr::spread(df1[,c("CalendarYear","Age", "StandardDeviation")],key=CalendarYear,value= Age  )
+    meanLength <- tidyr::spread(df1[,c("CalendarYear","Age", "MeanLength")],key=CalendarYear,value= MeanLength )
+    lengthstDev <- tidyr::spread(df1[,c("CalendarYear","Age", "StandardDeviation")],key=CalendarYear,value= StandardDeviation  )
 
     #=================================================================
 
-    return(GetMeanLength_CY=CY,
+    return(list(GetMeanLength_CY=CY,
         GetMeanLength_Age=Age,
         meanLength=meanLength,
         lengthstDev=lengthstDev
-        )
+        ))
   
 }
 

@@ -198,6 +198,8 @@ GetIMData <- function(D,M){
         RetentionEffort=RetentionEffort,
         CNREffort=CNREffort,
         Reavailability=Reavailability,
+        PNV= PNV,
+        PV=PV,
         GetIMDataErr=GetIMDataErr
         ))
 

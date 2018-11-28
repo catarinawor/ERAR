@@ -38,51 +38,69 @@ GetSizeLimitLengthVulnerable <- function(D,M){
     dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
     ERASQL <-paste0("SELECT CalendarYear, PSCFishery, MinSizeVulnerable, MinSizeLimit, MaxSizeLimit FROM ERA_IMInputs WHERE TimePeriod ='", D$TimePeriod, "'")
-    
+
     df1 <- sqlQuery( dta , query = ERASQL )
 
+    head(df1)
 
-    #'get minimum vulnerable lengths and size limits for PSC fisheries
-    MinSizeLimit<- matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
-    MaxSizeLimit<- matrix(NA,nrow=LastCalendarYear, ncol= NumberPSCFisheries)
-    MinSizeVulnerable<- matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
-    SizeLimitType <-matrix(NA,nrow=LastCalendarYear, ncol=NumberPSCFisheries)
-    #read from database
+    CY <-df1$CalendarYear 
+    PSCFishery <- df1$PSCFishery
     
-    for (i in 1:length(CISDataReader) ){
-        CY <- CISDataReader[1]
-        PSCFishery <-  CISDataReader[2]
-        if(is.na(CISDataReader[3])){
-            MinSizeVulnerable[CY, PSCFishery] <- 0
-        }else{
-            MinSizeVulnerable[CY, PSCFishery] <- CISDataReader[3]
-        }
+      
 
-        if(is.na(CISDataReader[4])){
-            MinSizeLimit[CY, PSCFishery] <- 0
-        }else{
-            MinSizeLimit[CY, PSCFishery] <- CISDataReader[4]
-        }
+    df1$MinSizeVulnerable[is.na(df1$MinSizeVulnerable)] <- 0
+    MinSizeVulnerable <-  tidyr::spread(df1[,c("MinSizeVulnerable","CalendarYear","PSCFishery")],key=PSCFishery,value= MinSizeVulnerable )
 
-        if(is.na(CISDataReader[5])){
-            #note: if maxsizelimir= 0 no fish are caught
-            MaxSizeLimit[CY, PSCFishery] <- 0
-        }else{
-            MaxSizeLimit[CY, PSCFishery] <- CISDataReader[5]
-        }
+    df1$MinSizeLimit[is.na(df1$MinSizeLimit)] <- 0
+    MinSizeLimit <-  tidyr::spread(df1[,c("MinSizeLimit","CalendarYear","PSCFishery")],key=PSCFishery,value=MinSizeLimit)
 
-        if(MinSizeLimit[CY, PSCFishery] > 0 & MaxSizeLimit[CY, PSCFishery] > 0){
-             SizeLimitType[CY, PSCFishery] = "SLOT"
-        } else if(MinSizeLimit[CY, PSCFishery] > 0 & MaxSizeLimit[CY, PSCFishery] == 0){
-            SizeLimitType[CY, PSCFishery] = "MINIMUM"
-        }else if(MinSizeLimit[CY, PSCFishery] == 0&MaxSizeLimit[CY, PSCFishery] > 0){
-            SizeLimitType[CY, PSCFishery] = "MAXIMUM"
-        }else{
-            SizeLimitType[CY, PSCFishery] = "NONE"
-        }
-              
-          
-    }
+    df1$MaxSizeLimit[is.na(df1$MaxSizeLimit)] <- 0
+    MaxSizeLimit <-  tidyr::spread(df1[,c("MaxSizeLimit","CalendarYear","PSCFishery")],key=PSCFishery,value= MaxSizeLimit )
+
+
+    df1$SizeLimitType<-rep("NONE",nrow(df1))
+    df1$SizeLimitType[df1$MinSizeLimit>0&df1$MaxSizeLimit>0]<-"SLOT"
+    df1$SizeLimitType[df1$MinSizeLimit>0&df1$MaxSizeLimit==0]<-"MINIMUM"
+    df1$SizeLimitType[df1$MinSizeLimit>0&df1$MaxSizeLimit==0]<-"MAXIMUM"
+
+    SizeLimitType <-  tidyr::spread(df1[,c("SizeLimitType","CalendarYear","PSCFishery")],key=PSCFishery,value=SizeLimitType )
+
+
+    return(list(SizeLimitCY=CY,
+        SizeLimitPSCFishery=PSCFishery,
+        MinSizeVulnerable=MinSizeVulnerable,
+        MinSizeLimit=MinSizeLimit,
+        MaxSizeLimit=MaxSizeLimit,
+        SizeLimitType=SizeLimitType))
+    
+
+    #original VB code
+    #=========================================================================
+    # 'get minimum vulnerable lengths and size limits for PSC fisheries
+    #    ReDim MinSizeLimit(LastCalendarYear, NumberPSCFisheries)
+    #    ReDim MaxSizeLimit(LastCalendarYear, NumberPSCFisheries)
+    #    ReDim MinSizeVulnerable(LastCalendarYear, NumberPSCFisheries)
+    #    ReDim SizeLimitType(LastCalendarYear, NumberPSCFisheries)
+    #    ERASQL = "SELECT CalendarYear, PSCFishery, MinSizeVulnerable, MinSizeLimit, MaxSizeLimit FROM ERA_IMInputs WHERE TimePeriod ='" & TimePeriod & "'"
+    #    ERACommand = New OleDbCommand(ERASQL, CISDBConnection)
+    #    CISDataReader = ERACommand.ExecuteReader()
+    #    Do While CISDataReader.Read()
+    #        Dim CY As Integer = CISDataReader(0)
+    #        Dim PSCFishery As Integer = CISDataReader(1)
+    #        MinSizeVulnerable(CY, PSCFishery) = If(IsDBNull(CISDataReader(2)), 0, CISDataReader(2))
+    #        MinSizeLimit(CY, PSCFishery) = If(IsDBNull(CISDataReader(3)), 0, CISDataReader(3))
+    #        MaxSizeLimit(CY, PSCFishery) = If(IsDBNull(CISDataReader(4)), 0, CISDataReader(4))
+    #        If MinSizeLimit(CY, PSCFishery) > 0 And MaxSizeLimit(CY, PSCFishery) > 0 Then
+    #            SizeLimitType(CY, PSCFishery) = "SLOT"
+    #        ElseIf MinSizeLimit(CY, PSCFishery) > 0 And MaxSizeLimit(CY, PSCFishery) = 0 Then
+    #            SizeLimitType(CY, PSCFishery) = "MINIMUM"
+    #        ElseIf MinSizeLimit(CY, PSCFishery) = 0 And MaxSizeLimit(CY, PSCFishery) > 0 Then
+    #            SizeLimitType(CY, PSCFishery) = "MAXIMUM"
+    #        Else
+    #            SizeLimitType(CY, PSCFishery) = "NONE"
+    #        End If
+    #    Loop
+    #    CISDataReader.Close()
         
   
 }
