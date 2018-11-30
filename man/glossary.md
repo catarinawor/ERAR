@@ -8,11 +8,19 @@ Objects are split in three groups: subs (or functions), variables and flags. All
 
 **GetFirstAndLastBY:** Get first and last brood years for the CASStocks corresponding to the current ERAstock.
 
+**GetIMData:**
+
+**GetInterDamSurvival:**
+
 **GetMaxReleaseSize:**  Returns the maximum amount (counts) amount of releases for each stock.
 
 **GetSuperStockData:** Function that reads in the data from the SuperStock table in the database.
 
+**GetSurvivalRates:**
+
 **GetTaggedReleaseByBrood:** Recovers the information about hatchery releases by brood year - BroodYear CWTRelease TotalRelease.
+
+**GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates:**
 
 
 **MainSub:** Main routine that calls most of the data reading and calculations subroutines.
