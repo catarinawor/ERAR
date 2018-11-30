@@ -21,11 +21,9 @@
 #'
 #' @details Calculates stock,age,fishery,year specific PNV values using ND function and input values.
 #'
-#' @return  
+#' @return  A list containing the internally calculated PNV and PV
 #' 
-#' 
-#' 
-#' @export
+
 #'
 #' @examples
 #' 
@@ -40,7 +38,7 @@ CreatePNV <- function(M,D){
     PV <- list()
     PNV <- list()
 
-    for(age in 1:(length(D$OceanStartAge:D$MaxAge)){
+    for(age in 1:(length(D$OceanStartAge:D$MaxAge))){
 
         tmpPNV<-matrix(NA, ncol=ncol(D$PNV[[1]]),nrow=nrow(D$PNV[[1]]))
         tmpPV<-matrix(NA, ncol=ncol(D$PV[[1]]),nrow=nrow(D$PV[[1]]))
