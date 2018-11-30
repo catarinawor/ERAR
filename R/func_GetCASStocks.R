@@ -17,7 +17,7 @@
 #' 
 #' 
 #'
-#' @param curr_stk A string specifying the current ERAstock 
+#' @param curr_stk A string specifying the current ERAstock, defined in D 
 #' 
 #' @param dbse  database location, defined in M 
 #'

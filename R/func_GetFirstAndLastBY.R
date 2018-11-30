@@ -13,17 +13,17 @@
 
 #' @title GetFirstAndLastBY
 #'
-#' @description  Get first and last brood years for the ERAstock
+#' @description   Get first and last brood years for the CASStocks corresponding to the current ERAstock
 #' 
 #' 
 #'
 #' @param M A list passed to MainSub
-#' @param D A list with stock specific information after  GetMaxReleaseSize
+#' @param D A list with stock specific output from GetMaxReleaseSize
 #' @param ERAstock Counter for loop over all ERA stocks
 #'
-#' @details
+#' @details Retrives information for each stock in CASStockString and adjusts the Brood year depending on the age of the stock and the available data on the data base.
 #'
-#' @return A list that includes: ERA stock specific youngestAge, FirstBY, LastAvailableBY,LastPossibleBY ,LastBY. TThe list also contaisn an error (erro) integer indicating wether or not the CASStockString is present in the data base. 
+#' @return A list that includes: ERA stock specific youngestAge, FirstBY, LastAvailableBY, LastPossibleBY, LastBY. The list also contaisn an error (erro) integer indicating wether or not the CASStockString is present in the data base. 
 #' 
 #' 
 #' 

@@ -87,45 +87,6 @@
 
 
 
-#initial list of settings
-M <- list(
-    isCombineAge2And3=c(TRUE,TRUE),
-    isCombineAge5And6=c(FALSE,FALSE),
-    isReplicateCohShak = FALSE,
-    StockListView =c("HAR","ATN"),
-    datbse="../data/CIS2018_Pilot_Small.accdb",
-    ArithmeticMeanFlag = TRUE,
-    MaxCalendarYear=2017,
-    isTraceCalc = FALSE,
-    isTraceByBroodYr = TRUE,
-    isTraceByCalendarYr = FALSE,
-    traceThisShakerMethod = "C",
-    Average_Maturation_Rate = "SelectNumberCompleteBroods",
-    LastCompleteBroodsUsed = 9,
-    MeanMatType = "ArithmeticMean",
-    PNVAlgorithm = "FisherySpecific",
-    ShakerMethod ="C",
-    IncompleteYearAlgorithm= "New",
-    RoundRecoveriesByTagCode= FALSE
-    )
-
-
-
-#load in all accessory functions - to be deleted if/when we turn this into a package
-funcfiles <- list.files(getwd(),pattern="func",full.names=TRUE)
-    
-for(i in 1:length(funcfiles)){
-    
-    source(funcfiles[i])
-
-}
-
-
-M<-StartCohortAnalysis_Click(M)
-
-
-
-CalculateButton_Click(M)
 
 
 
@@ -477,7 +438,7 @@ CalculateButton_Click  <- function(M){
 #'
 #' @param M A list. Output of StartCohortAnalysis_Click()
 #'
-#' @details
+#' @details It will create a list d with all the stock specific information
 #'
 #' @return A list ??? maybe something else? 
 #' 
