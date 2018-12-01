@@ -14,7 +14,7 @@
 
 #' @title GetSurvivalRates
 #'
-#' @description  
+#' @description  Retrieves Natural mortality rate from the database and teh associated vector of ages
 #' 
 #' 
 #'

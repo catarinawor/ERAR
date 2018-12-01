@@ -14,7 +14,7 @@
 
 #' @title GetInterDamSurvival
 #'
-#' @description  This function retrieves the inter dam survival for a specific ERA stock, if inter dam survival datadoes not exist (i.e. no dams), then sets the interdam to 1
+#' @description  This function retrieves the inter dam survival for a specific ERA stock, if inter dam survival data  does not exist (i.e. no dams), then sets the interdam survival to 1
 #' 
 #' 
 #'
@@ -55,12 +55,12 @@ GetInterDamSurvival <- function(D,M){
         cat(paste("cannot find interdam survival rate for " ,D$CurrentStock ," in InterDamSurvival table"))
         sink()
 
-        return(list( CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
+        return(list( InterDamSurvival_CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
         AdultInterDamSurvivalRate = AdultInterDamSurvivalRate,
         JackInterDamSurvivalRate =JackInterDamSurvivalRate))
 
     }else{
-        return(list( CalendarYear =df1[,1],
+        return(list( InterDamSurvival_CalendarYear =df1[,1],
         AdultInterDamSurvivalRate = df1[,2],
         JackInterDamSurvivalRate =df1[,3]))
 

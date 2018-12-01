@@ -4,28 +4,41 @@ Objects are split in three groups: subs (or functions), variables and flags. All
 
 ## Subs/functions
 
+**Age:** ages associated with antural mortlity rates
+
 **GetCASStocks:** function that Get the array of CASStocks corresponding to the current ERAStock (e.g. ANB,ACI,ALP,ADM,AHC for ERA stock AKS).
 
 **GetFirstAndLastBY:** Get first and last brood years for the CASStocks corresponding to the current ERAstock.
 
-**GetIMData:**
+**GetIMData:** 
 
-**GetInterDamSurvival:**
+**GetInterDamSurvival:** This function retrieves the inter dam survival for a specific ERA stock, if inter dam survival data  does not exist (i.e. no dams), then sets the interdam survival to 1
 
 **GetMaxReleaseSize:**  Returns the maximum amount (counts) amount of releases for each stock.
 
 **GetSuperStockData:** Function that reads in the data from the SuperStock table in the database.
 
-**GetSurvivalRates:**
+**GetSurvivalRates:** Retrieves Natural mortality rate from the database and the associated vector of ages.
 
 **GetTaggedReleaseByBrood:** Recovers the information about hatchery releases by brood year - BroodYear CWTRelease TotalRelease.
 
 **GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates:**
 
-
 **MainSub:** Main routine that calls most of the data reading and calculations subroutines.
 
+**NaturalMortalityRate:** What it says. For each ERA stock
+
 ## Variables
+
+OceanAge=D$OceanStartAge:(D$OceanStartAge+3),
+            AverageMatRate=df1[,4:7],
+            PNVRegion=df1$PNVRegion,
+            WithinBYWeightFlag
+
+
+**AdultInterDamSurvivalRate:** What is says. by calendar year
+
+
 
 **CASStockString:** vector containing three letter identifiers of CAS Stocks for a specific ERAStock.
 
@@ -36,7 +49,11 @@ Objects are split in three groups: subs (or functions), variables and flags. All
 
 **ERAStockArray:** Vector containing the 3-letter code that specifies the ERA stock identifier. Read from table CASStock in CIS. 
 
-**FirstBY:** First brood year for a given CASStockString 
+**FirstBY:** First brood year for a given CASStockString
+
+**InterDamSurvival_CalendarYear:** Calendar year for the interdamSurvival data. 
+
+**JackInterDamSurvivalRate:** What is says. by calendar year
 
 **LastAvailableBY:** Last available brood year for a given CASStockString
 
@@ -49,7 +66,7 @@ Objects are split in three groups: subs (or functions), variables and flags. All
 
 **MaxAge:** Maximum age assigned to a given Superstock. 
 
-**MaxCalendarYear:** variable used to store the last calendar year set initially by the user. 
+**MaxCalendarYear:** variable used to store the last calendar year set initially by the  user. 
 
 **MeanMatType:** Variable indicating what method is used to calculate average maturity rates. Options are: "ArithmeticMean" and  or other (defaults to geometric mean).
 
