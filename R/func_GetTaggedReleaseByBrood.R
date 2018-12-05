@@ -13,7 +13,7 @@
 
 #' @title GetTaggedReleaseByBrood
 #'
-#' @description   Recovers the information about hatchery releases by brood year. In addition it calculates the expansion ration used to normalize the CWT recoveries 
+#' @description   Recovers the information about hatchery releases by brood year. In addition it calculates the expansion ratio used to normalize and standardize the CWT recoveries 
 #' 
 #' 
 #'

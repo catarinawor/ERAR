@@ -11,7 +11,7 @@
 
 #' @title SetTerminalFishery
 #'
-#' @description  
+#' @description Populates a matrix that is PSCfishe ry x Age, with flags indicating if fish is caught at a terminal fishery
 #' 
 #' 
 #'

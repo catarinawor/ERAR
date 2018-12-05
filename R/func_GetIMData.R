@@ -13,7 +13,7 @@
 
 #' @title GetIMData
 #'
-#' @description  
+#' @description  Get incidental mortality data based on Calendar years and PNV Region (whatever that is).
 #' 
 #' 
 #'
@@ -167,12 +167,12 @@ GetIMData <- function(D,M){
     #       
 
     df2select_L<- df2[df2$Age<D$MaxAge&df2$SizeClass=="L",c("PSCFishery", "Age", "AvgQ")]   
-    LegalCatchabilityCoeifficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
+    LegalCatchabilityCoefficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
     df2select_S<- df2[df2$Age<D$MaxAge&df2$SizeClass!="L",c("PSCFishery", "Age", "AvgQ")]   
-    SubLegalCatchabilityCoeifficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
+    SubLegalCatchabilityCoeificient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
-    return( list(IM_PSCFishery=PSCFishery,
+    return( list(M_PSCFishery=PSCFishery,
         IM_CalendarYear=CalendarYear,
         SublegalIMRate=SublegalIMRate,
         LegalIMRate=LegalIMRate,
@@ -200,6 +200,8 @@ GetIMData <- function(D,M){
         Reavailability=Reavailability,
         PNV= PNV,
         PV=PV,
+        LegalCatchabilityCoefficient=LegalCatchabilityCoefficient,
+        SubLegalCatchabilityCoeificient=SubLegalCatchabilityCoeificient
         GetIMDataErr=GetIMDataErr
         ))
 

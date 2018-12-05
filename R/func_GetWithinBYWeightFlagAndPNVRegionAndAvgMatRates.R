@@ -15,16 +15,16 @@
 
 #' @title GetWithinBYWeightFlagAndPNVRegionAndAvgMatRate
 #'
-#' @description  
+#' @description  Retrives PNVRegion, AverageMatRate, PNVRegion, WithinBYWeightFlag from ERA_Stock table
 #' 
 #' 
 #'
 #' @param M A list passed to MainSub
-#'
-#' @details
-#'
-#' @return D: A list 
 #' 
+#' @param D A list containin ERA stock specific information
+#'
+#'
+#' @return D: A list containing information regarding OceanAge, AverageMatRate, PNVRegion, WithinBYWeightFlag
 #' 
 #' 
 #' @export

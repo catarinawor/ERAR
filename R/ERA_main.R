@@ -463,6 +463,7 @@ MainSub<-function(M){
  		#read in or refresh all user and database specified inputs
  		# Me.Refresh() 
 
+        #list that will store all the ERAstock specific info
         D <- list()    
         #'set the current stock from the user selected ERAStock array
 
@@ -664,7 +665,7 @@ MainSub<-function(M){
             sink()
            
             D1 <- GetFirstAndLastBY(D,M, ERAStock)
-            try(if(D1$erro ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
+            try(if(D1$err_FirstAndLastBY ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
             D <- append(D,D1)
 
 
@@ -704,6 +705,7 @@ MainSub<-function(M){
             
 
             if(M$PNVAlgorithm=="StockSpecific"){
+                # this is not used st the moment so these functions are not working properly
                 D1<-GetMeanLength(D,M)
                 D <- append(D,D1)
 
@@ -722,6 +724,15 @@ MainSub<-function(M){
             sink(MainSublog, append=TRUE)
             cat("Get Landed Catch and Escapement\n")
             sink()
+
+
+            if(D$WithinBYWeightFlag){
+                #not implemented yet
+            }else{
+                #in progress
+                D1<-CalcLandedCatchAndEscapement(M,D)
+                D <- append(D,D1)
+            }
             #   lblStatus.Text = " "
   #              lblStatus.Visible = True
   #              Me.Refresh()

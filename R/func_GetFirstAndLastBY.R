@@ -41,7 +41,7 @@ GetFirstAndLastBY <- function(D,M,ERAstock){
     
     df1 <- sqlQuery( dta , query = ERASQL )
     
-    erro<-0
+    err_FirstAndLastBY<-0
 
     FirstBY<-df1[1,1]
 
