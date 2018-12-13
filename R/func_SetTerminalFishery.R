@@ -44,7 +44,7 @@ SetTerminalFishery <- function(D,M){
      terminal[PSCFisheryNumber,]<-TRUE
 
 
-     terminal[which(M$PSCFisheryGear=="NET"),D$TermNetSwitchAge:D$MaxAge]<-TRUE
+     terminal[which(M$PSCFisheryGear=="NET"),(D$TermNetSwitchAge:D$MaxAge-(D$OceanStartAge)+1)]<-TRUE
 
      return(terminal)
 

@@ -1,5 +1,5 @@
 #=======================================================
-#ERA function GetPSCFisheries()
+#ERA function GetCalendarYears()
 #Translated from VB ERA CIS code
 #November 2018
 #Author: Catarina Wor

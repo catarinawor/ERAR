@@ -53,6 +53,7 @@ GetIMData <- function(D,M){
 
 
     ERASQL <- paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion,") Order By PSCFishery, CalendarYear" )
+              paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion, ") Order By PSCFishery, CalendarYear")
     #read from data base
     
     df1 <- sqlQuery( dta , query = ERASQL )
@@ -172,7 +173,7 @@ GetIMData <- function(D,M){
     df2select_S<- df2[df2$Age<D$MaxAge&df2$SizeClass!="L",c("PSCFishery", "Age", "AvgQ")]   
     SubLegalCatchabilityCoeificient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
-    return( list(M_PSCFishery=PSCFishery,
+    return( list(IM_PSCFishery=PSCFishery,
         IM_CalendarYear=CalendarYear,
         SublegalIMRate=SublegalIMRate,
         LegalIMRate=LegalIMRate,
@@ -201,7 +202,7 @@ GetIMData <- function(D,M){
         PNV= PNV,
         PV=PV,
         LegalCatchabilityCoefficient=LegalCatchabilityCoefficient,
-        SubLegalCatchabilityCoeificient=SubLegalCatchabilityCoeificient
+        SubLegalCatchabilityCoeificient=SubLegalCatchabilityCoeificient,
         GetIMDataErr=GetIMDataErr
         ))
 

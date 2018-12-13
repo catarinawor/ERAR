@@ -52,7 +52,7 @@ GetFirstAndLastBY <- function(D,M,ERAstock){
         sink("../GetFirstAndLastBY.log")
         cat(paste("please open ERA_CASStockToERAStockMapping and see if " , M$CASStockString[[1]] , " is missing in the CASStock field (column).  Program is going to stop"))
         sink()
-        erro<-1
+        err_FirstAndLastBY<-1
 
     }
 
@@ -86,11 +86,11 @@ GetFirstAndLastBY <- function(D,M,ERAstock){
 
     if(youngestAge < D$OceanStartAge& !M$isCombineAge2And3[ERAStock]){
         if(youngestAge == 1){
-            sink("../GetFirstAndLastBY.log",append = TRUE)
+            sink(Log_OlderThanMaxAge_ID,append = TRUE)
             cat(paste(M$ShakerMethod, youngestAge,  "will not be used in Exploitation Rate Analysis.\n"))
             sink()
         }else if(youngestAge > 1){
-            sink("../GetFirstAndLastBY.log",append = TRUE)
+            sink(Log_OlderThanMaxAge_ID,append = TRUE)
             cat(paste("Youngest age =", youngestAge ," is less than OceanStartAge in SuperStock.  Did you forget to combine age 2 and 3?\n"))
             sink()
 
@@ -103,7 +103,7 @@ GetFirstAndLastBY <- function(D,M,ERAstock){
         LastAvailableBY=LastAvailableBY,
         LastPossibleBY = LastPossibleBY,
         LastBY = LastBY,
-        erro= erro)
+        err_FirstAndLastBY = err_FirstAndLastBY)
 
      return(D)
 

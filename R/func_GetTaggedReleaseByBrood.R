@@ -47,7 +47,7 @@ GetTaggedReleaseByBrood <- function(D,M){
     RelRatio <- D$MaxRelease / df1$CWTRelease
     
     
-    return(list(RelRatio=RelRatio, BroodYear=df1$BroodYear, CWTRelease=df1$CWTRelease, TotalRelease=df1$TotalRelease))
+    return(list(RelRatio=RelRatio, CWTRelease_BroodYear=df1$BroodYear, CWTRelease=df1$CWTRelease, TotalRelease=df1$TotalRelease))
 
     
 

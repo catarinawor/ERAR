@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\TMB\test_examples.r
+^\R\handy_develop.R
+^\logs
+^\data
+^\R\func_builderafisheryidlist.R
+^\R\func_CalcLandedCatchAndEscapementWithBYWeights.R
+^\R\ERA_main.R
+^\R\utils.R

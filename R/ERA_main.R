@@ -517,8 +517,9 @@ MainSub<-function(M){
         #-------------------------------------------------------------------------  
          
         #build a log for fish that are observed to be older than the user set maximum age -- the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock
-        Log_OlderThanMaxAge_ID <- paste0(D$CurrentStock,"_OlderThanMaxAge.log")
-        sink(Log_OlderThanMaxAge_ID)
+        Log_OlderThanMaxAge_ID <- paste0("../logs/","OlderThanMaxAge.log")
+        sink(Log_OlderThanMaxAge_ID, append=T)
+        cat(paste(D$CurrentStock,"\n"))
         cat("the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock.\n")
         cat("ShakerMethod BY age fishery \n")
         sink()
@@ -605,13 +606,12 @@ MainSub<-function(M){
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
             D1<-GetSuperStockData(curr_stk=D$CurrentStock,dbse=M$datbse)
-            
             D<-append(D,D1)
             #TermNetSwitchAge <- D$TermNetSwitchAge
             #OceanStartAge  <- D$OceanStartAge 
             #MaxAge  <- D$MaxAge 
             #SuperStock  <- D$SuperStock
-
+            
                 
             if(M$isCombineAge2And3[ERAStock]){
             	
@@ -719,7 +719,7 @@ MainSub<-function(M){
 
 
             D1<-SetTerminalFishery(D,M)
-            D <- append(D,D1)
+            D$terminal <- D1
 
             sink(MainSublog, append=TRUE)
             cat("Get Landed Catch and Escapement\n")
@@ -727,10 +727,10 @@ MainSub<-function(M){
 
 
             if(D$WithinBYWeightFlag){
-                #not implemented yet
+                #not implemented yet$
             }else{
                 #in progress
-                D1<-CalcLandedCatchAndEscapement(M,D)
+                D1 <- CalcLandedCatchAndEscapement(M,D)
                 D <- append(D,D1)
             }
             #   lblStatus.Text = " "
