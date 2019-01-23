@@ -52,7 +52,7 @@ BuildPSCFisheryIdList <- function(M,PSCFish){
     StartMonthDay <- df1$StartMonthDay
     EndMonthDay <- df1$EndMonthDay
     FisheryIdList <- paste("(", toString(df1$Id),")")
-    DateRangeClause <- NA
+    DateRangeClause <- " "
 
     sink("../logs/BuildPSCFisheryIdList.log",append=T)
         cat(paste("You don't have an entry in the ERA_FisheryPSCFisheryMapping table for PSCFishery #" , PSCFish, ".\n"))

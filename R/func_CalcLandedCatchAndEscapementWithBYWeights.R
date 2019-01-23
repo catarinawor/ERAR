@@ -80,121 +80,105 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
    
     AllBY <- D$FirstBY:D$LastBY
+
     Allages <- D$youngestAge:D$MaxAge
+    Escape <-matrix(0,nrow=length(AllBY),ncol=length(Allages))
 
-    Escape <-matrix(NA,nrow=length(AllBY),ncol=length(Allages))
-
-
+    LandedCatch <-array(0,dim=c(length()))
+   
+    tag_code <- ""
+#
+#
+#    
+#
+#
     
-
-
-	if(M$isReplicateCohShak == FALSE){
-
-		#NumFish <- M$NumberPSCFisheries
+	if(!M$isReplicateCohShak){
 
 		NumFish <-   M$NumberPSCFisheries
-
-
+        
 	}else{
 
 		 NumFish <- M$NumberERAFisheries
-       
-
 
 	}
 
     LandedCatch<-array(NA,dim=c(NumFish,7,length(AllBY)))
 
-    
-
-
 	#'Loop through each PSCfishery (or ERAFishery if emulating CAS-Coshak) and escapement to obtain catch and escapement
  	for(Fish in 1:NumFish){
+        #deleted: 
+        #Fish=50
 
 	 sink("../logs/CalcLandedCatchAndEscapement.log",append=T)
 		cat(paste0(D$CASStockString,"\n"))
         cat(paste0("Get Landed Catch and Escapement for fishery " , Fish, " of ", NumFish, " fine scale fisheries\n"))
      sink()
-
-    #'Create a list of CAS Fisheries mapped to each PSC Fishery with appropriate start and end date ranges
-        if(M$isReplicateCohShak==FALSE){
+#
+   #'Create a list of CAS Fisheries mapped to each PSC Fishery with appropriate start and end date ranges
+        if(!M$isReplicateCohShak){
 
     	  d <- BuildPSCFisheryIdList(M,Fish)
+          ERASQL <- paste0( "SELECT wtc.BroodYear,r.Age, ",
+        "Sum(IIf(f.CASTerminal, r.AdjustedEstimatedNumber,IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor))) AS SumEstimatedNumber " ,
+        "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) " ,
+        "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode " ,
+        "WHERE wtc.CASStock IN ('",  D$CASStockString[[1]] ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in " , d$FisheryIdList ," ", d$DateRangeClause , " AND r.age > 1" ,
+        " GROUP BY r.Age,wtc.BroodYear ORDER BY wtc.BroodYear, r.Age")
+
     
-        }else{
+
+      
+       }else{#'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
+       #not tested
 
     	  d <- BuildERAFisheryIdList(M,Fish)
 
-        }
-
-        # 'Sum up adjusted estimated numbers for a brood year and age by PSCFishery for current ERAStock
-        if(M$isReplicateCohShak==FALSE){
-
-           ERASQL <- paste0("SELECT wtc.BroodYear,r.Age, ",
-            "Sum(IIf(f.CASTerminal, r.AdjustedEstimatedNumber,IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor))) AS SumEstimatedNumber ",
-            "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) ",
-            "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode ",
-            "WHERE wtc.CASStock IN ('", D$CASStockString[[1]] ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in ", d$FisheryIdList, " AND r.age > 1 ",
-            " GROUP BY r.Age,wtc.BroodYear ORDER BY wtc.BroodYear, r.Age")
-
-           #ERASQL <- paste0("SELECT wtc.BroodYear,r.Age, ",
-           # "Sum(IIf(f.CASTerminal, r.AdjustedEstimatedNumber,IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor))) AS SumEstimatedNumber ",
-           # "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) ",
-           # "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode ",
-           # "WHERE wtc.CASStock IN ('", D$CASStockString[[1]] ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in ", d$FisheryIdList, " ", d$DateRangeClause , " AND r.age > 1 ",
-           # " GROUP BY r.Age,wtc.BroodYear ORDER BY wtc.BroodYear, r.Age")
-
-
-            dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
-    
-            df3 <- RODBC::sqlQuery( dta , query =ERASQL)
-    
-        }else{
-            #'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
-            # Not fully tested
-            ERASQL <- paste0("SELECT wtc.BroodYear,r.Age, ",
-                "Sum(IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor)) AS SumEstimatedNumber, r.TagCode ",
-                "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) ",
-                "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode ",
-                "WHERE wtc.CASStock IN ('", D$CASStockString[[1]], "') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in ", d$FisheryIdList, " AND r.age > 1 ",
-                " GROUP BY r.Age, wtc.BroodYear, r.TagCode ORDER BY wtc.BroodYear, r.Age")
-
-            dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
-    
-            df3 <- RODBC::sqlQuery( dta , query =ERASQL)
-    
+          ERASQL <- paste0("SELECT wtc.BroodYear,r.Age, " ,
+        "Sum(IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor)) AS SumEstimatedNumber, " ,
+       "r.TagCode ",
+        "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) ",
+        "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode ",
+        "WHERE wtc.CASStock IN ('", D$CASStockString[[1]] ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in ", d$FisheryIdList ," ", d$DateRangeClause, " AND r.age > 1 ",
+        " GROUP BY r.Age, wtc.BroodYear, r.TagCode ORDER BY wtc.BroodYear, r.Age")
 
         }
 
-
+        dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+    
+        df3 <- RODBC::sqlQuery( dta , query =ERASQL)
+   
         BroodYear <- df3$BroodYear
         RecoveryAge <- df3$Age
         SumAdjustedEstimatedNumber <- df3$SumEstimatedNumber
 
-        if(M$isReplicateCohShak==TRUE){
+        if(M$isReplicateCohShak){
             #'reproduce CFile numbers
             tag_code <- df3[,4]
-        }
+       }else{
+            tag_code <- rep("",nrow(df3))
+       }
 
 
-        if(M$isReplicateCohShak==FALSE){
+
+       if(!M$isReplicateCohShak){
             FishName <- M$PSCFisheryName[Fish]
         }else{
+            #'reproduce CFile numbers
             #not tested
             FishName = M$ERAFisheryName[Fish]
         }
-        
+
+       #'limit data to last calendar year selected by user 
         for(y in 1:nrow(df3)){
 
-        #'limit data to last calendar year selected by user 
-        
             if(BroodYear[y] + RecoveryAge[y] <= M$LastCalendarYear){
 
                 isValidAge = TRUE
                 #'do not use recovery records where RecoveryAge > MaxAge+2
                 if(RecoveryAge[y] > D$MaxAge & RecoveryAge[y] <= D$MaxAge + 2 ){
                     sink("../logs/Log_OlderThanMaxAge_ID.log", append=TRUE)
-                    cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[y], RecoveryAge[y], FishName, "assigned to age ", D$MaxAge,"\n")
+                    cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[y], RecoveryAge[y], FishName, "assigned to age ", D$MaxAge,"\n"))
                     sink()
                     RecoveryAge[y] <- D$MaxAge
                 }
@@ -202,173 +186,164 @@ CalcLandedCatchAndEscapement <- function(D,M){
                 if(RecoveryAge[y] > D$MaxAge + 2 ){
                     isValidAge = FALSE
                     sink("../logs/Log_OlderThanMaxAge_ID.log", append=TRUE)
-                    cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[y], RecoveryAge[y], FishName, "will not be used in the cohort analysis\n")
+                    cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[y], RecoveryAge[y], FishName, "will not be used in the cohort analysis\n"))
                     sink()
                 }
 
                 if(isValidAge){
-                    #'combine ages if requested
-                    if(M$isCombineAge2And3[ERAStock] == TRUE & RecoveryAge[y] == 2)
-                       
+                   #'combine ages if requested
+                    if(M$isCombineAge2And3[ERAStock] == TRUE & RecoveryAge[y] == 2){
                        RecoveryAge[y] <- 3 
-
                     }else if(M$isCombineAge5And6[ERAStock] == TRUE & RecoveryAge[y] == 6){
-
                         RecoveryAge[y] <- 5
-
                     }
 
                     #'one more time, check BroodYear + RecoveryAge because of combine age
                     if(BroodYear[y] + RecoveryAge[y] <= M$LastCalendarYear){
+                      
                         #'CIS multiplies fine scale fishery and tag code esc by RelRatio BEFORE combining into PSC Fishery
                         #'CAS-Coshak rounds fine scale fishery, then combines into PSC Fishery BEFORE multiplying by RelRatio 
-                        if(FishName == "ESCAPEMENT" | grepl("ESC",FishName) ){
-                            if(M$isReplicateCohShak==FALSE){
-                                Esc <- SumAdjustedEstimatedNumber[y] * D$RelRatio[D$CWTRelease_BroodYear==BroodYear[y]]
-                            }else if(M$isReplicateCohShak==TRUE){
+                        if(d$FishName == "ESCAPEMENT" | grepl("ESC",FishName) ){
+                           
+                            if(!M$isReplicateCohShak){   
+                                Esc <- SumAdjustedEstimatedNumber[y] * D$RelRatio[D$CWTRelease_BroodYear==BroodYear[y]]                            
+                            }else if(M$isReplicateCohShak){                              
                                 #'CAS round escapement before applying IDL
-                                #'Esc = Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001) ' 0.00000001
-                                Esc <- SumAdjustedEstimatedNumber[y] + 0.0001
+                                #'Esc = Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001) ' 0.00000001 
+                                
+                                Esc <- SumAdjustedEstimatedNumber[y] + 0.0001 
                             }
-                            if(RecoveryAge[y] == D$OceanStartAge){
+                            
+                            if(RecoveryAge[y] == D$OceanStartAge){                                
+                                Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] <- Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] + Esc / D$JackInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]
 
-                                Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] <- Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])) + Esc / JackInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]
-                                if(M$isTraceCalc &ShakerMethod == M$traceThisShakerMethod & BroodYear[y] >= M$traceThisYear){
+                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[y] >= M$traceThisYear){
                                     sink("../logs/debug_EscapeID.log",append=T)
                                     cat(paste0(D$CASStockString,"\n"))
-                                    cat(paste("1100 accum fine scale escape", BroodYear[y], RecoveryAge[y], tag_code[y], Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])], Esc, SumAdjustedEstimatedNumber, JackInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]))
+                                    cat(paste("1100 accum fine scale escape", BroodYear[y], RecoveryAge[y], tag_code[y], Escape[which(AllBY==BroodYear[y])&which(Allages==RecoveryAge[y])], Esc, SumAdjustedEstimatedNumber[y], D$JackInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))])) 
                                     sink()
                                 }
+
                             }else{
-
-                                Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] <- Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])) + Esc / AdultInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]
-                                if(M$isTraceCalc &ShakerMethod == M$traceThisShakerMethod & BroodYear[y] >= M$traceThisYear){
+                                Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] <- Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])] + Esc / D$AdultInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]
+                                
+                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[y] >= M$traceThisYear) {
                                     sink("../logs/debug_EscapeID.log",append=T)
                                     cat(paste0(D$CASStockString,"\n"))
-                                    cat(paste("1103 accum fine scale escape", BroodYear[y], RecoveryAge[y], tag_code[y], Escape[which(AllBY==BroodYear[y]),which(Allages==RecoveryAge[y])], Esc, SumAdjustedEstimatedNumber, AdultInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]))
+                                    cat(paste("1103 accum fine scale escape", BroodYear[y], RecoveryAge[y], tag_code[y], Escape[which(AllBY==BroodYear[y])&which(Allages==RecoveryAge[y])], Esc, SumAdjustedEstimatedNumber[y], D$AdultInterDamSurvivalRate[which(D$InterDamSurvival_CalendarYear==(BroodYear[y] + RecoveryAge[y]))]))
                                     sink()
                                 }
+
                             }
 
-                        }else{
-                            #catch
+                        }else{ #catch
+
                             #'SQL returns fine scale fishery, this is where fine scale fishery is combined into PSC Fishery
                             #'WriteLine(debugID, CurrentStock, Fish, LastBY, BroodYear, RecoveryAge, BroodYear + RecoveryAge, LastCalendarYear)
-                            if(M$isReplicateCohShak==False){
-                                LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] <- LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] + SumAdjustedEstimatedNumber[y] * RelRatio[D$CWTRelease_BroodYear==BroodYear[y]]
-                                 
+                            if(!M$isReplicateCohShak){
+                                LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] <- LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] + SumAdjustedEstimatedNumber[y] + D$RelRatio[which(D$CWTRelease_BroodYear==BroodYear[y])]
                                 if(RecoveryAge[y] < D$OceanStartAge){
-                                    sink("../logs/CombineAge.log",append=T)
-                                    cat(paste0(D$CASStockString))
-                                    cat(paste0("Youngest age = " , RecoveryAge , " is less than OceanStartAge for ", BroodYear, ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message.")
+                                    sink("../logs/LandedCatch.log",append=T)
+                                    cat(paste0("Youngest age = ", RecoveryAge[y], " is less than OceanStartAge for " , BroodYear[y] , ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message.")
                                     sink()
+                                    stop(" MainSub stopped check  ../LandedCatch.log")
                                 }
                             }else{
-
-                                #'multiply catch by RelRatio AFTER combining fine scale fishery into PSC Fishery
-                                #    'SQL query must returning sum by fine scale fishery, not by tag code
-                                #    'SQL must accum by fine scale fishery before rounding because if Extrapoplated = YES in CWDBRecovery table, then the fractional numbers will get lost 
-                                #    'because SumAdjustedEstimatedNumber = accum fine scale catches, OK to round here
-                                #    'add 0.0000001 instead of 0.00000001 so even numbers to round up. The extra decimal place is not an issue for odd numbers.
-                                    
-                                #    'LandedCatch(Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + (Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001))  '0.00000001
-                                LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] <- LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] + (SumAdjustedEstimatedNumber + 0.0001) 
-                                    
+                                #multiply catch by RelRatio AFTER combining fine scale fishery into PSC Fishery
+                                #'SQL query must returning sum by fine scale fishery, not by tag code
+                                #'SQL must accum by fine scale fishery before rounding because if Extrapoplated = YES in CWDBRecovery table, then the fractional numbers will get lost 
+                                #'because SumAdjustedEstimatedNumber = accum fine scale catches, OK to round here
+                                #'add 0.0000001 instead of 0.00000001 so even numbers to round up. The extra decimal place is not an issue for odd numbers.
+                                LandedCatch[[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])]] <- LandedCatch[[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])]] + SumAdjustedEstimatedNumber[y] + 0.0001
                                 if(RecoveryAge[y] < D$OceanStartAge){
-                                    sink("../logs/CombineAge.log",append=T)
-                                    cat(paste0(D$CASStockString))
-                                    cat(paste0("Youngest age = " , RecoveryAge , " is less than OceanStartAge for ", BroodYear, ".  Did you forget to combine age 2 and 3?   Program is going to crash with an index out of bounds error message.")
+                                    sink("../logs/LandedCatch.log",append=T)
+                                    cat(paste0("Youngest age = " & RecoveryAge[y] & " is less than OceanStartAge for " & BroodYear[y] & ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index out of bounds error message.")
                                     sink()
+                                    stop(" MainSub stopped check  ../LandedCatch.log")
                                 }
-
                                 #'If RecoveryAge = 4 And Fish < 13 And BroodYear = 1975 Then WriteLine(debugID, "1327", ShakerMethod, Fish, RecoveryAge, BroodYear, LandedCatch(Fish, RecoveryAge, BroodYear), SumAdjustedEstimatedNumber, RelRatio(BroodYear))
-                                if(M$isTraceCalc &ShakerMethod == M$traceThisShakerMethod & M$isTraceByCalendarYr & (BroodYear[y] + RecoveryAge[y]) >= M$traceThisYear + M$traceThisAge & Fish == M$traceThisFishery){
+                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & M$isTraceByCalendarYr & (BroodYear[y] + RecoveryAge[y]) >= M$traceThisYear + M$traceThisAge & Fish == M$traceThisFishery){
                                     sink("../logs/debug_CatchID.log",append=T)
-                                    cat(paste0(D$CASStockString))
-                                    cat(paste0("line 1105 FineScaleCatch", BroodYear, Fish, RecoveryAge, tag_code, SumAdjustedEstimatedNumber, LandedCatch(Fish, RecoveryAge, BroodYear))
+                                    cat(paste0( "line 1105 FineScaleCatch", BroodYear[y], Fish, RecoveryAge[y], tag_code[y], SumAdjustedEstimatedNumber[y], LandedCatch[Fish, RecoveryAge[y], which(AllBY==BroodYear[y])]))
                                     sink()
-                                   
                                 }
-                                If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And isTraceByCalendarYr = True And (BroodYear + RecoveryAge) >= traceThisYear + traceThisAge And Fish = traceThisFishery Then WriteLine(debug_CatchID, "line 1105 FineScaleCatch", BroodYear, Fish, RecoveryAge, tag_code, SumAdjustedEstimatedNumber, LandedCatch(Fish, RecoveryAge, BroodYear))
-                                If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And Fish = 31 And BroodYear >= traceThisYear And RecoveryAge = traceThisAge Then WriteLine(debug_CatchID, "line 1106 FineScaleCatch", BroodYear, Fish, RecoveryAge, tag_code, SumAdjustedEstimatedNumber, LandedCatch(Fish, RecoveryAge, BroodYear))
-                            } #'isReplicateCohShak = False
-                      
 
+                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & Fish == 31 & BroodYear[y] >= M$traceThisYear & RecoveryAge[y] = M$traceThisAge){
+                                    sink("../logs/debug_CatchID.log",append=T)
+                                    cat(paste0("line 1106 FineScaleCatch", BroodYear[y], Fish, RecoveryAge[y], tag_code[y], SumAdjustedEstimatedNumber[y], LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])]))
+                                    sink()   
+                                }    
+                            }#'isReplicateCohShak = False
+                        
+                            #'legal dropoff mortalities for PSCFisheries, similar code for ERAFisheries is in the next loop below.  
+                            if(!M$isReplicateCohShak){
+                                if(D$CNRMethod[which(D$CNRMethod[,1]==BroodYear[y] + RecoveryAge[y]), Fish]!=3){
+                                    
+                                }
                             }
-
-
-
-                                 (Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + SumAdjustedEstimatedNumber * RelRatio(BroodYear)
-                                    Catch
-                                        If (RecoveryAge < OceanStartAge) Then
-                                            MsgBox("Youngest age = " & RecoveryAge & " is less than OceanStartAge for " & BroodYear & ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message.")
-                                        End If
-
-                            }
-
 
                         }
-                        D$JackInterDamSurvivalRate
 
-                    }
+                                           
+#                             
+#                        }else{
+#                            #catch
+#                            #'SQL returns fine scale fishery, this is where fine scale fishery is combined into PSC Fishery
+#                            #'WriteLine(debugID, CurrentStock, Fish, LastBY, BroodYear, RecoveryAge, BroodYear + RecoveryAge, LastCalendarYear)
+#                            if(M$isReplicateCohShak==False){
+#                                LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] <- LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] + SumAdjustedEstimatedNumber[y] * RelRatio[D$CWTRelease_BroodYear==BroodYear[y]]
+#                                 
+#                                if(RecoveryAge[y] < D$OceanStartAge){
+#                                    sink("../logs/CombineAge.log",append=T)
+#                                    cat(paste0(D$CASStockString))
+#                                    cat(paste0("Youngest age = " , RecoveryAge , " is less than OceanStartAge for ", BroodYear, ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message."))
+#                                    sink()
+#                                }
+#                            }else{
+#
+#                                #'multiply catch by RelRatio AFTER combining fine scale fishery into PSC Fishery
+#                                #    'SQL query must returning sum by fine scale fishery, not by tag code
+#                                #    'SQL must accum by fine scale fishery before rounding because if Extrapoplated = YES in CWDBRecovery table, then the fractional numbers will get lost 
+#                                #    'because SumAdjustedEstimatedNumber = accum fine scale catches, OK to round here
+#                                #    'add 0.0000001 instead of 0.00000001 so even numbers to round up. The extra decimal place is not an issue for odd numbers.
+#                                    
+#                                #    'LandedCatch(Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + (Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001))  '0.00000001
+#                                LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] <- LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])] + (SumAdjustedEstimatedNumber + 0.0001) 
+#                                    
+#                                if(RecoveryAge[y] < D$OceanStartAge){
+#                                    sink("../logs/CombineAge.log",append=T)
+#                                    cat(paste0(D$CASStockString))
+#                                    cat(paste0("Youngest age = " , RecoveryAge , " is less than OceanStartAge for ", BroodYear, ".  Did you forget to combine age 2 and 3?   Program is going to crash with an index out of bounds error message."))
+#                                    sink()
+#                                }
+#
+#                                #'If RecoveryAge = 4 And Fish < 13 And BroodYear = 1975 Then WriteLine(debugID, "1327", ShakerMethod, Fish, RecoveryAge, BroodYear, LandedCatch(Fish, RecoveryAge, BroodYear), SumAdjustedEstimatedNumber, RelRatio(BroodYear))
+#                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod &  M$isTraceByCalendarYr & (BroodYear[y] + RecoveryAge[y]) >= M$traceThisYear + M$traceThisAge & Fish == M$traceThisFishery){
+#                                    sink("../logs/debug_CatchID.log",append=T)
+#                                    cat(paste0(D$CASStockString))
+#                                    cat(paste("line 1105 FineScaleCatch", BroodYear[y], Fish, RecoveryAge[y], tag_code[y], SumAdjustedEstimatedNumber[y], LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])]))
+#                                    sink()
+#                                   
+#                                }
+#
+#                                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & Fish ==31 & Broodyear[y]>= M$traceThisYear & RecoveryAge == M$traceThisAge){
+#                                    sink("../logs/debug_CatchID.log",append=T)
+#                                    cat(paste0(D$CASStockString))
+#                                    cat(paste( "line 1106 FineScaleCatch", BroodYear[y], Fish, RecoveryAge[y], tag_code[y], SumAdjustedEstimatedNumber[y], LandedCatch[Fish,RecoveryAge[y],which(AllBY==BroodYear[y])]))
+#                                    sink()
+#                                }
+#                                
+#                            } #'isReplicateCohShak = False
+#                            #'legal dropoff mortalities for PSCFisheries, similar code for ERAFisheries is in the next loop below.  
+#                            if(M$isReplicateCohShak == FALSE){
+#                                if(D$CNRMethod[D$CNRMethod$CalendarYear==(BroodYear[y] + RecoveryAge[y]), Fish+1] != 3){
+#                                    
+#                                }
+#                            }                          
+#                        }
+#                    }
+#                }
 
-
-                }
-            }  
-
-        } 
-
-               
-                    
-
-                                'SQL returns fine scale fishery, this is where fine scale fishery is combined into PSC Fishery
-                                'WriteLine(debugID, CurrentStock, Fish, LastBY, BroodYear, RecoveryAge, BroodYear + RecoveryAge, LastCalendarYear)
-                                If isReplicateCohShak = False Then
-                                    Try
-                                        LandedCatch(Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + SumAdjustedEstimatedNumber * RelRatio(BroodYear)
-                                    Catch
-                                        If (RecoveryAge < OceanStartAge) Then
-                                            MsgBox("Youngest age = " & RecoveryAge & " is less than OceanStartAge for " & BroodYear & ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message.")
-                                        End If
-                                    End Try
-                                Else 'multiply catch by RelRatio AFTER combining fine scale fishery into PSC Fishery
-                                    'SQL query must returning sum by fine scale fishery, not by tag code
-                                    'SQL must accum by fine scale fishery before rounding because if Extrapoplated = YES in CWDBRecovery table, then the fractional numbers will get lost 
-                                    'because SumAdjustedEstimatedNumber = accum fine scale catches, OK to round here
-                                    'add 0.0000001 instead of 0.00000001 so even numbers to round up. The extra decimal place is not an issue for odd numbers.
-                                    Try
-                                        'LandedCatch(Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + (Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001))  '0.00000001
-                                        LandedCatch(Fish, RecoveryAge, BroodYear) = LandedCatch(Fish, RecoveryAge, BroodYear) + (SumAdjustedEstimatedNumber + 0.0001)
-                                    Catch
-                                        If (RecoveryAge < OceanStartAge) Then
-                                            MsgBox("Youngest age = " & RecoveryAge & " is less than OceanStartAge for " & BroodYear & ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index out of bounds error message.")
-                                        End If
-                                    End Try
-                                    'If RecoveryAge = 4 And Fish < 13 And BroodYear = 1975 Then WriteLine(debugID, "1327", ShakerMethod, Fish, RecoveryAge, BroodYear, LandedCatch(Fish, RecoveryAge, BroodYear), SumAdjustedEstimatedNumber, RelRatio(BroodYear))
-
-                                    If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And isTraceByCalendarYr = True And (BroodYear + RecoveryAge) >= traceThisYear + traceThisAge And Fish = traceThisFishery Then WriteLine(debug_CatchID, "line 1105 FineScaleCatch", BroodYear, Fish, RecoveryAge, tag_code, SumAdjustedEstimatedNumber, LandedCatch(Fish, RecoveryAge, BroodYear))
-                                    If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And Fish = 31 And BroodYear >= traceThisYear And RecoveryAge = traceThisAge Then WriteLine(debug_CatchID, "line 1106 FineScaleCatch", BroodYear, Fish, RecoveryAge, tag_code, SumAdjustedEstimatedNumber, LandedCatch(Fish, RecoveryAge, BroodYear))
-                                End If 'isReplicateCohShak = False
-                                'legal dropoff mortalities for PSCFisheries, similar code for ERAFisheries is in the next loop below.  
-                                If isReplicateCohShak = False Then
-                                    If CNRMethod(BroodYear + RecoveryAge, Fish) <> 3 Then
-                                        LegalDropoffMortality(Fish, RecoveryAge, BroodYear) = LegalDropoffMortality(Fish, RecoveryAge, BroodYear) + LandedCatch(Fish, RecoveryAge, BroodYear) * DropoffRate(BroodYear + RecoveryAge, Fish)
-                                        If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear And Fish = traceThisFishery Then WriteLine(debug_LegalDropoffID, "1196 L dropoff", Fish, RecoveryAge, tag_code, LegalDropoffMortality(Fish, RecoveryAge, BroodYear), LandedCatch(Fish, RecoveryAge, BroodYear), DropoffRate(BroodYear + RecoveryAge, Fish))
-                                        If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear And Fish = traceThisFishery Then WriteLine(debug_ShakerID, "1196 L dropoff", Fish, RecoveryAge, tag_code, LegalDropoffMortality(Fish, RecoveryAge, BroodYear), LandedCatch(Fish, RecoveryAge, BroodYear), DropoffRate(BroodYear + RecoveryAge, Fish))
-                                    End If
-                                Else
-                                    'to emulate CAS-Coshak, calculate dropoff after rounding ERAFishery and after combining ERAFishery into PSCFishery in the next loop below
-                                End If 'sReplicateCohShak = False
-                            End If 'BroodYear + RecoveryAge <= LastCalendarYear
-                        End If 'FishName = "ESCAPEMENT" Or FishName = "ESCAPE" 
-                    End If 'isValidAge = True
-                End If 'BroodYear + RecoveryAge <= LastCalendarYear
-            End While 'loop thru tag codes, brood years, and ages
-
-                
-
-
-    }
 
 
 

@@ -52,12 +52,11 @@ M<-StartCohortAnalysis_Click(M)
 
 
 
-CalculateButton_Click(M)
+#CalculateButton_Click(M)
 
 
 #implementation of package usage
-
-
+usethis::use_r("func_StartCohortAnalysis_Click")
 
 
 
