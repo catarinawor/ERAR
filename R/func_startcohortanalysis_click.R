@@ -45,82 +45,57 @@ StartCohortAnalysis_Click <- function(M){
     cat("You have selected the following settings:\n")
 
     if(M$Average_Maturation_Rate == "LongTermAverage"){
-
         cat("Average Maturation Rate: Long Term Average\n")
-
     }else if(M$Average_Maturation_Rate == "SelectNumberCompleteBroods" ){
-    
         cat(paste("Average Maturation Rate: Last= ", M$LastCompleteBroodsUsed,"Complete Broods \n"))
-    
     }
 
-
-    if(M$MeanMatType=="ArithmeticMean"){
-    
+    if(M$MeanMatType=="ArithmeticMean"){    
         cat("Arithmetic Average Maturity Rates \n")
-    
     }else{
-    
-       cat("Geometic Average Maturity Rates \n")
-    
+        cat("Geometic Average Maturity Rates \n")
     }
 
     if(M$PNVAlgorithm=="StockSpecific"){
-
         cat("Proportion Not Vulnerable setting: Stock Specific \n")
-
     }else if(M$PNVAlgorithm=="FisherySpecific"){
-
         cat("Proportion Not Vulnerable setting: Fishery Specific \n")
-
     }
 
     if(M$ShakerMethod == 1){
-
         cat("Using Shaker Method 1 \n")
-    
     }else if(M$ShakerMethod == 4){
-    
         cat("Using Shaker Method 4 \n")
-    
     }
 
     if(M$IncompleteYearAlgorithm=="New"){
-
         cat("Use new incomplete brood year algorithm\n")
-
     }else if(M$IncompleteYearAlgorithm=="Historic"){
-
         cat("Use historic incomplete brood year algorithm\n")
-
     }
     
     if(M$RoundRecoveriesByTagCode== TRUE){
-       
         cat("Round recoveries as in CAS CFiles \n")
         M$isReplicateCohShak <- TRUE
-
     }else{
-
         cat("Do NOT round recoveries\n")
         M$isReplicateCohShak <- FALSE
-
-
     }
 
     cat("If you need to change these settings, please change options in the input list M and re-sun the program.\n")
 
     sink()
 
+    M$chnl <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+     
+
 
     d <- GetPSCFisheries(M)
     M2 <- append(M,d)
 
     if(M$isReplicateCohShak){
-
         d1 <- GetERAFisheries(M2)
         M2 <- append(M2,d1)
-
     }
 
     d2 <- GetCalendarYears(M2)

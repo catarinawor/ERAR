@@ -36,11 +36,11 @@ GetMeanLength <- function(D,M){
 
 
 #'Get MeanLength,StandardDeviation for current ERAStock
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)         
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
     ERASQL = paste0("SELECT CalendarYear, Age, MeanLength, StandardDeviation FROM ERA_Stock INNER JOIN MeanLength ON ERA_Stock.SuperStock = MeanLength.SuperStock WHERE ERAStock = '", D$CurrentStock, "' and TimePeriod = '", D$TimePeriod, "'")
     
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
 
     CY <- df1[,1]
     Age <- df1[,2]
@@ -50,11 +50,13 @@ GetMeanLength <- function(D,M){
 
     #=================================================================
 
-    return(list(GetMeanLength_CY=CY,
-        GetMeanLength_Age=Age,
-        meanLength=meanLength,
-        lengthstDev=lengthstDev
-        ))
+    return(list(MeanLengthdf=df1))
+
+    #return(list(GetMeanLength_CY=CY,
+    #    GetMeanLength_Age=Age,
+    #    meanLength=meanLength,
+    #    lengthstDev=lengthstDev
+    #    ))
   
 }
 

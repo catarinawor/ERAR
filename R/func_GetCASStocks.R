@@ -39,14 +39,14 @@ GetCASStocks <- function(curr_stk=CurrentStock,dbse=M$datbse){
 
 	require(RODBC)
 
-	dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path
+	#dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path
 	
 
 	ERASQL <- paste0("Select CASStock from ERA_CASStockToERAStockMapping Where ERAStock = '",curr_stk, "'")
 
 	#  single quotes need to exist. 
 
-	CASStockString <- RODBC::sqlQuery( dta , query = ERASQL )
+	CASStockString <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
 	
 

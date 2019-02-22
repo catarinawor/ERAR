@@ -38,7 +38,7 @@ GetMaxReleaseSize <- function(D,M){
      #   'original CIS code includes nonCWTMarkCount in MaxRelease but not in CWTRelease(BroodYear)
 
      #establish connection with database
-     dta <- RODBC::odbcConnectAccess2007(M$datbse)      
+     #dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
 
      if(!M$isReplicateCohShak){
@@ -50,7 +50,7 @@ GetMaxReleaseSize <- function(D,M){
 
      }
 
-     df1 <- sqlQuery( dta , query = ERASQL )
+     df1 <- sqlQuery( M$chnl , query = ERASQL )
        MaxReleaseErr <- 0
 
 

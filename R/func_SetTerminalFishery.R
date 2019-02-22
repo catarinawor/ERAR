@@ -32,13 +32,13 @@
 #' 
 SetTerminalFishery <- function(D,M){
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)         
+   # dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
     ERASQL = "SELECT * FROM ERA_PSCFishery WHERE PSCTerminal=Yes"
 
-    df2<- sqlQuery( dta , query = ERASQL )
+    df2<- sqlQuery( M$chnl , query = ERASQL )
 
-    terminal<-matrix(FALSE,nrow=length(unique(D$IM_PSCFishery)),ncol=length(D$OceanStartAge:D$MaxAge))
+    terminal<-matrix(FALSE,nrow=length(unique(D$IMdf$PSCFishery)),ncol=length(D$OceanStartAge:D$MaxAge))
 
      PSCFisheryNumber<-df2[,1]
      terminal[PSCFisheryNumber,]<-TRUE

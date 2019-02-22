@@ -35,11 +35,11 @@
 GetSizeLimitLengthVulnerable <- function(D,M){
 
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)         
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
     ERASQL <-paste0("SELECT CalendarYear, PSCFishery, MinSizeVulnerable, MinSizeLimit, MaxSizeLimit FROM ERA_IMInputs WHERE TimePeriod ='", D$TimePeriod, "'")
 
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
 
     head(df1)
 
@@ -66,12 +66,14 @@ GetSizeLimitLengthVulnerable <- function(D,M){
     SizeLimitType <-  tidyr::spread(df1[,c("SizeLimitType","CalendarYear","PSCFishery")],key=PSCFishery,value=SizeLimitType )
 
 
-    return(list(SizeLimitCY=CY,
-        SizeLimitPSCFishery=PSCFishery,
-        MinSizeVulnerable=MinSizeVulnerable,
-        MinSizeLimit=MinSizeLimit,
-        MaxSizeLimit=MaxSizeLimit,
-        SizeLimitType=SizeLimitType))
+    return(list(SizeLimitLengthVulnerabledf=df1))
+
+    #return(list(SizeLimitCY=CY,
+    #    SizeLimitPSCFishery=PSCFishery,
+    #    MinSizeVulnerable=MinSizeVulnerable,
+    #    MinSizeLimit=MinSizeLimit,
+    #    MaxSizeLimit=MaxSizeLimit,
+    #    SizeLimitType=SizeLimitType))
     
 
     #original VB code

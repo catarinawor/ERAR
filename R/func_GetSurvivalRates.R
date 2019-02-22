@@ -37,12 +37,12 @@ GetSurvivalRates <- function(D,M){
     isOK <- FALSE #equivalent to isOK
     #Get Survival Rates for current ERAStock
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)         
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)         
 
     #read from database
     ERASQL = paste0("SELECT Age, NaturalMortalityRate FROM ERA_Stock INNER JOIN NaturalMortality ON ERA_Stock.SuperStock = NaturalMortality.SuperStock WHERE ERAStock = '" , D$CurrentStock , "' and TimePeriod ='" , D$TimePeriod , "'")
    
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
 
     if(nrow(df1)==0){
         nome <- "GetSurvivalRates.log"

@@ -34,13 +34,13 @@
 #' 
 GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates <- function(D,M){
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)      
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
 
     #  'determines whether Within BY Weighting occurs for a stock
     ERASQL = paste0("Select PNVRegion, WithinBYWeightFlag, AverageMatRateFlag, Age2AverageMatRate, Age3AverageMatRate, Age4AverageMatRate, Age5AverageMatRate from ERA_Stock Where ERAStock = '", D$CurrentStock , "'")
 
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
         
     
     if(!df1$AverageMatRateFlag){ 

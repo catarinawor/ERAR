@@ -49,14 +49,16 @@ GetIMData <- function(D,M){
     #    Dim CalendarYear, PSCFishery As Integer
    # if(!isReplicateCohShak){
     
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)      
+   # dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
 
     ERASQL <- paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion,") Order By PSCFishery, CalendarYear" )
               paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion, ") Order By PSCFishery, CalendarYear")
     #read from data base
     
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
+
+    summary(df1)
 
 
     PSCFishery <- df1$PSCFishery
@@ -156,7 +158,7 @@ GetIMData <- function(D,M){
    
 
     ERASQL2 = paste0("SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients WHERE ERAStock = '", D$CurrentStock ,"' AND ShakerMethod = '" ,M$ShakerMethod ,"'")
-    df2 <- sqlQuery( dta , query = ERASQL2 )
+    df2 <- sqlQuery( M$chnl , query = ERASQL2 )
      GetIMDataErr <- 0
 
     if(nrow(df2)==0){
@@ -171,40 +173,43 @@ GetIMData <- function(D,M){
     LegalCatchabilityCoefficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
     df2select_S<- df2[df2$Age<D$MaxAge&df2$SizeClass!="L",c("PSCFishery", "Age", "AvgQ")]   
-    SubLegalCatchabilityCoeificient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
+    SubLegalCatchabilityCoefficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
-    return( list(IM_PSCFishery=PSCFishery,
-        IM_CalendarYear=CalendarYear,
-        SublegalIMRate=SublegalIMRate,
-        LegalIMRate=LegalIMRate,
-        DropoffRate=DropoffRate,
-        ExtraLegalIMRate=ExtraLegalIMRate,
-        CNRMethod=CNRMethod,
-        RetentionMethod=RetentionMethod,
-        CNRLegalEncounterEst=CNRLegalEncounterEst,
-        CNRSubLegalEncounterEst=CNRSubLegalEncounterEst,
-        CNRExtraLegalEncounterEst=CNRExtraLegalEncounterEst,
-        LandedCatchEst=LandedCatchEst,
-        LegalShakerEst=LegalShakerEst,
-        SubLegalShakerEst=SubLegalShakerEst,
-        ExtraLegalShakerEst=ExtraLegalShakerEst,
-        LegalSelectivityFactor=LegalSelectivityFactor,
-        SublegalSelectivityFactor=SublegalSelectivityFactor,
-        ExtraLegalSelectivityFactor=ExtraLegalSelectivityFactor,
-        MonitoredLegalCatch=MonitoredLegalCatch,
-        MonitoredLegalReleases=MonitoredLegalReleases,
-        SeasonUnits=SeasonUnits,
-        SeasonLength=SeasonLength,
-        CNRSeasonLength=CNRSeasonLength,
-        RetentionEffort=RetentionEffort,
-        CNREffort=CNREffort,
-        Reavailability=Reavailability,
-        PNV= PNV,
-        PV=PV,
-        LegalCatchabilityCoefficient=LegalCatchabilityCoefficient,
-        SubLegalCatchabilityCoeificient=SubLegalCatchabilityCoeificient,
-        GetIMDataErr=GetIMDataErr
-        ))
+    return(list(IMdf=df1,catchabilitydf=df2,
+        GetIMDataErr=GetIMDataErr))
+
+    #return( list(IM_PSCFishery=PSCFishery,
+    #    IM_CalendarYear=CalendarYear,
+    #    SublegalIMRate=SublegalIMRate,
+    #    LegalIMRate=LegalIMRate,
+    #    DropoffRate=DropoffRate,
+    #    ExtraLegalIMRate=ExtraLegalIMRate,
+    #    CNRMethod=CNRMethod,
+    #    RetentionMethod=RetentionMethod,
+    #    CNRLegalEncounterEst=CNRLegalEncounterEst,
+    #    CNRSubLegalEncounterEst=CNRSubLegalEncounterEst,
+    #    CNRExtraLegalEncounterEst=CNRExtraLegalEncounterEst,
+    #    LandedCatchEst=LandedCatchEst,
+    #    LegalShakerEst=LegalShakerEst,
+    #    SubLegalShakerEst=SubLegalShakerEst,
+    #    ExtraLegalShakerEst=ExtraLegalShakerEst,
+    #    LegalSelectivityFactor=LegalSelectivityFactor,
+    #    SublegalSelectivityFactor=SublegalSelectivityFactor,
+    #    ExtraLegalSelectivityFactor=ExtraLegalSelectivityFactor,
+    #    MonitoredLegalCatch=MonitoredLegalCatch,
+    #    MonitoredLegalReleases=MonitoredLegalReleases,
+    #    SeasonUnits=SeasonUnits,
+    #    SeasonLength=SeasonLength,
+    #    CNRSeasonLength=CNRSeasonLength,
+    #    RetentionEffort=RetentionEffort,
+    #    CNREffort=CNREffort,
+    #    Reavailability=Reavailability,
+    #    PNV= PNV,
+    #    PV=PV,
+    #    LegalCatchabilityCoefficient=LegalCatchabilityCoefficient,
+    #    SubLegalCatchabilityCoeificient=SubLegalCatchabilityCoeificient,
+    #    GetIMDataErr=GetIMDataErr
+    #    ))
 
 
 

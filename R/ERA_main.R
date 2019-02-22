@@ -401,6 +401,7 @@ MainSub<-function(M){
             D$CASStockString<-GetCASStocks(curr_stk=D$CurrentStock,dbse=M$datbse)
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
+           
             D1<-GetSuperStockData(curr_stk=D$CurrentStock,dbse=M$datbse)
             D<-append(D,D1)
             #TermNetSwitchAge <- D$TermNetSwitchAge
@@ -524,9 +525,11 @@ MainSub<-function(M){
 
             if(D$WithinBYWeightFlag){
                 #not implemented yet$
+                stop("Routine not implemented - set D$WithinBYWeightFlag to 0")
+
             }else{
                 #in progress
-                D1 <- CalcLandedCatchAndEscapement(M,D)
+                D1 <- CalcLandedCatchAndEscapement(D,M)
                 D <- append(D,D1)
             }
             #   lblStatus.Text = " "

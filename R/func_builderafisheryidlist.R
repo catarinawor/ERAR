@@ -43,9 +43,9 @@ BuildPSCFisheryIdList <- function(M,PSCFish){
          " ON ERA_Fishery.Name = ERA_FisheryPSCFisheryMapping.Fishery) ON ERA_PSCFishery.Name = ERA_FisheryPSCFisheryMapping.PSCFishery",
          " where(PSCFishery = '", M$PSCFisheryName[PSCFish], "') order by Fishery")
 	
-	dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+	#dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
 	
-	df1 <- RODBC::sqlQuery( dta , query =sSQL)
+	df1 <- RODBC::sqlQuery( M$chnl , query =sSQL)
 
     NumberFisheries <- nrow(df1)
     FisheryId <- df1$Id

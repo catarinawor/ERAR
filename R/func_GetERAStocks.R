@@ -40,10 +40,10 @@ GetERAStocks <- function(M){
     #========================================================
 
 	# 'Select available ERAStocks from database
-	dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+	#dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
     ERASQL <- "Select DISTINCT CASStock from ERA_WiretagCode ORDER by CASStock"
 
-	ERAStockTable <-  RODBC::sqlQuery( dta , query = ERASQL )
+	ERAStockTable <-  RODBC::sqlQuery( M$chnl , query = ERASQL )
     
 	names(ERAStockTable) <- "ERAStockAcronym"
 

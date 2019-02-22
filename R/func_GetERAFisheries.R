@@ -39,11 +39,11 @@ GetERAFisheries <- function(M){
 
 
 	#    'Get number of ERAFisheries
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
   
     #    'Get name,number,gear of ERAFisheries 
     ERASQL2 <- "SELECT ID,Name from ERA_ERAFishery"
-    df1 <-  RODBC::sqlQuery( dta , query = ERASQL2)
+    df1 <-  RODBC::sqlQuery( M$chnl , query = ERASQL2)
 
     NumberERAFisheries <- nrow(df1)
 	names(df1) <- c("ERAFisheryNumber","ERAFisheryName")

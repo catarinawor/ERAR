@@ -36,7 +36,7 @@
 GetInterDamSurvival <- function(D,M){
 
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)      
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
     #'Set default InterDamSurvival Rate to 1 for each year, change below if stock has rates in InterDamSurvival table
     AdultInterDamSurvivalRate <- numeric(length=length((D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge)))+1
@@ -46,7 +46,7 @@ GetInterDamSurvival <- function(D,M){
     #Get InterDamSurvival Rates for each stock
     ERASQL = paste0("SELECT CalendarYear, AdultInterDamSurvivalRate, JackInterDamSurvivalRate FROM ERA_Stock INNER JOIN InterDamSurvival ON ERA_Stock.SuperStock = InterDamSurvival.SuperStock WHERE ERAStock = '" , D$CurrentStock ,"' and TimePeriod ='", D$TimePeriod, "' and CalendarYear <= ", D$LastBY + D$MaxAge)
         
-    df1 <- sqlQuery( dta , query = ERASQL )
+    df1 <- sqlQuery( M$chnl , query = ERASQL )
 
         
     if( nrow(df1)==0){
@@ -55,14 +55,19 @@ GetInterDamSurvival <- function(D,M){
         cat(paste("cannot find interdam survival rate for " ,D$CurrentStock ," in InterDamSurvival table"))
         sink()
 
-        return(list( InterDamSurvival_CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
-        AdultInterDamSurvivalRate = AdultInterDamSurvivalRate,
-        JackInterDamSurvivalRate =JackInterDamSurvivalRate))
+        #return(list( InterDamSurvival_CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
+        #AdultInterDamSurvivalRate = AdultInterDamSurvivalRate,
+        #JackInterDamSurvivalRate =JackInterDamSurvivalRate))
+        return(list( InterDamSurvivaldf=data.frame(InterDamSurvival_CalendarYear =(D$FirstBY + D$OceanStartAge):(D$LastBY + D$MaxAge),
+            AdultInterDamSurvivalRate = AdultInterDamSurvivalRate,
+        JackInterDamSurvivalRate =JackInterDamSurvivalRate)))
 
     }else{
-        return(list( InterDamSurvival_CalendarYear =df1[,1],
-        AdultInterDamSurvivalRate = df1[,2],
-        JackInterDamSurvivalRate =df1[,3]))
+       # return(list( InterDamSurvival_CalendarYear =df1[,1],
+       # AdultInterDamSurvivalRate = df1[,2],
+       # JackInterDamSurvivalRate =df1[,3]))
+
+        return(list( InterDamSurvivaldf=df1))
 
     }
 

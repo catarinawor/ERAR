@@ -43,22 +43,20 @@ GetCalendarYears <- function(M){
 
 	NumberIMPSCFisheries <- M$NumberPSCFisheries - sum(!is.na(match(M$PSCFisheryName,nonIMPSCfisheries)))
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
 
 
     #which calendar years have Im data and what is the total number of fisheries
 	ERASQL0 <- "SELECT Count(ERA_IMInputs.PSCFishery) AS CountOfPSCFishery, ERA_IMInputs.CalendarYear
 	FROM ERA_IMInputs GROUP BY ERA_IMInputs.CalendarYear"
 
-    df0 <-  RODBC::sqlQuery( dta , query = ERASQL0 )
+    df0 <-  RODBC::sqlQuery( M$chnl , query = ERASQL0 )
 
-
-    #which years have recovery data
     ERASQL <- "SELECT ERA_CWDBRecovery.RunYear FROM ERA_CWDBRecovery GROUP BY ERA_CWDBRecovery.RunYear"
 
-    df1 <- RODBC::sqlQuery( dta , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
-   
+    #which years have recovery data
 	IMyear <- df0$CalendarYear[df0$CountOfPSCFishery[which(df0$CalendarYear==df1[,1])]==NumberIMPSCFisheries]
 
     LastCalendarYear<-max(IMyear[IMyear<=M$MaxCalendarYear])
@@ -75,8 +73,8 @@ GetCalendarYears <- function(M){
 
 	
 
-	D <- list(LastYearCheckedListBox=LastCalendarYear,RunYearList=IMyear)
-	return(D)
+	d <- list(LastYearCheckedListBox=LastCalendarYear,RunYearList=IMyear)
+	return(d)
 
 	#Original ERA code
 	#Dim LastCalendarYearItemNumber As Integer

@@ -38,39 +38,83 @@ CreatePNV <- function(M,D){
     PV <- list()
     PNV <- list()
 
-    for(age in 1:(length(D$OceanStartAge:D$MaxAge))){
+    stk_age<-D$OceanStartAge:D$MaxAge
 
-        tmpPNV<-matrix(NA, ncol=ncol(D$PNV[[1]]),nrow=nrow(D$PNV[[1]]))
-        tmpPV<-matrix(NA, ncol=ncol(D$PV[[1]]),nrow=nrow(D$PV[[1]]))
+    for(age in 1:(length(stk_age))){
 
-        for(CalYr in 1:length(unique(D$IM_CalendarYear))){
+        #tmpPNV<-matrix(NA, ncol=ncol(D$PNV[[1]]),nrow=nrow(D$PNV[[1]]))
+        #tmpPV<-matrix(NA, ncol=ncol(D$PV[[1]]),nrow=nrow(D$PV[[1]]))
+        nCalYr<-length(unique(D$IMdf$CalendarYear))
+        nPSCFisheries<-length(unique(D$IMdf$PSCFishery))
 
-            tmpPNV[CalYr,1]<-unique(D$IM_CalendarYear)[CalYr]
-             tmpPV[CalYr,1]<-unique(D$IM_CalendarYear)[CalYr]
+        CalYrs<-(unique(D$IMdf$CalendarYear))
+        PSCFisheries<-(unique(D$IMdf$PSCFishery))
 
-            for(PSCfishery in 2:(length(unique(D$IM_PSCFishery)+1))){
+        tmpPNV<-matrix(NA, ncol= nPSCFisheries+1,nrow=nCalYr)
+        tmpPV<-matrix(NA, ncol= nPSCFisheries+1,nrow=nCalYr)
 
-                if(D$SizeLimitType[CalYr,PSCfishery]=="SLOT"){
+
+        for(CalYr in 1:nCalYr){
+
+            tmpPNV[CalYr,1]<-unique(D$IMdf$CalendarYear)[CalYr]
+             tmpPV[CalYr,1]<-unique(D$IMdf$CalendarYear)[CalYr]
+
+            for(PSCfishery in 1:nPSCFisheries+1){
+
+                head(SizeLimitLengthVulnerabledf)
+                head(MeanLengthdf)
+
+                minSize_tmp<-D$SizeLimitLengthVulnerabledf$MinSizeLimit[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+                                                                        D$SizeLimitLengthVulnerabledf$PSCFishery==PSCfisheries[PSCfishery]]
+                maxSize_tmp<-D$SizeLimitLengthVulnerabledf$MaxSizeLimit[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+                                                                        D$SizeLimitLengthVulnerabledf$PSCFishery==PSCfisheries[PSCfishery]]
+
+                minSizeVul_tmp<-D$SizeLimitLengthVulnerabledf$MinSizeVulnerable[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+                                                                        D$SizeLimitLengthVulnerabledf$PSCFishery==PSCfisheries[PSCfishery]]
+
+
+                meanSize_tmp<-D$MeanLengthdf$MeanLength[D$MeanLengthdf$CalendarYear== CalYrs[CalYr]&
+                                                        D$MeanLengthdf$Age==stk_age[age]]
+
+                sdSize_tmp<-D$MeanLengthdf$StandardDeviation[D$MeanLengthdf$CalendarYear== CalYrs[CalYr]&
+                                                        D$MeanLengthdf$Age==stk_age[age]]
+
+                SizeLimitType_tmp <-  D$SizeLimitLengthVulnerabledf$SizeLimitType[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+                                                                D$SizeLimitLengthVulnerabledf$PSCFishery==PSCFisheries[PSCfishery]]       
+
+            #SizeLimitLengthVulnerabledf$MinSizeLimit[SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+            #                                                        SizeLimitLengthVulnerabledf$PSCFishery==PSCFisheries[PSCfishery]]
+            #  SizeLimitLengthVulnerabledf$MaxSizeLimit[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+            #                                                            D$SizeLimitLengthVulnerabledf$PSCFishery==PSCFisheries[PSCfishery]]
+
+            #    meanSize_tmp<-MeanLengthdf$MeanLength[D$MeanLengthdf$CalendarYear== CalYrs[CalYr]&
+            #                                            D$MeanLengthdf$Age==stk_age[age]]       ]
+
+            #    SizeLimitLengthVulnerabledf$SizeLimitType[SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
+            #                                                    SizeLimitLengthVulnerabledf$PSCFishery==PSCFisheries[PSCfishery]]
+
+
+                if(SizeLimitType_tmp=="SLOT"){
                 
-                    tmpPNV[CalYr,PSCfishery] <- pnorm(D$MinSizeLimit[CalYr, PSCfishery], mean = D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr])-
-                                            pnorm(D$MinSizeVulnerable[CalYr, PSCfishery], mean = D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr]) + 
-                                            (1 - pnorm(D$MaxSizeLimit[CalYr, PSCfishery], mean = D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr]))
+                    tmpPNV[CalYr,PSCfishery] <- pnorm(minSize_tmp, mean = meanSize_tmp, sd=sdSize_tmp)-
+                                            pnorm( minSizeVul_tmp, mean = meanSize_tmp, sd=sdSize_tmp) + 
+                                            (1 - pnorm( maxSize_tmp, mean = meanSize_tmp, sd=sdSize_tmp))
                                     
-                    tmpPV[CalYr, PSCfishery] <- pnorm(D$MaxSizeLimit[CalYr, PSCfishery], mean= D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr]) - 
-                                                     pnorm(D$MinSizeLimit[CalYr, PSCfishery], mean =D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr])
+                    tmpPV[CalYr, PSCfishery] <- pnorm(maxSize_tmp, mean= meanSize_tmp, sd=sdSize_tmp) - 
+                                                     pnorm(minSize_tmp, mean=meanSize_tmp, sd=sdSize_tmp)
                 
-                }else if(D$SizeLimitType[CalYr,PSCfishery]=="MINIMUM"){
+                }else if(SizeLimitType_tmp=="MINIMUM"){
                     
-                    tmpPNV[CalYr,PSCfishery] <- pnorm(D$MinSizeLimit[CalYr, PSCfishery], mean=D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr]) -
-                                             pnorm(D$MinSizeVulnerable[CalYr, PSCfishery], mean=D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr])
-                    tmpPV[CalYr,PSCfishery] <- 1 - (pnorm(D$MinSizeLimit[CalYr, PSCfishery], mean=meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr]))                      
+                    tmpPNV[CalYr,PSCfishery] <- pnorm(minSize_tmp, mean=meanSize_tmp, sd=sdSize_tmp) -
+                                             pnorm(minSizeVul_tmp, mean=meanSize_tmp, sd=sdSize_tmp)
+                    tmpPV[CalYr,PSCfishery] <- 1 - (pnorm(minSize_tmp, mean=meanSize_tmp, sd=sdSize_tmp))                      
 
-                }else if(D$SizeLimitType[CalYr,PSCfishery]=="MAXIMUM"){
+                }else if(SizeLimitType_tmp=="MAXIMUM"){
                    
-                    tmpPNV[CalYr, PSCfishery] <- 1 - pnorm(D$MaxSizeLimit[CalYr, PSCfishery], mean=D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr])
-                    tmpPV[CalYr, PSCfishery] <- pnorm(D$MaxSizeLimit[CalYr, PSCfishery], mean=D$meanLength[age+1, CalYr], sd=D$lengthstDev[age+1, CalYr])
+                    tmpPNV[CalYr, PSCfishery] <- 1 - pnorm(maxSize_tmp, mean=meanSize_tmp, sd=sdSize_tmp)
+                    tmpPV[CalYr, PSCfishery] <- pnorm(maxSize_tmp, mean=meanSize_tmp, sd=sdSize_tmp)
 
-                }else if(D$SizeLimitType[CalYr,PSCfishery]=="NONE"){
+                }else if(SizeLimitType_tmp=="NONE"){
                         sink("../logs/CreatePNV.log")
                         cat(paste("There is no data to compute an age ", (D$OceanStartAge:D$MaxAge)[age] , "PNV for Fishery " , unique(D$IM_PSCFishery)[PSCfishery] , " in ", unique(D$IM_CalendarYear)[CalYr]),"\n")
                         sink()

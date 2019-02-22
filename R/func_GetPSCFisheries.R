@@ -40,23 +40,27 @@ GetPSCFisheries <- function(M){
     #========================================================
 
 
-    dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
-    
+    #dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
+
     #'Get name,number,gear of PSCFisheries
     
     ERASQL2 = "SELECT ID, Name, Gear from ERA_PSCFishery"
-    df1 <-  RODBC::sqlQuery( dta , query = ERASQL2)
+    df1 <-  RODBC::sqlQuery( M$chnl , query = ERASQL2)
     names(df1) <- c("PSCFisheryNumber","PSCFisheryName","PSCFisheryGear")
             
     NumberPSCFisheries <- nrow(df1)    
     
 
-    D <- list(NumberPSCFisheries=NumberPSCFisheries,
+    #d<-list(NumberPSCFisheries=NumberPSCFisheries,
+    #  PSCFisheriesdf=df1)
+
+
+    d <- list(NumberPSCFisheries=NumberPSCFisheries,
               PSCFisheryNumber = df1$PSCFisheryNumber,
               PSCFisheryName = df1$PSCFisheryName,
               PSCFisheryGear = df1$PSCFisheryGear)
 	
-    return(D)
+    return(d)
 
 } 
 
