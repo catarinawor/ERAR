@@ -80,6 +80,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
     AllBY <- D$FirstBY:D$LastBY
     Allages <- D$youngestAge:D$MaxAge
+    AlloceanAges <-
     Escape <-matrix(0,nrow=length(AllBY),ncol=length(Allages))
     tag_code <- ""
     tempPSCCatch<-matrix(0,nrow=M$NumberPSCFisheries,ncol=7)
@@ -100,6 +101,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
     LastAge<-NULL
     NumberCompleteBroods <-0
     CompleteBYFlag<-NULL
+    MissingBroodYearFlag<-NULL
 
     #variables created by Catarina for monitoring purposes
     databasecatch<-list()
@@ -166,7 +168,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
         if(nrow(EstimatedNumberdf)>0){
             for(ya in 1:nrow(EstimatedNumberdf)){
                 if(BroodYear[ya] + RecoveryAge[ya] <= M$LastCalendarYear){
-                    print(paste(Fish,ya))
+                    #print(paste(Fish,ya))
                     isValidAge = TRUE
                     
                     #'do not use recovery records where RecoveryAge > MaxAge+2
@@ -388,6 +390,9 @@ CalcLandedCatchAndEscapement <- function(D,M){
         for(Age in 1:length(Allages)){
             if(Allages[Age] <= M$LastCalendarYear - AllBY[BYind] ){
                 for(Fish in 1:(M$NumberPSCFisheries - 1)){
+
+                    #print(paste(BYind,Age,Fish))
+
                     #'WriteLine(debugID, "1408", terminal(PSCFishery, Age), PSCFishery, Age)
                     #'total (PreTerm and terminal) landed catch BroodYear age
                     TotalLandedCatch[BYind, Age] = TotalLandedCatch[BYind, Age] + LandedCatch[Fish, Age, BYind]
@@ -433,7 +438,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
         #'set MissingBroodYearFlag to False if there is escapement for the brood year
         #'If BroodYearEscapement > 0 Then
         if(BroodYearCatch > 0 |  BroodYearEscapement > 0){
-            MissingBroodYearFlag[BYind] <- False
+            MissingBroodYearFlag[BYind] <- FALSE
             #'Get number of ages completed in a broodyear through the last calendar year
             if(AllBY[BYind] + D$MaxAge <= M$LastCalendarYear){
                 #'Set CompleteBYFlag and get the number of complete broods and lastCompleteBroodYear for the stock
@@ -447,7 +452,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
                 }
                 LastCompleteBroodYear = AllBY[BYind]
             }else{
-                LastAge[BYind] = D$LastCalendarYear - AllBY[BYind] #'last age for incomplete Brood years
+                LastAge[BYind] = M$LastCalendarYear - AllBY[BYind] #'last age for incomplete Brood years
             }
         }else{
             MissingBroodYearFlag[BYind] = TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
@@ -455,8 +460,12 @@ CalcLandedCatchAndEscapement <- function(D,M){
     }
  
 
-    return(list(TotalLandedCatch=TotalLandedCatch,
-    TotalLandedCatch_ByFishery=TotalLandedCatch_ByFishery))
+    return(list(LandedCatch=LandedCatch,
+        TotalLandedCatch=TotalLandedCatch,
+    TotalLandedCatch_ByFishery=TotalLandedCatch_ByFishery,
+    NumberCompleteBroods=NumberCompleteBroods,
+    CompleteBYFlag=CompleteBYFlag,
+    MissingBroodYearFlag=MissingBroodYearFlag))
 }
     #original VB code
     #=============================================================

@@ -532,16 +532,10 @@ MainSub<-function(M){
                 D1 <- CalcLandedCatchAndEscapement(D,M)
                 D <- append(D,D1)
             }
-            #   lblStatus.Text = " "
-  #              lblStatus.Visible = True
-  #              Me.Refresh()
-  #              If withinBYWeightFlag = True Then
-  #                  Call CalcLandedCatchAndEscapementWithBYWeights()
-  #              Else
-  #                  Call CalcLandedCatchAndEscapement()
-  #              End If
-           
 
+            D<-AdjustLastBYandLastCY(D)
+
+             CalcCalendarYearCatch()
 
             
 

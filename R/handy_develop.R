@@ -55,7 +55,7 @@ M<-StartCohortAnalysis_Click(M)
 
 
 #implementation of package usage
-usethis::use_r("func_BuildERAFisheryToPSCFisheryList")
+usethis::use_r("func_AdjustLastHliBYandLastCY")
 
 
 

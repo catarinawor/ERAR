@@ -38,7 +38,7 @@ SetTerminalFishery <- function(D,M){
 
     df2<- sqlQuery( M$chnl , query = ERASQL )
 
-    terminal<-matrix(FALSE,nrow=length(unique(D$IMdf$PSCFishery)),ncol=length(D$OceanStartAge:D$MaxAge))
+    terminal<-matrix(FALSE,nrow=M$NumberPSCFisheries,ncol=D$MaxAge)
 
      PSCFisheryNumber<-df2[,1]
      terminal[PSCFisheryNumber,]<-TRUE
