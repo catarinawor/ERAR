@@ -32,10 +32,31 @@ CalcCalendarYearCatch <- function(D){
 
     allBY<-D$FirstBY:D$LastBY
     allCY<-(D$FirstBY + D$OceanStartAge):M$LastCalendarYear
+    allAge<-D$OceanStartAge:D$MaxAge
+
+    CalendarYearLandedCatch <-matrix(NA,nrow=length(M$RunYearList),ncol=M$NumberPSCFisheries)
+
 
     for(CalYr in 1:length(allCY)){
-        
+        for(PSCFishery in 1:M$NumberPSCFisheries){
+            for(Age in allAge){
+                BroodYear < CalYr - Age
+                if(BroodYear >= D$FirstBY & BroodYear <= D$LastBY){
+                    BYind<-which(allBY==BroodYear)
+                    if(D$MissingBroodYearFlag[which(allBY==BroodYear)]){
+
+                        D$CalendarYearLandedCatch[CalYr, PSCFishery] = D$CalendarYearLandedCatch[CalYr, PSCFishery] + D$LandedCatch[PSCFishery, Age, BroodYear]
+                     #          If isTraceCalc = True And isTraceByCalendarYr = True And CalYr >= traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CalYrCatchID, "1339 CalYrCat", PSCFishery, CalYr, BroodYear, Age, CalendarYearLandedCatch(CalYr, PSCFishery), LandedCatch(PSCFishery, Age, BroodYear), RelRatio(BroodYear))
+
+                    }
+                }
+
+            }
+        }
+
     }
+
+
 
 
 }

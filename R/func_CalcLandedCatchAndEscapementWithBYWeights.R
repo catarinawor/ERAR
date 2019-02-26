@@ -465,7 +465,8 @@ CalcLandedCatchAndEscapement <- function(D,M){
     TotalLandedCatch_ByFishery=TotalLandedCatch_ByFishery,
     NumberCompleteBroods=NumberCompleteBroods,
     CompleteBYFlag=CompleteBYFlag,
-    MissingBroodYearFlag=MissingBroodYearFlag))
+    MissingBroodYearFlag=MissingBroodYearFlag,
+    CalendarYearLandedCatch=CalendarYearLandedCatch))
 }
     #original VB code
     #=============================================================
