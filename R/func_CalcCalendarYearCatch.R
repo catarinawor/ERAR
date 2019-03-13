@@ -30,36 +30,41 @@
 #' 
 CalcCalendarYearCatch <- function(D){
 
-    allBY<-D$FirstBY:D$LastBY
-    allCY<-(D$FirstBY + D$OceanStartAge):M$LastCalendarYear
-    allAge<-D$OceanStartAge:D$MaxAge
+    allBY <- D$FirstBY:D$LastBY
+    allCY <- (D$FirstBY + D$OceanStartAge):M$LastCalendarYear
+    allAge <- D$OceanStartAge:D$MaxAge
 
-    CalendarYearLandedCatch <-matrix(NA,nrow=length(M$RunYearList),ncol=M$NumberPSCFisheries)
+    CalendarYearLandedCatch <- matrix(0,nrow=length(M$RunYearList),ncol=M$NumberPSCFisheries)
 
 
     for(CalYr in 1:length(allCY)){
         for(PSCFishery in 1:M$NumberPSCFisheries){
             for(Age in allAge){
-                BroodYear < CalYr - Age
+                BroodYear <- allCY[CalYr] - Age
                 if(BroodYear >= D$FirstBY & BroodYear <= D$LastBY){
-                    BYind<-which(allBY==BroodYear)
-                    if(D$MissingBroodYearFlag[which(allBY==BroodYear)]){
+                    
+                    BYind <- which(allBY==BroodYear)
+                    
+                    if(!D$MissingBroodYearFlag[BYind]){
 
-                        D$CalendarYearLandedCatch[CalYr, PSCFishery] = D$CalendarYearLandedCatch[CalYr, PSCFishery] + D$LandedCatch[PSCFishery, Age, BroodYear]
-                     #          If isTraceCalc = True And isTraceByCalendarYr = True And CalYr >= traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CalYrCatchID, "1339 CalYrCat", PSCFishery, CalYr, BroodYear, Age, CalendarYearLandedCatch(CalYr, PSCFishery), LandedCatch(PSCFishery, Age, BroodYear), RelRatio(BroodYear))
+                        CalendarYearLandedCatch[CalYr, PSCFishery] <- CalendarYearLandedCatch[CalYr, PSCFishery] + D$LandedCatch[PSCFishery, Age, BYind]
+                        #print(CalendarYearLandedCatch[CalYr, PSCFishery])
+                        #print(paste("PSCFishery =",PSCFishery,"Age =", Age,"BYind =", BYind,"CY =", allCY[CalYr] ))
+                        
 
+                        if(M$isTraceCalc & M$isTraceByCalendarYr & allCY[CalYr] >= M$traceThisYear & PSCFishery == M$traceThisFishery){
+                            sink("../logs/debug_CalYrCatchID.log", append=TRUE)
+                            cat("1339 CalYrCat", PSCFishery, AllCY[CalYr], BroodYear, Age, CalendarYearLandedCatch[CalYr, PSCFishery],
+                             LandedCatch[PSCFishery, Age,AllBY==BroodYear], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear==BroodYear])
+                            sink()                                                                                                                  
+                        }
                     }
                 }
-
             }
         }
-
     }
 
-
-
-
-}
+    return( list(CalendarYearLandedCatch=CalendarYearLandedCatch))
 
 
 

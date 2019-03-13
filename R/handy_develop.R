@@ -47,7 +47,7 @@ for(i in 1:length(funcfiles)){
 
 
 
-M<-StartCohortAnalysis_Click(M)
+M <- StartCohortAnalysis_Click(M)
 
 
 
@@ -55,7 +55,7 @@ M<-StartCohortAnalysis_Click(M)
 
 
 #implementation of package usage
-usethis::use_r("func_AdjustLastHliBYandLastCY")
+usethis::use_r("func_CalcCohort")
 
 
 

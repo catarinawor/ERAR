@@ -111,9 +111,8 @@
 #' 
 CalculateButton_Click  <- function(M){
 
-   
 
-    if(is.na(M$LastYearCheckedListBox)){
+    if( is.na(M$LastYearCheckedListBox) ){
 
         sink("../logs/YearSelectionError.log")
         cat("Error: You must select a year before continuing.\n")
@@ -122,7 +121,7 @@ CalculateButton_Click  <- function(M){
 
     }
 
-    if(is.na(sum(M$StockListBox))){
+    if( is.na(sum(M$StockListBox)) ){
 
         sink("../logs/StockListError.log")
         cat("Error: You must select at least one stock before continuing.\n")
@@ -134,7 +133,7 @@ CalculateButton_Click  <- function(M){
     MaxCalendarYear <- M$LastYearCheckedListBox
     
 
-    if(length(M$isCombineAge2And3) != length(M$StockListBox)){
+    if( length(M$isCombineAge2And3) != length(M$StockListBox) ){
         
         sink("../logs/CombineAge.log")
         cat("Error: You must state if isCombineAge2And3 for each stock \n")
@@ -142,7 +141,7 @@ CalculateButton_Click  <- function(M){
 
     }
 
-    if(length(M$isCombineAge5And6) != length(M$StockListBox)){
+    if( length(M$isCombineAge5And6) != length(M$StockListBox) ){
 
         sink("../logs/CombineAge.log")
         cat("Error: You must state if isCombineAge5And6 for each stock \n")
@@ -248,7 +247,7 @@ CalculateButton_Click  <- function(M){
 MainSub<-function(M){
 
 
-    for(ERAStock in 1:M$NumStocks){
+    for( ERAStock in 1:M$NumStocks ){
 
 
         # Testing run - to be deleted
@@ -288,11 +287,17 @@ MainSub<-function(M){
         cat("when the sub-legal CNR mortalities and Ocean Exploitation Rate are calculated. This is because\n")
         cat("CWT catch is compared to Actual Catch to calculate the proportion of the total catch assigned to the\n")
         cat("CWT stock.  If one brood year is under- or over- represented, it will bias the over-all assignment of\n")
-        cat("sub-legal mortalities.  RelRatio is removed. e.g. catch(BY) = catch(BY)/RelRatio(BY), in the data below and in the database tables.\n")
+        cat(
+            "sub-legal mortalities.  RelRatio is removed. e.g. catch(BY) = catch(BY)/RelRatio(BY), 
+            in the data below and in the database tables.\n"
+        )
         cat("\n")
         cat("the following found in the ERA_Output_BroodYearExploitationRate table can be reconstructed from the data below\n")
         cat("Cohort is after natural mortality\n")
-        cat("totalMortality = LandedCatch + LegalDropoffMortality + SublegalShakerMortalities + SublegalDropoffMortalities + LegalCNRMortality + LegalCNRDropoffs + SubLegalCNRMortality + SubLegalCNRDropoffs\n")
+        cat(
+            "totalMortality = LandedCatch + LegalDropoffMortality + SublegalShakerMortalities + SublegalDropoffMortalities + 
+            LegalCNRMortality + LegalCNRDropoffs + SubLegalCNRMortality + SubLegalCNRDropoffs\n"
+        )
         cat("Escapement includes Cost Rec, Pers Use, Sub, and Terminal Fishery Stray but does not include Esc Stray\n")
         cat("AEQLandedCatchTotalRun = (AEQ * LandedCatch) + Escape\n")
         cat("AEQTotalMortTotalRun = (AEQ * TotalMort) + Escape\n")
@@ -303,16 +308,20 @@ MainSub<-function(M){
         cat("TerminalLandedCatchAllAges = Terminal LandedCatch\n")
         cat("TerminalTotalMortsAllAges = Terminal TotalMort\n")
         cat("\n")
-        cat(paste("ShakerMethod", "BY", "Age", "Fishery", "Total", "LandedCatch", "LegalDropoffMortality", "SublegalShakerMortalities", "SublegalDropoffMortalities",
-            "LegalCNRMortality", "LegalCNRDropoffs", " SubLegalCNRMortality", "SubLegalCNRDropoffs", "CohortAfterNatMort", "TermRun","Escape", "CanadaEscStray",
-             "USEscStray", "AEQ", "RelRatio","\n"))
+        cat(paste(
+            "ShakerMethod", "BY", "Age", "Fishery", "Total", "LandedCatch", "LegalDropoffMortality", "SublegalShakerMortalities", 
+            "SublegalDropoffMortalities","LegalCNRMortality", "LegalCNRDropoffs", " SubLegalCNRMortality", "SubLegalCNRDropoffs",
+             "CohortAfterNatMort", "TermRun","Escape", "CanadaEscStray","USEscStray", "AEQ", "RelRatio","\n"
+            )
+        )
         sink()
 
          
         #This part of the code writes out another log file for fish that are observed to be older than the user set maximum age  
         #-------------------------------------------------------------------------  
          
-        #build a log for fish that are observed to be older than the user set maximum age -- the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock
+        #build a log for fish that are observed to be older than the user set maximum age -- 
+        #the following are older than MaxAge or younger than OceanStartAge specified in the CIS table named SuperStock
         Log_OlderThanMaxAge_ID <- paste0("../logs/","OlderThanMaxAge.log")
         sink(Log_OlderThanMaxAge_ID, append=T)
         cat(paste(D$CurrentStock,"\n"))
@@ -329,7 +338,7 @@ MainSub<-function(M){
         M$isTraceByCalendarYr <- FALSE
         M$traceThisShakerMethod <- "C"
 
-        if(M$isTraceCalc){
+        if( M$isTraceCalc ){
 
         	traceThisYear <- 1981
             traceThisFishery <- 58
@@ -360,7 +369,7 @@ MainSub<-function(M){
 
         }
 
-        for(ShakCalcFlg in 1:2){
+        for( ShakCalcFlg in 1:2 ){
 
             #to be deleted
             #ShakCalcFlg<- 1            
@@ -370,11 +379,11 @@ MainSub<-function(M){
         	#This version does not need a progress bar
          	#SetupProgressBar()
 
-         	if(ShakCalcFlg == 1){
+         	if( ShakCalcFlg == 1 ){
 
          		ShakerMethod <- "C"
 
-         	}else if(ShakCalcFlg == 2) {
+         	}else if( ShakCalcFlg == 2 ) {
 
          		 ShakerMethod <- "B"
 
@@ -398,12 +407,12 @@ MainSub<-function(M){
             #ERAStockLabel.Visible <- TRUE
             #lblStatus.Visible <- FALSE
 
-            D$CASStockString<-GetCASStocks(curr_stk=D$CurrentStock,dbse=M$datbse)
+            D$CASStockString <- GetCASStocks(curr_stk=D$CurrentStock,dbse=M$datbse)
             
             #Get TermNetSwitchAge,OceanStartAge ,  MaxAge, SuperStock 
            
-            D1<-GetSuperStockData(curr_stk=D$CurrentStock,dbse=M$datbse)
-            D<-append(D,D1)
+            D1 <- GetSuperStockData(curr_stk=D$CurrentStock,dbse=M$datbse)
+            D <- append(D,D1)
             #TermNetSwitchAge <- D$TermNetSwitchAge
             #OceanStartAge  <- D$OceanStartAge 
             #MaxAge  <- D$MaxAge 
@@ -487,35 +496,33 @@ MainSub<-function(M){
             try(if(!D1$isOK ) stop(" MainSub stopped check  ../logs/GetSurvivalRates.log"))            
             D <- append(D,D1)
            
-
-            D1<-GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates(D, M) #get within by flag, average mat rates, PNVregion try(if(D1$longerr ) stop(" MainSub stopped check  ../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates.log"))     
+            D1 <- GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates(D, M)   
             D <- append(D,D1)  
             
             sink(MainSublog, append=TRUE)
             cat("Get PSL Data\n")
             sink()
          
-            
             D1 <- GetIMData(D,M)
             try(if(D1$GetIMDataErr ) stop(" MainSub stopped check  ../logs/GetIMDataErr.log"))     
             D <- append(D,D1)  
             
-
-            if(M$PNVAlgorithm=="StockSpecific"){
+            if( M$PNVAlgorithm=="StockSpecific" ){
+            
                 # this is not used st the moment so these functions are not working properly
-                D1<-GetMeanLength(D,M)
+                D1 <- GetMeanLength(D,M)
                 D <- append(D,D1)
 
-                D1<-GetSizeLimitLengthVulnerable(D,M)
+                D1 <- GetSizeLimitLengthVulnerable(D,M)
                 D <- append(D,D1)
 
                 #need to implement this one - there is something wrong with the get mean length function. 
-                D1<-CreatePNV(D,M)
+                D1 <- CreatePNV(D,M)
                 D <- append(D,D1)
             }
 
 
-            D1<-SetTerminalFishery(D,M)
+            D1 <- SetTerminalFishery(D,M)
             D$terminal <- D1
 
             sink(MainSublog, append=TRUE)
@@ -523,7 +530,7 @@ MainSub<-function(M){
             sink()
 
 
-            if(D$WithinBYWeightFlag){
+            if( D$WithinBYWeightFlag ){
                 #not implemented yet$
                 stop("Routine not implemented - set D$WithinBYWeightFlag to 0")
 
@@ -533,9 +540,24 @@ MainSub<-function(M){
                 D <- append(D,D1)
             }
 
-            D<-AdjustLastBYandLastCY(D)
+            D <- AdjustLastBYandLastCY(D)
 
-             CalcCalendarYearCatch()
+            D1 <- CalcCalendarYearCatch(D)
+            D <- append(D,D1)
+
+            D1 <- CheckIMData(D,M)
+            D <- append(D,D1)
+
+            #'compute cohort sizes without CNR or Shakers, this is necessary to compute shakers and CNR
+            if(M$IncompleteYearAlgorithm=="Historic"){
+                #CalcCohort()
+
+            }else if(M$IncompleteYearAlgorithm=="New"){
+
+                #CalcCohort_IncompleteBrood()
+            }
+
+           
 
             
 

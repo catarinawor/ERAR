@@ -53,8 +53,12 @@ GetSurvivalRates <- function(D,M){
 
     }else{
 
-        D2<-(list(Age = df1$Age,
-        SurvivalRate = 1 - df1$NaturalMortalityRate,
+        #D2<-(list(Age = df1$Age,
+        #SurvivalRate = 1 - df1$NaturalMortalityRate,
+        #isOK = TRUE))
+        df1$SurvivalRate = 1 - df1$NaturalMortalityRate
+
+        D2<-(list(survivaldf= df1,
         isOK = TRUE))
     }
 
