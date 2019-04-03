@@ -49,7 +49,7 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
     
     if(is.na( FirstBY)|is.na(LastAvailableBY)){
 
-        sink("../GetFirstAndLastBY.log")
+        sink("../logs/GetFirstAndLastBY.log")
         cat(paste("please open ERA_CASStockToERAStockMapping and see if " , M$CASStockString[[1]] , " is missing in the CASStock field (column).  Program is going to stop"))
         sink()
         err_FirstAndLastBY<-1

@@ -55,8 +55,9 @@ M <- StartCohortAnalysis_Click(M)
 
 
 #implementation of package usage
-usethis::use_r("func_CalcCohort")
-
+setwd("C:\\Users\\worc\\Documents\\ERA")
+usethis::use_r("func_TotalCatch_Age")
+setwd("C:\\Users\\worc\\Documents\\ERA\\R")
 
 
 
@@ -64,3 +65,6 @@ names(M)
 
 
 names(D)
+
+
+RODBC::odbcCloseAll()

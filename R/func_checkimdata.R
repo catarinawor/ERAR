@@ -39,8 +39,8 @@ CheckIMData <- function(D,M){
 				next
 			}
 			
-			for(age in 1:length(allAge)){
-				CalYr <- allBY[BYind] + allAge[age]
+			for(age in D$OceanStartAge:LastAge[BYind]){
+				CalYr <- allBY[BYind] + age
 
 				if(length(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery])>0){
 					if(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery]==0){

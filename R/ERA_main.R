@@ -396,7 +396,7 @@ MainSub<-function(M){
             #LastCompleteBroodYear <- NA
 
             #reset pass between shaker methods and stocks
-            #pass <- 0
+            D$pass <- 0
             
             #update stock label as progress is made - use this inestead of progerss bar
             ERAStockLabel.Text <- paste("Stock:", D$CurrentStock, "(", ERAStock , "of", M$NumStocks, ") Shaker Method:", ShakerMethod)
@@ -471,12 +471,12 @@ MainSub<-function(M){
             sink()
            
             D1 <- GetFirstAndLastBY(D,M, ERAStock)
-            try(if(D1$err_FirstAndLastBY ==1 ) stop(" MainSub stopped check  ../GetFirstAndLastBY.log"))            
+            try(if(D1$err_FirstAndLastBY ==1 ) stop(" MainSub stopped check  ../logs/GetFirstAndLastBY.log"))            
             D <- append(D,D1)
 
 
             D1 <- GetMaxReleaseSize(D,M)
-            try(if(D1$MaxReleaseErr == 1 )stop(" MainSub stopped check  ../GetMaxReleaseSize.log"))            
+            try(if(D1$MaxReleaseErr == 1 )stop(" MainSub stopped check  ../logs/GetMaxReleaseSize.log"))            
             D <- append(D,D1)
 
             #RedimensionArrays()

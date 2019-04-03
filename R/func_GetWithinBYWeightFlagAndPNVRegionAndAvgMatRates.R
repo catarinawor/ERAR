@@ -43,20 +43,25 @@ GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates <- function(D,M){
     df1 <- sqlQuery( M$chnl , query = ERASQL )
         
     
-    if(!df1$AverageMatRateFlag){ 
-        return(list( OceanAge=D$OceanStartAge:(D$OceanStartAge+3),
-            AverageMatRate=df1[,4:7],
+    if(df1$AverageMatRateFlag){ 
+        if(is.na(sum(df1[,-c(1:3)]))){
+            nome<- "../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRate.log"
+            sink(nome)
+            cat(paste("You have selected the AverageMatRateFlag in the ERA_Stock table, but not all average maturation rates have been entered in the table. The program will stop. Error"))
+            sink()
+            return(list(longerr=1))
+        }else{
+            return(list( OceanAge=D$OceanStartAge:(D$OceanStartAge+3),
+            AverageMatRate=df1[,-c(1:3)],
             PNVRegion=df1$PNVRegion,
             WithinBYWeightFlag= df1$WithinBYWeightFlag,
             longerr=0))
+        }
+    
     }else{
-        nome<- "../logs/GetWithinBYWeightFlagAndPNVRegionAndAvgMatRate.log"
-        sink(nome)
-        cat(paste("You have selected the AverageMatRateFlag in the ERA_Stock table, but not all average maturation rates have been entered in the table. The program will stop. Error"))
-        sink()
-        return(list(longerr=1))
-
+        return(NULL)
     }
+       
 
 
 

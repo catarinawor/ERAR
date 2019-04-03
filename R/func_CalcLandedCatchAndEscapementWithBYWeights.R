@@ -80,12 +80,12 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
     AllBY <- D$FirstBY:D$LastBY
     Allages <- D$youngestAge:D$MaxAge
-    AlloceanAges <-
-    Escape <-matrix(0,nrow=length(AllBY),ncol=length(Allages))
+    #AlloceanAges <-
+    Escape <- matrix(0,nrow=length(AllBY),ncol=length(Allages))
     tag_code <- ""
     tempPSCCatch<-matrix(0,nrow=M$NumberPSCFisheries,ncol=7)
 
-    TotalLandedCatch<-matrix(0,nrow=length(AllBY),ncol=7)
+    TotalLandedCatch <- matrix(0,nrow=length(AllBY),ncol=7)
     
 	if(!M$isReplicateCohShak){
 		NumFish <-  M$NumberPSCFisheries        
@@ -93,10 +93,11 @@ CalcLandedCatchAndEscapement <- function(D,M){
 		NumFish <- M$NumberERAFisheries
 	}
 
-    LandedCatch<-array(0,dim=c(NumFish,7,length(AllBY)))
-    LegalDropoffMortality <- array(0,dim=c(NumFish,7,length(AllBY)))
-    TotalLandedCatch_ByFishery<-matrix(0,nrow=length(AllBY),ncol=NumFish)
-    TotalTerminalLandedCatch<-matrix(0,nrow=length(AllBY), ncol=7)
+    LandedCatch <- array(0,dim=c(NumFish,7,length(AllBY)))
+    LegalDropoffMortality <- array(0,dim=c(NumFish, 7, length(AllBY)))
+    TotalLandedCatch_ByFishery <- matrix(0,nrow=length(AllBY), ncol=NumFish)
+    TotalTerminalLandedCatch <- matrix(0,nrow=length(AllBY), ncol=7)
+    TotalLegalDropoffs <- matrix(0,nrow=length(AllBY), ncol=NumFish)
 
     LastAge<-NULL
     NumberCompleteBroods <-0
@@ -107,10 +108,8 @@ CalcLandedCatchAndEscapement <- function(D,M){
     databasecatch<-list()
 
 	#'Loop through each PSCfishery (or ERAFishery if emulating CAS-Coshak) and escapement to obtain catch and escapement
- 	for(Fish in 1:NumFish){
-        #deleted: 
-        #Fish=81
-
+ 	for(Fish in seq_len(NumFish)){
+        
 	    sink("../logs/CalcLandedCatchAndEscapement.log",append=T)
 		cat(paste0(D$CASStockString,"\n"))
         cat(paste0("Get Landed Catch and Escapement for fishery " , Fish, " of ", NumFish, " fine scale fisheries\n"))
@@ -125,7 +124,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
                 "Sum(IIf(f.CASTerminal, r.AdjustedEstimatedNumber,IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor))) AS SumEstimatedNumber " ,
                 "FROM ((ERA_CWDBRecovery AS r LEFT JOIN ERA_CWDBCatchSample AS c ON (r.Agency = c.Agency) AND (r.RunYear = c.CatchYear) AND (r.CatchSampleId = c.CatchSampleId)) " ,
                 "INNER JOIN ERA_Fishery AS f ON r.Fishery = f.Id) INNER JOIN ERA_WireTagCode AS wtc ON r.TagCode = wtc.TagCode " ,
-                "WHERE wtc.CASStock IN ('",  D$CASStockString[[1]] ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in " , d$FisheryIdList ," ", d$DateRangeClause , " AND r.age > 1" ,
+                "WHERE wtc.CASStock IN ('",  as.character(D$CASStockString[[1]]) ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in " , d$FisheryIdList ," ", d$DateRangeClause , " AND r.age > 1" ,
                 " GROUP BY r.Age,wtc.BroodYear ORDER BY wtc.BroodYear, r.Age")
     
        }else{#'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
@@ -460,12 +459,16 @@ CalcLandedCatchAndEscapement <- function(D,M){
     }
  
 
-    return(list(LandedCatch=LandedCatch,
-        TotalLandedCatch=TotalLandedCatch,
-    TotalLandedCatch_ByFishery=TotalLandedCatch_ByFishery,
-    NumberCompleteBroods=NumberCompleteBroods,
-    CompleteBYFlag=CompleteBYFlag,
-    MissingBroodYearFlag=MissingBroodYearFlag))
+    return(list(LandedCatch = LandedCatch,
+        TotalLandedCatch = TotalLandedCatch,
+    TotalLandedCatch_ByFishery = TotalLandedCatch_ByFishery,
+    NumberCompleteBroods = NumberCompleteBroods,
+    CompleteBYFlag = CompleteBYFlag,
+    MissingBroodYearFlag = MissingBroodYearFlag,
+    TotalLegalDropoffs = TotalLegalDropoffs,
+    TotalTerminalLandedCatch = TotalTerminalLandedCatch,  
+    LastAge = LastAge,
+    Escape = Escape))
 }
     #original VB code
     #=============================================================
