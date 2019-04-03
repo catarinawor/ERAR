@@ -249,7 +249,7 @@ TotalCatch_Age <- function(BroodYear,Age, pass){
 
 	}else{
 
-		TotalCatch_Age = D$TotalLandedCatch[BroodYear, Age] + TotalLegalDropoffs(BroodYear, Age) + TotalSublegalShakers(BroodYear, Age) + TotalSublegalShakerDropoffs(BroodYear, Age) + TotalCNRLegal(BroodYear, Age) + TotalCNRLegalDropoffs(BroodYear, Age) + TotalCNRSubLegal(BroodYear, Age) + TotalCNRSubLegalDropoffs(BroodYear, Age)
+		TotalCatch_Age <- D$TotalLandedCatch[BroodYear, Age] + TotalLegalDropoffs[BroodYear, Age] + TotalSublegalShakers(BroodYear, Age) + TotalSublegalShakerDropoffs(BroodYear, Age) + TotalCNRLegal(BroodYear, Age) + TotalCNRLegalDropoffs(BroodYear, Age) + TotalCNRSubLegal(BroodYear, Age) + TotalCNRSubLegalDropoffs(BroodYear, Age)
 
 	}
 

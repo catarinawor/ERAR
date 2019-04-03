@@ -513,7 +513,6 @@ MainSub<-function(M){
                 D1 <- GetMeanLength(D,M)
                 D <- append(D,D1)
 
-                D1 <- GetSizeLimitLengthVulnerable(D,M)
                 D <- append(D,D1)
 
                 #need to implement this one - there is something wrong with the get mean length function. 
