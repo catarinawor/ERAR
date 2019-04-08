@@ -40,36 +40,42 @@ CalcCohort <- function(D,M){
 	SumAEQ <- NULL
 	SumMatRate <- NULL
 	SumPreTermER <- NULL
-	PreTermER <- matrix(NA, nrow=length(allBY),ncol=length(allAge))
-	Cohort <- matrix(NA, nrow=length(allBY),ncol=length(allAge))
-
+	PreTermER <- matrix(NA, nrow=length(allBY),ncol=7)
+	Cohort <- matrix(NA, nrow=length(allBY),ncol=7)
 
 	SurvivalRate <- D$survivaldf$SurvivalRate
 
 	if( M$Average_Maturation_Rate == "SelectNumberCompleteBroods" ){
+		
 		NumAvgYears <- sum(allBY < (M$LastCalendarYear-D$MaxAge))
+	
 	}else{
+		
 		NumAvgYears <- M$LastCompleteBroodsUsed
+	
 	}
 
 	NumAvgYears <- MatRateNumberBroods.NumBroodsUpDown.Value
 
 	for( BYind in seq_along(allBY) ){
+
 		#'skip all missing brood years
+
 		if( !D$MissingBroodYearFlag[BYind] ){
 			
 			#'the first time, this sub is called then Cohort(BroodYear, OceanStartAge) is empty or zero
 			TestCohortNum <- Cohort[BYind, D$OceanStartAge]
 
 			#'set survival rate of maxage+1 for use in AEQ equations below
-			SurvivalRate[which(D$survivaldf$Age==D$MaxAge) + 1] <- SurvivalRate[which(D$survivaldf$Age==D$MaxAge)]
+			SurvivalRate[ which(D$survivaldf$Age==D$MaxAge) + 1 ] <- SurvivalRate[ which(D$survivaldf$Age==D$MaxAge) ]
 			
 			#'loop through each age
-			for(age  in LastAge[BYind]:D$OceanStartAge ){
+			for( age in D$LastAge[BYind]:D$OceanStartAge ){
+				
 				#'sum up total catch BroodYear age (landed catch + legal dropoff+ shakers + shakerdropoffs + legalCNR + sublegalCNR + legalCNRdropoff + sublegalCNRdropoff), first time through will just be landed catch
 				TotalCatch <- TotalCatch_Age(D, M, BY=BYind, age)
 				#'sum up total terminal catch BroodYear age (landed catch + legal dropoff+ shakers + shakerdropoffs + legalCNR + sublegalCNR + legalCNRdropoff + sublegalCNRdropoff)
-         		if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod){
+         		if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
 
          			sink("../logs/debug_terminalCatchID.log", append=TRUE)
             		cat(paste("2183 CalcCohort callTotalTerminalCatch_Age", M$ShakerMethod, BYind, age))
@@ -77,7 +83,7 @@ CalcCohort <- function(D,M){
 
          		}
 
-         		TotalTerminalCatch = TotalTerminalCatch_Age(D, M, BYind, age)
+         		TotalTerminalCatch <- TotalTerminalCatch_Age(D, M, BYind, age)
          		#'subtract total terminal catch from total catch to get total PreTerm catch
          		TotalPreTermCatch <- TotalCatch - TotalTerminalCatch
 
@@ -86,12 +92,35 @@ CalcCohort <- function(D,M){
          			sink("../logs/debug_CohortID.log", append=TRUE)
             		cat(paste("line 1925","totCat", TotalCatch, "totTermCat", TotalTerminalCatch))
             		sink()
-         		}
-         		#'estimate cohort size for last available age of an incomplete cohort, otherwise estimate cohort size from backwards cohort analysis
-         		if(!D$CompleteBYFlag[BYind] & age == LastAge[BYind] & D$pass > 1){
-         			Cohort[BYind, age] <-
-         		}else{
 
+         		}
+
+         		#'estimate cohort size for last available age of an incomplete cohort, otherwise estimate cohort size from backwards cohort analysis
+         		if( !D$CompleteBYFlag[BYind] & age == D$LastAge[BYind] & D$pass > 1 ){
+         		
+         			Cohort[BYind, age] <- CalcEstmCohrt2( D, M, BYind, age ) / D$survivaldf$SurvivalRate[ survivaldf$Age==age ]
+         			#'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1818 compl BY", ShakerMethod, BroodYear, age, Cohort(BroodYear, age), SurvivalRate(age))
+         			
+         			if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
+         				sink("../logs/debug_Cohort_IncompleteBroodID.log", append=TRUE)
+            			cat(paste("2158 CalcCohort", M$ShakerMethod, BYind, age, Cohort[BYind, D$OceanStartAge]))
+            			sink()
+         			}
+         			
+         		}else{
+         			
+         			Cohort[ BYind, age ] <- (Cohort[ BYind, age + 1 ] +  Escape[ BYind, age ] + TotalCatch)/ SurvivalRate[ which(D$survivaldf$Age==age) ]
+         		
+         		}
+
+         		if( age == D$OceanStartAge & Cohort[BYind, D$OceanStartAge] == 0){
+
+         			sink("../logs/debug_ERROR_noCWT.log", append=TRUE)
+            		cat(paste("Brood Year ", allBY[BYind], " has NO CWT recoveries at all!"))
+            		sink()
+         			ErrCaption = "Brood Year " & allBY[BYind] & " has NO CWT recoveries at all!"
+            		ErrMessage = "Hint: If the brood year has no recoveries, decrement last brood year in the .CM1 file and remove from the .CDS file."
+            		ErrMessage = ErrMessage & "  If intermediate brood year, treat as missing brood and remove from .CDS file."
          		}
 
 			}
@@ -267,48 +296,64 @@ CalcCohort <- function(D,M){
 #' @examples
 #' 
 #' 
-CalcEstmCohrt2 <- function(D, M, BroodYear,Age){
+CalcEstmCohrt2 <- function( D, M, BroodYear,Age ){
 
 	#'This subroutine increases current age cohort sizes to correct for the lack of
     #'recoveries in older age classes in incomplete brood years (used by Calendar Year shaker
     #'option and Brood Year shaker option with oldest age and in final calculation of harvest rates).
     #'local variables
 
-    if(D$MissingBroodYearFlag[BroodYear]){
+    if( D$MissingBroodYearFlag[BroodYear] ){
+    
     	return(NULL)
+    
     }else{
-    	if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod){
+    
+    	if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
+    
     		sink("../logs/debug_terminalCatchID.log", append=TRUE)
             cat(paste("2522 CalcEstmCohrt2 call TotalTerminalCatch_age",M$ShakerMethod,BroodYear, Age, "\n"))
             sink()
+    
     	}
 
     	TerminalRun <- TotalTerminalCatch_Age(D, M, BroodYear, D$LastAge[BroodYear]) + D$Escape[BroodYear, D$LastAge[BroodYear]]
     	#'USE AVERAGE MATURATION RATE TO ESTIMATE COHORT SIZE AFTER MATURATION FOR INCOMPLETE BROOD
-    	Chort <- (1 - D$AverageMatRate[LastAge[BroodYear]]) * TerminalRun / D$AverageMatRate[LastAge[BroodYear]]
-    	if(M$isTraceCalc & M$ShakerMethod = M$traceThisShakerMethod & BroodYear >= M$traceThisYear){
+    	Chort <- (1 - D$AverageMatRate[D$LastAge[BroodYear]]) * TerminalRun / D$AverageMatRate[D$LastAge[BroodYear]]
+    
+    	if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear >= M$traceThisYear ){
+    	
     		sink("../logs/debug_Cohort_IncompleteBroodID.log", append=TRUE)
             cat(paste("1991 calcestmcohrt2",M$ShakerMethod,BroodYear, Age,
-            	Chort, "avgMatRte", D$AverageMatRate[LastAge[BroodYear]], "termRun", TerminalRun, "\n"))
+            	Chort, "avgMatRte", D$AverageMatRate[D$LastAge[BroodYear]], "termRun", TerminalRun, "\n"))
             sink()
+    	
     	}
     	#'RECONSTRUCT COHORT SIZES BroodYear ADDING CATCH, ESCAPEMENT, AND NATURAL MORTALITY
-    	for(A in D$LastAge[BroodYear]:Age){
-    		Chort <- Chort + D$Escape[BroodYear, A] + TotalCatch_Age(D, M, BroodYear, A) 
-    		if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear >= M$traceThisYear){
+    	for( A in D$LastAge[BroodYear]:Age ){
+    	
+    		Chort <- Chort + D$Escape[BroodYear, A] + TotalCatch_Age( D, M, BroodYear, A ) 
+    	
+    		if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear >= M$traceThisYear ){
+    	
     			sink("../logs/debug_Cohort_IncompleteBroodID.log", append=TRUE)
             	cat(paste("1996 calcestmcohrt2",M$ShakerMethod,BroodYear, A, "accum", Chort, "escape",
-            	D$Escape[BroodYear, A], "totCat", TotalCatch_Age(D, M, BroodYear, A), "surv", D$survivaldf$SurvivalRate[survivaldf$Age==A]
-            	 "\n"))
-            	sink()
+            	D$Escape[BroodYear, A], "totCat", TotalCatch_Age(D, M, BroodYear, A), "surv", 
+            	D$survivaldf$SurvivalRate[survivaldf$Age==A], "\n"))
+            	sink() 
     		}
-    		if(A != Age){Chort = Chort/ D$survivaldf$SurvivalRate[survivaldf$Age==A]}
+
+    		if( A != Age ){ Chort = Chort/ D$survivaldf$SurvivalRate[survivaldf$Age==A] }
     	}
     	#'COHORT SIZE AFTER NATURAL MORTALITY
-    	if(is.na(Chort)){
-    		return(0.0}
+    	if( is.na(Chort) ){
+
+    		return(0.0)
+
     	}else{
-    		return(Chort}
+
+    		return(Chort)
+    	
     	}
 
     }

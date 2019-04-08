@@ -65,7 +65,7 @@ CalcLandedCatchAndEscapementWithBYWeights <- function(D,M){
 #' @examples
 #' 
 #' 
-CalcLandedCatchAndEscapement <- function(D,M){
+CalcLandedCatchAndEscapement <- function( D,M ){
 
 
 	#=============================================================
@@ -80,35 +80,39 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
     AllBY <- D$FirstBY:D$LastBY
     Allages <- D$youngestAge:D$MaxAge
-    #AlloceanAges <-
-    Escape <- matrix(0,nrow=length(AllBY),ncol=length(Allages))
+    Escape <- matrix(0, nrow=length(AllBY), ncol=length(Allages))
     tag_code <- ""
-    tempPSCCatch<-matrix(0,nrow=M$NumberPSCFisheries,ncol=7)
+    tempPSCCatch <- matrix(0, nrow=M$NumberPSCFisheries, ncol=7)
 
-    TotalLandedCatch <- matrix(0,nrow=length(AllBY),ncol=7)
-    
-	if(!M$isReplicateCohShak){
-		NumFish <-  M$NumberPSCFisheries        
-	}else{
-		NumFish <- M$NumberERAFisheries
-	}
+    TotalLandedCatch <- matrix(0, nrow=length(AllBY), ncol=7)
+    TotalTerminalLandedCatch <- matrix(0, nrow=length(AllBY), ncol=7)
+    TotalLegalDropoffs <- matrix(0, nrow=length(AllBY), ncol=7)
 
-    LandedCatch <- array(0,dim=c(NumFish,7,length(AllBY)))
-    LegalDropoffMortality <- array(0,dim=c(NumFish, 7, length(AllBY)))
-    TotalLandedCatch_ByFishery <- matrix(0,nrow=length(AllBY), ncol=NumFish)
-    TotalTerminalLandedCatch <- matrix(0,nrow=length(AllBY), ncol=7)
-    TotalLegalDropoffs <- matrix(0,nrow=length(AllBY), ncol=NumFish)
-
-    LastAge<-NULL
+    LastAge <- NULL
     NumberCompleteBroods <-0
     CompleteBYFlag<-NULL
     MissingBroodYearFlag<-NULL
+    
+	if( !M$isReplicateCohShak ){
+
+		NumFish <- M$NumberPSCFisheries        
+	
+    }else{
+	
+    	NumFish <- M$NumberERAFisheries
+	
+    }
+
+    LandedCatch <- array(0, dim=c(NumFish, 7, length(AllBY)))
+    LegalDropoffMortality <- array(0, dim=c(NumFish, 7, length(AllBY)))
+    TotalLandedCatch_ByFishery <- matrix(0, nrow=length(AllBY), ncol=NumFish)
+
 
     #variables created by Catarina for monitoring purposes
     databasecatch<-list()
 
 	#'Loop through each PSCfishery (or ERAFishery if emulating CAS-Coshak) and escapement to obtain catch and escapement
- 	for(Fish in seq_len(NumFish)){
+ 	for( Fish in seq_len(NumFish) ){
         
 	    sink("../logs/CalcLandedCatchAndEscapement.log",append=T)
 		cat(paste0(D$CASStockString,"\n"))
@@ -116,9 +120,9 @@ CalcLandedCatchAndEscapement <- function(D,M){
         sink()
 #
         #'Create a list of CAS Fisheries mapped to each PSC Fishery with appropriate start and end date ranges
-        if(!M$isReplicateCohShak){
+        if( !M$isReplicateCohShak ){
 
-            d <- BuildPSCFisheryIdList(M,Fish)
+            d <- BuildPSCFisheryIdList( M,Fish )
             
             ERASQL <- paste0( "SELECT wtc.BroodYear,r.Age, ",
                 "Sum(IIf(f.CASTerminal, r.AdjustedEstimatedNumber,IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor))) AS SumEstimatedNumber " ,
@@ -130,7 +134,7 @@ CalcLandedCatchAndEscapement <- function(D,M){
        }else{#'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
        #not tested
 
-            d <- BuildERAFisheryIdList(M,Fish)
+            d <- BuildERAFisheryIdList( M,Fish )
 
             ERASQL <- paste0("SELECT wtc.BroodYear,r.Age, " ,
                 "Sum(IIf(IsNull(c.ExpansionFactor), r.AdjustedEstimatedNumber, r.AdjustedEstimatedNumber * c.ExpansionFactor)) AS SumEstimatedNumber, " ,
@@ -144,102 +148,133 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
         #dta <- RODBC::odbcConnectAccess2007(M$datbse)   #specifies the file path
         
-        EstimatedNumberdf <- RODBC::sqlQuery( M$chnl , query =ERASQL)
+        EstimatedNumberdf <- RODBC::sqlQuery( M$chnl , query =ERASQL )
 
-        databasecatch[[Fish]]<- EstimatedNumberdf
+        databasecatch[[Fish]] <- EstimatedNumberdf
    
         BroodYear <- EstimatedNumberdf$BroodYear
         RecoveryAge <- EstimatedNumberdf$Age
         SumAdjustedEstimatedNumber <- EstimatedNumberdf$SumEstimatedNumber
 
-        if(M$isReplicateCohShak){
+        if( M$isReplicateCohShak ){
+
             #'reproduce CFile numbers
             tag_code <- EstimatedNumberdf[,4]
             #'reproduce CFile numbers
             #not tested
-            FishName = M$ERAFisheryName[Fish]
-        }else{
+            FishName <- M$ERAFisheryName[Fish]
+
+        }else{ 
+
             tag_code <- rep("",nrow(EstimatedNumberdf))
             FishName <- M$PSCFisheryName[Fish]
+
         }
       
        #'limit data to last calendar year selected by user 
-        if(nrow(EstimatedNumberdf)>0){
-            for(ya in 1:nrow(EstimatedNumberdf)){
-                if(BroodYear[ya] + RecoveryAge[ya] <= M$LastCalendarYear){
+        if( nrow(EstimatedNumberdf)>0 ){
+
+            for( ya in 1:nrow(EstimatedNumberdf) ){
+
+                if( BroodYear[ya] + RecoveryAge[ya] <= M$LastCalendarYear ){
+
                     #print(paste(Fish,ya))
                     isValidAge = TRUE
                     
                     #'do not use recovery records where RecoveryAge > MaxAge+2
-                    if(RecoveryAge[ya] > D$MaxAge & RecoveryAge[ya] <= D$MaxAge + 2 ){
+                    if( RecoveryAge[ya] > D$MaxAge & RecoveryAge[ya] <= D$MaxAge + 2 ){
+                       
                         sink("../logs/Log_OlderThanMaxAge_ID.log", append=TRUE)
                         cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[ya], RecoveryAge[ya], FishName, "assigned to age ", D$MaxAge,"\n"))
                         sink()
                         RecoveryAge[ya] <- D$MaxAge
+
                     }
 
-                    if(RecoveryAge[ya] > D$MaxAge + 2 ){
+                    if( RecoveryAge[ya] > D$MaxAge + 2 ){
+
                         isValidAge = FALSE
                         sink("../logs/Log_OlderThanMaxAge_ID.log", append=TRUE)
                         cat(paste(D$CASStockString[[1]], ShakerMethod, BroodYear[ya], RecoveryAge[ya], FishName, "will not be used in the cohort analysis\n"))
                         sink()
+
                     }
 
-                    if(isValidAge){
+                    if( isValidAge ){
+
                         #'combine ages if requested
-                        if(M$isCombineAge2And3[ERAStock] == TRUE & RecoveryAge[ya] == 2){
+                        if( M$isCombineAge2And3[ERAStock] == TRUE & RecoveryAge[ya] == 2 ){
+
                             RecoveryAge[ya] <- 3 
-                        }else if(M$isCombineAge5And6[ERAStock] == TRUE & RecoveryAge[ya] == 6){
+
+                        }else if( M$isCombineAge5And6[ERAStock] == TRUE & RecoveryAge[ya] == 6 ){
+                            
                             RecoveryAge[ya] <- 5
+                        
                         }
 
                         #'one more time, check BroodYear + RecoveryAge because of combine age
-                        if(BroodYear[ya] + RecoveryAge[ya] <= M$LastCalendarYear){
+                        if( BroodYear[ya] + RecoveryAge[ya] <= M$LastCalendarYear ){
                           
                             #'CIS multiplies fine scale fishery and tag code esc by RelRatio BEFORE combining into PSC Fishery
                             #'CAS-Coshak rounds fine scale fishery, then combines into PSC Fishery BEFORE multiplying by RelRatio 
-                            if(FishName == "ESCAPEMENT" | grepl("ESC",FishName) ){
+                            if( FishName == "ESCAPEMENT" | grepl("ESC",FishName) ){
                                
-                                if(!M$isReplicateCohShak){   
+                                if( !M$isReplicateCohShak ){   
+                                    
                                     Esc <- SumAdjustedEstimatedNumber[ya] * D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear==BroodYear[ya]]                            
-                                }else if(M$isReplicateCohShak){                              
+                                
+                                }else if( M$isReplicateCohShak ){ 
+
                                     #'CAS round escapement before applying IDL
                                     #'Esc = Convert.ToInt32(SumAdjustedEstimatedNumber + 0.0000001) ' 0.00000001                     
                                     Esc <- SumAdjustedEstimatedNumber[ya] + 0.0001 
                                 }
                                 
                                 if(RecoveryAge[ya] == D$OceanStartAge){                                
-                                    Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] <- Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] + Esc / D$InterDamSurvivaldf$JackInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))]
+                                    
+                                    Escape[which(AllBY==BroodYear[ya]), which(Allages==RecoveryAge[ya])] <- Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] + Esc / D$InterDamSurvivaldf$JackInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))]
 
-                                    if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[ya] >= M$traceThisYear){
+                                    if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[ya] >= M$traceThisYear ){ 
+
                                         sink("../logs/debug_EscapeID.log",append=T)
                                         cat(paste0(D$CASStockString,"\n"))
                                         cat(paste("1100 accum fine scale escape", BroodYear[ya], RecoveryAge[ya], tag_code[ya], Escape[which(AllBY==BroodYear[ya])&which(Allages==RecoveryAge[ya])], Esc, SumAdjustedEstimatedNumber[ya], D$InterDamSurvivaldf$JackInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))])) 
                                         sink()
+
                                     }
                                 
-                                }else{
+                                }else{ 
+
                                     Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] <- Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] + Esc / D$InterDamSurvivaldf$AdultInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))]
                                     
                                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[ya] >= M$traceThisYear) {
+                                       
                                         sink("../logs/debug_EscapeID.log",append=T)
                                         cat(paste0(D$CASStockString,"\n"))
                                         cat(paste("1103 accum fine scale escape", BroodYear[ya], RecoveryAge[ya], tag_code[ya], Escape[which(AllBY==BroodYear[ya])&which(Allages==RecoveryAge[ya])], Esc, SumAdjustedEstimatedNumber[ya], D$InterDamSurvivaldf$AdultInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))]))
                                         sink()
+
                                     }
                                 }
+
                             }else{ #catch
 
                                 #'SQL returns fine scale fishery, this is where fine scale fishery is combined into PSC Fishery
                                 #'WriteLine(debugID, CurrentStock, Fish, LastBY, BroodYear, RecoveryAge, BroodYear + RecoveryAge, LastCalendarYear)
                                 if(!M$isReplicateCohShak){
+
                                     LandedCatch[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])] <- LandedCatch[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])] + SumAdjustedEstimatedNumber[ya] * D$RelRatiodf$RelRatio[which(D$RelRatiodf$BroodYear==BroodYear[ya])]
+                                    
                                     if(RecoveryAge[ya] < D$OceanStartAge){
+                                        
                                         sink("../logs/LandedCatch.log",append=T)
                                         cat(paste0("Youngest age = ", RecoveryAge[ya], " is less than OceanStartAge for " , BroodYear[ya] , ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index was outside the bounds of the array error message."))
                                         sink()
                                         stop(" MainSub stopped check  ../LandedCatch.log")
+
                                     }
+
                                 }else{
                                     #multiply catch by RelRatio AFTER combining fine scale fishery into PSC Fishery
                                     #'SQL query must returning sum by fine scale fishery, not by tag code
@@ -247,41 +282,56 @@ CalcLandedCatchAndEscapement <- function(D,M){
                                     #'because SumAdjustedEstimatedNumber = accum fine scale catches, OK to round here
                                     #'add 0.0000001 instead of 0.00000001 so even numbers to round up. The extra decimal place is not an issue for odd numbers.
                                     LandedCatch[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])] <- LandedCatch[[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])]] + SumAdjustedEstimatedNumber[ya] + 0.0001
+                                    
                                     if(RecoveryAge[ya] < D$OceanStartAge){
+                                        
                                         sink("../logs/LandedCatch.log",append=T)
                                         cat(paste0("Youngest age = " & RecoveryAge[ya] & " is less than OceanStartAge for " & BroodYear[ya] & ".  Did you forget to combine age 2 and 3?  Program is going to crash with an index out of bounds error message."))
                                         sink()
                                         stop(" MainSub stopped check  ../LandedCatch.log")
+                                    
                                     }
                                     #'If RecoveryAge = 4 And Fish < 13 And BroodYear = 1975 Then WriteLine(debugID, "1327", ShakerMethod, Fish, RecoveryAge, BroodYear, LandedCatch(Fish, RecoveryAge, BroodYear), SumAdjustedEstimatedNumber, RelRatio(BroodYear))
                                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & M$isTraceByCalendarYr & (BroodYear[ya] + RecoveryAge[ya]) >= M$traceThisYear + M$traceThisAge & Fish == M$traceThisFishery){
+                                    
                                         sink("../logs/debug_CatchID.log",append=T)
                                         cat(paste0( "line 1105 FineScaleCatch", BroodYear[ya], Fish, RecoveryAge[ya], tag_code[ya], SumAdjustedEstimatedNumber[ya], LandedCatch[Fish, RecoveryAge[ya], which(AllBY==BroodYear[ya])]))
                                         sink()
+                                    
                                     }
 
                                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & Fish == 31 & BroodYear[ya] >= M$traceThisYear & RecoveryAge[ya] == M$traceThisAge){
+                                    
                                         sink("../logs/debug_CatchID.log",append=T)
                                         cat(paste0("line 1106 FineScaleCatch", BroodYear[ya], Fish, RecoveryAge[ya], tag_code[ya], SumAdjustedEstimatedNumber[ya], LandedCatch[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])]))
                                         sink()   
+                                    
                                     }    
+                                
                                 }#'isReplicateCohShak = False
                     
                                 #'legal dropoff mortalities for PSCFisheries, similar code for ERAFisheries is in the next loop below.  
                                 if(!M$isReplicateCohShak){
+                                    
                                     if(D$IMdf$CNRMethod[D$IMdf$CalendarYear==BroodYear[ya] + RecoveryAge[ya] &D$IMdf$PSCFishery==Fish]!=3){
+                                       
                                         LegalDropoffMortality[Fish,RecoveryAge[ya],which(AllBY==BroodYear[ya])] <- LegalDropoffMortality[Fish,RecoveryAge[ya],AllBY==BroodYear[ya]] +
                                                                                                                  LandedCatch[Fish,RecoveryAge[ya],AllBY==BroodYear[ya]] * 
                                                                                                                  D$IMdf$DropoffRate[(BroodYear[ya] + RecoveryAge[ya])==D$IMdf$CalendarYear & D$IMdf$PSCFishery==Fish]
+                                       
                                         if(is.na(LegalDropoffMortality[Fish,RecoveryAge[ya],AllBY==BroodYear[ya]])){
+                                           
                                             LegalDropoffMortality[Fish,RecoveryAge[ya],AllBY==BroodYear[ya]] <- 0.0
+                                        
                                         }
                                     }
                                     
                                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[ya] >= M$traceThisYear & Fish== M$traceThisFishery){
+                                       
                                         sink("../logs/debug_LegalDropoffID.log",append=T)
                                         cat(paste("1196 L dropoff", Fish, RecoveryAge[ya], tag_code[ya], LegalDropoffMortality[Fish, RecoveryAge[ya], BroodYear[ya]], LandedCatch[Fish, RecoveryAge[ya], ya], D$DropoffRate[which((BroodYear[ya] + RecoveryAge[ya])==D$DropoffRate$CalendarYear), Fish+1]))
                                         sink()
+                                    
                                     }
                                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear And Fish = traceThisFishery Then WriteLine(debug_LegalDropoffID, "1196 L dropoff", Fish, RecoveryAge, tag_code, LegalDropoffMortality(Fish, RecoveryAge, BroodYear), LandedCatch(Fish, RecoveryAge, BroodYear), DropoffRate(BroodYear + RecoveryAge, Fish))
                                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear And Fish = traceThisFishery Then WriteLine(debug_ShakerID, "1196 L dropoff", Fish, RecoveryAge, tag_code, LegalDropoffMortality(Fish, RecoveryAge, BroodYear), LandedCatch(Fish, RecoveryAge, BroodYear), DropoffRate(BroodYear + RecoveryAge, Fish))
@@ -295,74 +345,105 @@ CalcLandedCatchAndEscapement <- function(D,M){
                 } # end of if statement
             }# 'BroodYear + RecoveryAge <= LastCalendarYear
         }else{
+
             LegalDropoffMortality[Fish,,] <- 0.0
-             LandedCatch[Fish,,] <-0.0
+            LandedCatch[Fish,,] <-0.0
+        
         }
     } #next Fish 
 
     if(M$isReplicateCohShak){ #'combine ERAFisheries into PSCFishery as with CMB spreadsheet
+        
         for(y in 1:length(AllBY)){
+           
             for(Fish in 1:(M$NumberPSCFisheries-1)){ #'except escapement
+            
             #initialize at the start of each PSCFishery and BroodYear
                 for(Age in D$OceanStartAge:D$MaxAge){
+            
                     tempPSCCatch[Fish, Age] <- 0
+            
                 }
+            
                 D2 <- BuildERAFisheryToPSCFisheryList(Fish,M)
                 D$NumberERA2PSCFisheries[Fish]<-D2$NumberERA2PSCFisheries
                 D$ERA2PSC[[Fish]]<-D2$ERA2PSC
+            
                 #'accum ERAFishery LandedCatch() into TempPSCCatch() 
                 for(FisheryID in 1:D$NumberERA2PSCFisheries[Fish]){
+                    
                     ERAFish = D$ERA2PSC[[Fish]][FisheryID]
+                    
                     for(Age in D$OceanStartAge:D$MaxAge){
+                    
                         tempPSCCatch[Fish, Age] <- tempPSCCatch[Fish, Age] + LandedCatch[ERAFish, Age, y] * D$RelRatiodf$RelRatio[AllBY[y]==D$RelRatiodf$BroodYear]
+                    
                         if(M$isTraceCalc&M$ShakerMethod==M$traceThisShakerMethod&M$isTraceByBroodYr&BroodYear>=M$traceThisYear&Fish==M$traceThisFishery){
+                    
                             sink("../logs/CatchID.log",,append=T)
                             cat(paste("after", tempPSCCatch[Fish, Age], LandedCatch[ERAFish, Age, y], D$RelRatiodf$RelRatio[AllBY[y]==D$RelRatiodf$BroodYear]))
                             sink() 
+                    
                         }
                     }
                 }
             }
 
-            for(Fish in 1:(M$NumberPSCFisheries-1)){
+            for(Fish in 1:(M$NumberPSCFisheries-1)){ 
+
                 for(Age in D$OceanStartAge:D$MaxAge){
+
                     if(AllBY[y]+Age <= M$LastCalendarYear){
-                        LandedCatch[Fish, Age, y] = tempPSCCatch[Fish, Age]   
+
+                        LandedCatch[Fish, Age, y] <- tempPSCCatch[Fish, Age]   
+
                         if(M$isTraceCalc&M$isTraceByCalendarYr&(BroodYear[y] + Age)>= M$traceThisYear& Fish==M$traceThisFishery){
+                          
                             sink("../logs/debug_CatchID.log", append=T)
                             cat(paste("line 1198 combined rounded RelRatio", Fish, BroodYear[y], Age, LandedCatch[Fish, Age, y], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[y]]))
                             sink()   
+
                         }
                         if(M$isTraceCalc&M$isTraceByBroodYr&BroodYear[y]>=M$traceThisYear&Fish == M$traceThisFishery){
+                            
                             sink("../logs/debug_CatchID.log")
                             cat(paste("line 1198 combined rounded RelRatio", Fish, BroodYear[y], Age, LandedCatch[Fish, Age, y], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[y]]))
                             sink()   
+
                         }
                         #'when emulating CAS-Coshak 
                         #'step 1, calculate drop-off here, after rounding and combining ERAFisheries into PSCFisheries
                         #'step 2 use  DropoffRate(BroodYear + 2, PSCFishery) instead of DropoffRate(BroodYear + Age, PSCFishery) if brood year method
                         #'else use DropoffRate(BroodYear + age, PSCFishery) if calendar year method
 
-                        if(M$ShakerMethod == "B"){
-                            LegalDropoffMortality[Fish, Age, y] = LegalDropoffMortality[Fish, Age, y] + LandedCatch[Fish, Age, y] * D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + 2)& D$IMdf$PSCFishery== Fish]
+                        if(M$ShakerMethod == "B"){ 
+
+                            LegalDropoffMortality[Fish, Age, y] <- LegalDropoffMortality[Fish, Age, y] + LandedCatch[Fish, Age, y] * D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + 2) & D$IMdf$PSCFishery == Fish]
+                        
                         }else if(M$ShakerMethod == "C"){
-                            LegalDropoffMortality[Fish, Age, y] = LegalDropoffMortality[Fish, Age, y] + LandedCatch[Fish, Age, y] *  D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + Age)& D$IMdf$PSCFishery== Fish]
+
+                            LegalDropoffMortality[Fish, Age, y] <- LegalDropoffMortality[Fish, Age, y] + LandedCatch[Fish, Age, y] *  D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + Age) & D$IMdf$PSCFishery == Fish]
+                       
                         }
                         
                     }else{
 
                         if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod &  AllBY[y] >= M$traceThisYear & Fish ==M$traceThisFishery ){
+                           
                             sink("../logs/debug_ShakerID.log")
                             cat(paste("1344 L dropoff", Fish, Age, tag_code, LegalDropoffMortality[Fish, Age, y], LandedCatch[Fish, Age, y], D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + 2)& D$IMdf$PSCFishery== Fish]))
                             sink()   
+
                         }
 
                         #'step 3 add sublegal shakers and dropoff (i.e. replicate double count) in sub ShakerMethod1 
                         
                         if(M$isTraceCalc & AllBY[y] >= M$traceThisYear & Fish == M$traceThisFishery){
+
                             sink("../logs/debug_LegalDropoffID.log")
                             cat(paste("1268 L dropofff before doubleCount", Fish, Age, tag_code, LegalDropoffMortality[Fish, Age, y], LandedCatch[PSCFishery, Age, y], D$IMdf$DropoffRate[D$IMdf$CalendarYear==(AllBY[y] + 2)& D$IMdf$PSCFishery== Fish]))
                             sink()   
+
                         }
                     }# 'BroodYear + RecoveryAge <= LastCalendarYear
                 }
@@ -370,25 +451,34 @@ CalcLandedCatchAndEscapement <- function(D,M){
 
             #'apply RelRatio to Escape
             for(Age in 1:length(D$OceanStartAge:D$MaxAge) ){
+
                 #'limit data to last calendar year selected by user
                 if((BroodYear[which(BroodYear==AllBY[y])]+Age) <= M$LastCalendarYear){
+
                     Escape[y,Age] =Escape[y,Age] *  D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[y]]
+
                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod &AllBY[y] >= M$traceThisYear){
+
                         sink("../logs/debug_EscapeID.log")
                         cat(paste("1565 rounded esc * relRatio", BroodYear[BroodYear==AllBY[y]], Age, Escape[BroodYear==AllBY[y], Age], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[y]]))
-                        sink()   
+                        sink() 
+
                     }
                 }
             }
         }
     }  
           
-    for(BYind in 1:length(AllBY)){
+    for(BYind in seq_along(AllBY)){
+
         BroodYearCatch <- 0
         BroodYearEscapement <- 0
-        for(Age in 1:length(Allages)){
-            if(Allages[Age] <= M$LastCalendarYear - AllBY[BYind] ){
-                for(Fish in 1:(M$NumberPSCFisheries - 1)){
+
+        for(Age in seq_along(Allages)){
+
+            if( Allages[Age] <= M$LastCalendarYear - AllBY[BYind] ){
+
+                for(Fish in seq_len(M$NumberPSCFisheries - 1)){
 
                     #print(paste(BYind,Age,Fish))
 
@@ -397,14 +487,19 @@ CalcLandedCatchAndEscapement <- function(D,M){
                     TotalLandedCatch[BYind, Age] = TotalLandedCatch[BYind, Age] + LandedCatch[Fish, Age, BYind]
 
                     if(M$isTraceCalc & M$isTraceByCalendarYr & (AllBY[BYind] + Allages[Age]) >= M$traceThisYear & Fish == M$traceThisFishery){
+                        
                         sink("../logs/debug_CatchID.log")
                         cat(paste("line 1127 TotalLandedcatch", AllBY[BYind], Fish, Allages[Age], TotalLandedCatch[BYind, Age], LandedCatch[Fish, Age, BYind], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[BYind]]))
                         sink() 
+
                     }
+
                     if(M$isTraceCalc & M$isTraceByBroodYr & AllBY[BYind] >= M$traceThisYear & Fish == M$traceThisFishery){
+                        
                         sink("../logs/debug_CatchID.log")
                         cat(paste("line 1127 TotalLandedcatch", AllBY[BYind], Fish, Allages[Age], TotalLandedCatch[BYind, Age], LandedCatch[Fish, Age, BYind], D$RelRatiodf$RelRatio[D$RelRatiodf$BroodYear ==AllBY[BYind]]))
-                        sink()                       
+                        sink()  
+
                     }
                     #'moved to ShakerMethod1 to compare against Coshak12, uncomment here and remove from ShakerMethod1 when done testing
                     # 'total (PreTerm and terminal) Legal Dropoff mortalities BroodYear age
@@ -412,13 +507,18 @@ CalcLandedCatchAndEscapement <- function(D,M){
                     #'total (PreTerm and terminal) landed catch BroodYear fishery
 
                     TotalLandedCatch_ByFishery[BYind, Fish] = TotalLandedCatch_ByFishery[BYind, Fish] + LandedCatch[Fish , Age,BYind ]
+                    
                     #'total terminal landed catch BroodYear age
-                    if(D$terminal[Fish,Age] & M$PSCFisheryGear[Fish]!="STRAY"){
-                        TotalTerminalLandedCatch[BYind, Age] = TotalTerminalLandedCatch[BYind, Age] + LandedCatch[Fish, Age, BYind]
-                        if(M$isTraceCalc & M$ShakerMethod==M$traceThisShakerMethod & AllBY[BYind]>=M$traceThisYear){
+                    if(D$terminal[Fish,Age] & M$PSCFisheryGear[Fish] != "STRAY"){
+                        
+                        TotalTerminalLandedCatch[BYind, Age] <- TotalTerminalLandedCatch[BYind, Age] + LandedCatch[Fish, Age, BYind]
+                        
+                        if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & AllBY[BYind] >= M$traceThisYear){
+                        
                             sink("../logs/debug_SumMatAgeCatID.log")
                             cat(paste("1394 sumMatCat", AllBY[BYind], Allages[Age], Fish, TotalTerminalLandedCatch[BYind, Age], LandedCatch[Fishery, Age, BYind], PSCFisheryGear[PSCFishery]))
                             sink() 
+                        
                         }
                         #'moved to ShakerMethod1 to compare against Coshak12, uncomment here and remove from ShakerMethod1 when done testing
                         #'TotalTerminalLegalDropoffs(BroodYear, age) = TotalTerminalLegalDropoffs(BroodYear, age) + LegalDropoffMortality(PSCFishery, age, BroodYear)
@@ -429,38 +529,54 @@ CalcLandedCatchAndEscapement <- function(D,M){
                     #'    If isTraceCalc = True and shakermethod = traceThisShakerMethod Then WriteLine(debugID, "1288 catch", PSCFishery, Age, BroodYear, LandedCatch(PSCFishery, Age, BroodYear))
                     #'End If
                 }
+                
                 #'sum up all catch and escapement for brood year
-                BroodYearCatch <- BroodYearCatch+ TotalLandedCatch[BYind, Age]
+                BroodYearCatch <- BroodYearCatch + TotalLandedCatch[BYind, Age]
                 BroodYearEscapement <- BroodYearEscapement + Escape[BYind, Age]
+
             } #'age <= LastCalendarYear - BroodYear
         }
+       
         #'set MissingBroodYearFlag to False if there is escapement for the brood year
         #'If BroodYearEscapement > 0 Then
-        if(BroodYearCatch > 0 |  BroodYearEscapement > 0){
+        if( BroodYearCatch > 0 |  BroodYearEscapement > 0 ){
+            
             MissingBroodYearFlag[BYind] <- FALSE
+            
             #'Get number of ages completed in a broodyear through the last calendar year
-            if(AllBY[BYind] + D$MaxAge <= M$LastCalendarYear){
+            if( AllBY[BYind] + D$MaxAge <= M$LastCalendarYear ){
+                
                 #'Set CompleteBYFlag and get the number of complete broods and lastCompleteBroodYear for the stock
                 LastAge[BYind] = D$MaxAge
                 NumberCompleteBroods = NumberCompleteBroods + 1
                 CompleteBYFlag[BYind] = TRUE
-                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & AllBY[BYind] >= M$traceThisYear){
+                
+                if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & AllBY[BYind] >= M$traceThisYear ){
+                    
                     sink("../logs/debug_EncounterRateID.log")
                     cat(paste("1432 completeBYFlag",  AllBY[BYind], CompleteBYFlag[BYind], "max", D$MaxAge, "BY+max", AllBY[BYind] + D$MaxAge, "lastCalYr", M$LastCalendarYear))
                     sink() 
+
                 }
+
                 LastCompleteBroodYear = AllBY[BYind]
+            
             }else{
-                LastAge[BYind] = M$LastCalendarYear - AllBY[BYind] #'last age for incomplete Brood years
+            
+                LastAge[BYind] <- M$LastCalendarYear - AllBY[BYind] #'last age for incomplete Brood years
+           
             }
+
         }else{
-            MissingBroodYearFlag[BYind] = TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
+            
+            MissingBroodYearFlag[BYind] <- TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
+            LastAge[BYind] <- 0
         }
     }
  
 
     return(list(LandedCatch = LandedCatch,
-        TotalLandedCatch = TotalLandedCatch,
+    TotalLandedCatch = TotalLandedCatch,
     TotalLandedCatch_ByFishery = TotalLandedCatch_ByFishery,
     NumberCompleteBroods = NumberCompleteBroods,
     CompleteBYFlag = CompleteBYFlag,

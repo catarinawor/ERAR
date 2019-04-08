@@ -33,25 +33,35 @@ CheckIMData <- function(D,M){
     allCY <- (D$FirstBY + D$OceanStartAge):M$LastCalendarYear
     allAge <- D$OceanStartAge:D$MaxAge
 
-	for(BYind in 1:length(allBY)){
-		for(PSCFishery in 1:M$NumberPSCFisheries){
-			if(M$PSCFisheryName[PSCFishery]=="ESCAPEMENT" | M$PSCFisheryName[PSCFishery] == "XCA ESC STRAY" | M$PSCFisheryName[PSCFishery] == "XUS ESC STRAY" ){
+	for( BYind in seq_along(allBY) ){
+		
+		for( PSCFishery in 1:M$NumberPSCFisheries ){
+		
+			if( M$PSCFisheryName[PSCFishery]=="ESCAPEMENT" | M$PSCFisheryName[PSCFishery] == "XCA ESC STRAY" | M$PSCFisheryName[PSCFishery] == "XUS ESC STRAY" ){
+		
 				next
+		
 			}
 			
-			for(age in D$OceanStartAge:LastAge[BYind]){
+			for(age in D$OceanStartAge:D$LastAge[BYind]){
+				
 				CalYr <- allBY[BYind] + age
 
-				if(length(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery])>0){
-					if(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery]==0){
+				if( length(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery]) > 0 ){
+					
+					if(D$IMdf$CNRMethod[D$IMdf$CalendarYear==CalYr&D$IMdf$PSCFishery==PSCFishery] == 0){
+
 						sink("../logs/debug_CNRMethod.log", append=TRUE)
                 		cat(paste("You need to add data to the ERA_IMInputs table for all fisheries in year",
                 		CalYr , "before program will work.  Else if NO CNR then CNRMethod 0 should be 9. ERROR \n"))
                 		sink() 
                 	 	imd<-list(IMerror=1)
+
 					}else{
+
 						#Necessary IM data is loaded, do nothing
 						imd<-NULL
+
 					}
 				}
 			}

@@ -507,7 +507,7 @@ MainSub<-function(M){
             try(if(D1$GetIMDataErr ) stop(" MainSub stopped check  ../logs/GetIMDataErr.log"))     
             D <- append(D,D1)  
             
-            if( M$PNVAlgorithm=="StockSpecific" ){
+            if( M$PNVAlgorithm == "StockSpecific" ){
             
                 # this is not used st the moment so these functions are not working properly
                 D1 <- GetMeanLength(D,M)

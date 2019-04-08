@@ -34,7 +34,7 @@
 #' @importFrom tidyr spread
 #' 
 #' 
-GetIMData <- function(D,M){
+GetIMData <- function( D,M ){
 
     # ReDimension Incidental Mortality variables
     #Coshak PSL file has 1 more year of data than recoveries
@@ -52,8 +52,8 @@ GetIMData <- function(D,M){
    # dta <- RODBC::odbcConnectAccess2007(M$datbse)      
 
 
-    ERASQL <- paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion,") Order By PSCFishery, CalendarYear" )
-              paste0("SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion, ") Order By PSCFishery, CalendarYear")
+    ERASQL <- paste0( "SELECT ERA_IMInputs.* FROM ERA_IMInputs WHERE CalendarYear <= ", M$LastCalendarYear, " and (PNVRegion = 1 or PNVRegion = ", D$PNVRegion,") Order By PSCFishery, CalendarYear" )
+              
     #read from data base
     
     df1 <- sqlQuery( M$chnl , query = ERASQL )

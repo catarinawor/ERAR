@@ -59,7 +59,10 @@ GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates <- function(D,M){
         }
     
     }else{
-        return(NULL)
+        return(list( OceanAge=D$OceanStartAge:(D$OceanStartAge+3),
+            PNVRegion=df1$PNVRegion,
+            WithinBYWeightFlag= df1$WithinBYWeightFlag,
+            longerr=0))
     }
        
 
