@@ -31,40 +31,40 @@ CalcCohort <- function(D,M){
 
 
 	allBY <- D$FirstBY:D$LastBY
-    #allCY <- (D$FirstBY + D$OceanStartAge):M$LastCalendarYear
-    allAge <- D$OceanStartAge:D$MaxAge
+  #allCY <- (D$FirstBY + D$OceanStartAge):M$LastCalendarYear
+  allAge <- D$OceanStartAge:D$MaxAge
 
-
-
-    NumberOceanCohorts <- NULL
+  NumberOceanCohorts <- NULL
 	SumAEQ <- NULL
 	SumMatRate <- NULL
 	SumPreTermER <- NULL
-	PreTermER <- matrix(NA, nrow=length(allBY),ncol=7)
-	Cohort <- matrix(NA, nrow=length(allBY),ncol=7)
+  AveragePreTermER <- NULL
+	PreTermER <- matrix(NA, nrow = length(allBY),ncol = 7 )
+	Cohort <- matrix(0, nrow = length(allBY),ncol = 7 )
+	MatRate <- matrix(0, nrow = length(allBY),ncol = 7 )
+
+	AEQ <- matrix(0, nrow=length(allBY),ncol = D$MaxAge + 1 )
+	SumAEQ <- rep(0,D$MaxAge)
+	SumPreTermER <- rep(0,D$MaxAge)
+	NumberOceanCohorts <- rep(0,D$MaxAge)
 
 	SurvivalRate <- D$survivaldf$SurvivalRate
 
 	if( M$Average_Maturation_Rate == "SelectNumberCompleteBroods" ){
-		
-		NumAvgYears <- sum(allBY < (M$LastCalendarYear-D$MaxAge))
-	
-	}else{
-		
+		#This is not selecting the number of complte broods but choosing all the complete broods. 
+		#NumAvgYears <- sum(allBY < (M$LastCalendarYear-D$MaxAge))
+		NumAvgYears <- M$NumAvgYears	
+	}else{		
 		NumAvgYears <- M$LastCompleteBroodsUsed
-	
 	}
-
-	NumAvgYears <- MatRateNumberBroods.NumBroodsUpDown.Value
 
 	for( BYind in seq_along(allBY) ){
 
 		#'skip all missing brood years
-
-		if( !D$MissingBroodYearFlag[BYind] ){
+		if( !D$MissingBroodYearFlag[ BYind ] ){
 			
 			#'the first time, this sub is called then Cohort(BroodYear, OceanStartAge) is empty or zero
-			TestCohortNum <- Cohort[BYind, D$OceanStartAge]
+			TestCohortNum <- Cohort[ BYind, D$OceanStartAge ]
 
 			#'set survival rate of maxage+1 for use in AEQ equations below
 			SurvivalRate[ which(D$survivaldf$Age==D$MaxAge) + 1 ] <- SurvivalRate[ which(D$survivaldf$Age==D$MaxAge) ]
@@ -75,57 +75,217 @@ CalcCohort <- function(D,M){
 				#'sum up total catch BroodYear age (landed catch + legal dropoff+ shakers + shakerdropoffs + legalCNR + sublegalCNR + legalCNRdropoff + sublegalCNRdropoff), first time through will just be landed catch
 				TotalCatch <- TotalCatch_Age(D, M, BY=BYind, age)
 				#'sum up total terminal catch BroodYear age (landed catch + legal dropoff+ shakers + shakerdropoffs + legalCNR + sublegalCNR + legalCNRdropoff + sublegalCNRdropoff)
-         		if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
+        if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
+         	sink("../logs/debug_terminalCatchID.log", append=TRUE)
+          cat(paste("2183 CalcCohort callTotalTerminalCatch_Age", M$ShakerMethod, BYind, age))
+          sink()
+        }
 
-         			sink("../logs/debug_terminalCatchID.log", append=TRUE)
-            		cat(paste("2183 CalcCohort callTotalTerminalCatch_Age", M$ShakerMethod, BYind, age))
-            		sink()
+        TotalTerminalCatch <- TotalTerminalCatch_Age(D, M, BYind, age)
+        #'subtract total terminal catch from total catch to get total PreTerm catch
+        TotalPreTermCatch <- TotalCatch - TotalTerminalCatch
 
-         		}
+        if(M$isTraceCalc){
+          sink("../logs/debug_CohortID.log", append=TRUE)
+          cat(paste("line 1925","totCat", TotalCatch, "totTermCat", TotalTerminalCatch))
+          sink()
+        }
 
-         		TotalTerminalCatch <- TotalTerminalCatch_Age(D, M, BYind, age)
-         		#'subtract total terminal catch from total catch to get total PreTerm catch
-         		TotalPreTermCatch <- TotalCatch - TotalTerminalCatch
-
-         		if(M$isTraceCalc){
-
-         			sink("../logs/debug_CohortID.log", append=TRUE)
-            		cat(paste("line 1925","totCat", TotalCatch, "totTermCat", TotalTerminalCatch))
-            		sink()
-
-         		}
-
-         		#'estimate cohort size for last available age of an incomplete cohort, otherwise estimate cohort size from backwards cohort analysis
-         		if( !D$CompleteBYFlag[BYind] & age == D$LastAge[BYind] & D$pass > 1 ){
+        #'estimate cohort size for last available age of an incomplete cohort, otherwise estimate cohort size from backwards cohort analysis
+        if( !D$CompleteBYFlag[BYind] & age == D$LastAge[BYind] & D$pass > 1 ){
          		
-         			Cohort[BYind, age] <- CalcEstmCohrt2( D, M, BYind, age ) / D$survivaldf$SurvivalRate[ survivaldf$Age==age ]
-         			#'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1818 compl BY", ShakerMethod, BroodYear, age, Cohort(BroodYear, age), SurvivalRate(age))
+         	Cohort[BYind, age] <- CalcEstmCohrt2( D, M, BYind, age ) / D$survivaldf$SurvivalRate[ survivaldf$Age==age ]
+         	#'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1818 compl BY", ShakerMethod, BroodYear, age, Cohort(BroodYear, age), SurvivalRate(age))
          			
-         			if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
-         				sink("../logs/debug_Cohort_IncompleteBroodID.log", append=TRUE)
-            			cat(paste("2158 CalcCohort", M$ShakerMethod, BYind, age, Cohort[BYind, D$OceanStartAge]))
-            			sink()
-         			}
+         	if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod ){
+         		sink("../logs/debug_Cohort_IncompleteBroodID.log", append=TRUE)
+            cat(paste("2158 CalcCohort", M$ShakerMethod, BYind, age, Cohort[BYind, D$OceanStartAge]))
+            sink()
+         	}
          			
-         		}else{
+        }else{
          			
-         			Cohort[ BYind, age ] <- (Cohort[ BYind, age + 1 ] +  Escape[ BYind, age ] + TotalCatch)/ SurvivalRate[ which(D$survivaldf$Age==age) ]
+         	Cohort[ BYind, age ] <- (Cohort[ BYind, age + 1 ] +  D$Escape[ BYind, age ] + TotalCatch)/ SurvivalRate[ which(D$survivaldf$Age==age) ]
          		
-         		}
+        }
 
-         		if( age == D$OceanStartAge & Cohort[BYind, D$OceanStartAge] == 0){
+        if( age == D$OceanStartAge & Cohort[BYind, D$OceanStartAge] == 0){
 
-         			sink("../logs/debug_ERROR_noCWT.log", append=TRUE)
-            		cat(paste("Brood Year ", allBY[BYind], " has NO CWT recoveries at all!"))
-            		sink()
-         			ErrCaption = "Brood Year " & allBY[BYind] & " has NO CWT recoveries at all!"
-            		ErrMessage = "Hint: If the brood year has no recoveries, decrement last brood year in the .CM1 file and remove from the .CDS file."
-            		ErrMessage = ErrMessage & "  If intermediate brood year, treat as missing brood and remove from .CDS file."
-         		}
+         	sink("../logs/debug_ERROR_noCWT.log", append=TRUE)
+          cat(paste("Brood Year ", allBY[BYind], " has NO CWT recoveries at all!"))
+          sink()
+         	ErrCaption = paste("Brood Year ", allBY[BYind] , " has NO CWT recoveries at all! \n")
+          ErrMessage = paste("Hint: If the brood year has no recoveries, decrement last brood year in the .CM1 file and remove from the .CDS file.\n")
+          ErrMessage = paste(ErrMessage, " If intermediate brood year, treat as missing brood and remove from .CDS file.\n")
+         	stop(paste(ErrCaption,ErrMessage))
+        }
 
+        CohortAfterPreTermFishery <- Cohort[ BYind, age ] * SurvivalRate[ age ] - TotalPreTermCatch
+        TerminalRun <- TotalTerminalCatch + D$Escape[ BYind, age ] 
+   
+        if( !D$ReadAvgMatRteFlg ){
+          #'rates not from ERA_Stock table, instead calculate from data
+          if( age == D$LastAge[ BYind ] & D$CompleteBYFlag[ BYind ]){
+          	MatRate[ BYind, age ] <- 1	
+          }else if( CohortAfterPreTermFishery <= 0 ){
+          	MatRate[ BYind, age ] <- 0
+          }else{		
+          	MatRate[ BYind, age ] <-  TerminalRun / CohortAfterPreTermFishery
+          	if(isTraceCalc){
+          		sink("../logs/debug_MatRteID.log", append=TRUE)
+          		cat(paste("2189 MatRte", BYind, age, MatRate[ BYind, age ], TerminalRun, CohortAfterPreTermFishery,"\n"))
+          		sink()
+          	}
+          }
+        }else{
+          MatRate[ BYind, age ] <- D$AverageMatRate[ age-1 ]	
+        }
+
+        # 'compute adult equivalent factor
+        if(age == D$LastAge[ BYind ] & !D$CompleteBYFlag[ BYind ]){	
+          #'use average adult equivalent for incomplete brood
+          AEQ[ BYind, age ] <- MatRate[ BYind, age ] + ((1 - MatRate[ BYind, age ]) * SurvivalRate[ which(D$survivaldf$Age==age ) + 1 ] * AverageAEQ[age + 1])
+        }else{
+          AEQ[ BYind, age ] <- MatRate[ BYind, age ] + ((1 - MatRate[ BYind, age ]) * SurvivalRate[ which(D$survivaldf$Age==age) + 1 ]  * AEQ[ BYind, age + 1 ] )
+        }
+        CohortBeforePreTermFishery <- Cohort[ BYind, age ] * SurvivalRate[ which(D$survivaldf$Age==age) ]
+        # 'Compute Ocean harvest rates
+        if(CohortBeforePreTermFishery > 0 ){
+          PreTermER[ BYind, age ] <- TotalPreTermCatch / CohortBeforePreTermFishery
+        }else{
+          PreTermER[ BYind, age ] <- 0
+        }
+        #parei aqui
+        if(M$LongTermAverage){
+          #ACCUMULATE ADULT EQUIVALENTS AND MATURATION RATES FOR COMPLETE BROODS using longterm average
+          if(D$CompleteBYFlag[BYind]){
+          	SumAEQ[age] <- SumAEQ[age] + AEQ[ BYind,age ]
+          	SumPreTermER[age] <- SumPreTermER[age] + PreTermER[ BYind,age ]
+          	NumberOceanCohorts[age] <- NumberOceanCohorts[age] + 1 
+          				
+            #'ACCUMULATE MATURATION RATES IF NOT USING INPUT AVERAGE
+            #'note: because AverageMatRate(age) = SumMatRate(age) / NumberCompleteBroods%
+            #'therefore SumMatRate(age) is not needed or used if ReadAvgMatRteFlg% = 1
+          				
+          	if( !D$ReadAvgMatRteFlg ){
+          		SumMatRate[ age ] <- SumMatRate[ age ]  + MatRate[ BYind, age ]
+          	}
+          }
+        }else{
+          #'ACCUMULATE ADULT EQUIVALENTS AND MATURATION RATES FOR COMPLETE BROODS using average 
+          #number of years specified BroodYear NumAvgYears
+          if(allBY[ BYind ] == D$LastCompleteBroodYear ){
+            for(BroodYearNumber in 1:NumAvgYears){
+           		SumAEQ[age] <- SumAEQ[age] - AEQ[BYind - BroodYearNumber, age ]
+           		SumPreTermER[age] <- SumPreTermER[age] + PreTermER[BYind - BroodYearNumber, age ]
+              NumberOceanCohorts[age] <-  NumberOceanCohorts[age] + 1
+
+              if(!D$ReadAvgMatRteFlg){
+                #'rates not from .cm1 file, instead calculate from data
+                SumMatRate[age] <- SumMatRate[age] + MatRate[BYind - BroodYearNumber, age ] 
+              }	
+           	}
+            D$NumberCompleteBroods <- NumAvgYears
+          }
+        }           	 
 			}
+      ActDif <- 100 * (abs(Cohort[BYind, D$OceanStartAge] - TestCohortNum) / Cohort[BYind, D$OceanStartAge])
+      if( ActDif > M$TESTDIF &  !RepeatPass ) RepeatPass <- TRUE
 		}
 	}
+  #'COMPUTE AVERAGE MATURATION RATES, OCEAN HARVEST RATES, AND ADULT EQUIVALENTS
+  for(age in D$OceanStartAge:D$MaxAge){
+    if(NumberOceanCohorts[age] == 0){
+      #'there are never any ocean recoveries of this age
+       AveragePreTermER[age] <- 0
+    }else{
+      AveragePreTermER[age] <- SumPreTermER[age] / NumberOceanCohorts[age]
+    }
+
+    if(age != D$MaxAge){
+      #'rates not from ERA_Stock table, instead calculate from data
+      if(!D$ReadAvgMatRteFlg){
+        AverageMatRate[age] = SumMatRate[age] /  D$NumberCompleteBroods
+        if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod){
+          sink("../logs/debug_AvgMatRteID.log", append=TRUE)
+          cat(paste("2178 avgMatRte", age, AverageMatRate[age], "accum", SumMatRate[age], "numBroods", D$NumberCompleteBroods,"\n"))
+          sink()
+        }
+      }
+      AverageAEQ[age] = SumAEQ[age] / D$NumberCompleteBroods
+    }else{
+      #'rate for oldest age not from .cm1 file, instead calculate from data
+      if(!D$ReadAvgMatRteFlg) AverageMatRate[D$MaxAge] <- 1
+      AverageAEQ[D$MaxAge] <- 1
+    }
+  }
+  #'PUT AVERAGE VALUES INTO ARRAYS FOR INCOMPLETE BROODS
+  for(BYind in seq_along(allBY) ){
+    if(!D$CompleteBYFlag[BYind]){
+      for(age in D$OceanStartAge:D$MaxAge){
+        AEQ[BYind, age] <- AverageAEQ[age]
+        MatRate[BYind, age] <- AverageMatRate[age]
+        PreTermER[BYind, age] <- AveragePreTermER[age]
+      }
+    }
+  }
+
+  return(list(Cohort=Cohort,
+    AEQ=AEQ,
+    MatRate=MatRate,
+    PreTermER= PreTermER,
+    AverageAEQ=AverageAEQ,
+    AverageMatRate =AverageMatRate,
+    AveragePreTermER=AveragePreTermER
+    pass=D$pass,
+    NumberCompleteBroods=D$NumberCompleteBroods,
+    NumberOceanCohorts=NumberOceanCohorts,
+    SumAEQ=SumAEQ,
+    SumMatRate=SumMatRate,
+    SumPreTermER =SumPreTermER
+  ))
+
+
+
+
+
+
+}
+#if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod){
+#                  sink("../logs/debug_AvgMatRteID.log", append=TRUE)
+#                  cat(paste("2638 avgMatRte", BYind - BroodYearNumber, age, SumMatRate[ age ], MatRate[ BYind - BroodYearNumber,age ],"\n"))
+#                  sink()
+#                }
+
+#parei aqui
+#If LongTermAverage.Checked = True Then
+#            'ACCUMULATE ADULT EQUIVALENTS AND MATURATION RATES FOR COMPLETE BROODS using longterm average
+#            If CompleteBYFlag(BroodYear) = True Then
+#              SumAEQ(age) = SumAEQ(age) + AEQ(BroodYear, age)
+#              SumPreTermER(age) = SumPreTermER(age) + PreTermER(BroodYear, age)
+#              NumberOceanCohorts(age) = NumberOceanCohorts(age) + 1
+#              'ACCUMULATE MATURATION RATES IF NOT USING INPUT AVERAGE
+#              'note: because AverageMatRate(age) = SumMatRate(age) / NumberCompleteBroods%
+#              'therefore SumMatRate(age) is not needed or used if ReadAvgMatRteFlg% = 1
+#              If ReadAvgMatRteFlg = False Then 'rates not from ERA_Stock table, instead calculate from data
+#                SumMatRate(age) = SumMatRate(age) + MatRate(BroodYear, age)
+#              End If
+#            End If
+#          Else
+#            'ACCUMULATE ADULT EQUIVALENTS AND MATURATION RATES FOR COMPLETE BROODS using average number of years specified BroodYear NumAvgYears
+#            If BroodYear = LastCompleteBroodYear Then
+#              For BroodYearNumber As Integer = 0 To NumAvgYears - 1
+#                SumAEQ(age) = SumAEQ(age) + AEQ(BroodYear - BroodYearNumber, age)
+#                SumPreTermER(age) = SumPreTermER(age) + PreTermER(BroodYear - BroodYearNumber, age)
+#                NumberOceanCohorts(age) = NumberOceanCohorts(age) + 1
+#                If ReadAvgMatRteFlg = False Then 'rates not from .cm1 file, instead calculate from data
+#                  SumMatRate(age) = SumMatRate(age) + MatRate(BroodYear - BroodYearNumber, age)
+#                End If
+#              Next BroodYearNumber
+#              NumberCompleteBroods = NumAvgYears
+#            End If
+#          End If
+	
 
 	#original vb code
 		#	 Dim ActDif As Single

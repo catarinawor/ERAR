@@ -55,6 +55,7 @@ GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates <- function(D,M){
             AverageMatRate=df1[,-c(1:3)],
             PNVRegion=df1$PNVRegion,
             WithinBYWeightFlag= df1$WithinBYWeightFlag,
+            ReadAvgMatRteFlg=df1$AverageMatRateFlag,
             longerr=0))
         }
     
@@ -62,6 +63,7 @@ GetWithinBYWeightFlagAndPNVRegionAndAvgMatRates <- function(D,M){
         return(list( OceanAge=D$OceanStartAge:(D$OceanStartAge+3),
             PNVRegion=df1$PNVRegion,
             WithinBYWeightFlag= df1$WithinBYWeightFlag,
+            ReadAvgMatRteFlg=df1$AverageMatRateFlag,
             longerr=0))
     }
        

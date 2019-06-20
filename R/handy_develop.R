@@ -25,7 +25,10 @@ M <- list(
     RoundRecoveriesByTagCode= FALSE,
     traceThisYear = NA,
     traceThisAge =NA,
-    traceThisFishery =NA
+    traceThisFishery =NA,
+    LongTermAverage = FALSE,
+    NumAvgYears = 9,
+    TESTDIF=0.05
 
     )
 

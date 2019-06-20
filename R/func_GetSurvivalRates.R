@@ -42,7 +42,7 @@ GetSurvivalRates <- function(D,M){
     #read from database
     ERASQL = paste0("SELECT Age, NaturalMortalityRate FROM ERA_Stock INNER JOIN NaturalMortality ON ERA_Stock.SuperStock = NaturalMortality.SuperStock WHERE ERAStock = '" , D$CurrentStock , "' and TimePeriod ='" , D$TimePeriod , "'")
    
-    df1 <- sqlQuery( M$chnl , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
     if(nrow(df1)==0){
         nome <- "GetSurvivalRates.log"
@@ -83,6 +83,9 @@ GetSurvivalRates <- function(D,M){
     #    CISDataReader.Close()
         
 }
+
+
+
 
 
 

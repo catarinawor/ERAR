@@ -89,9 +89,9 @@ CalcLandedCatchAndEscapement <- function( D,M ){
     TotalLegalDropoffs <- matrix(0, nrow=length(AllBY), ncol=7)
 
     LastAge <- NULL
-    NumberCompleteBroods <-0
-    CompleteBYFlag<-NULL
-    MissingBroodYearFlag<-NULL
+    NumberCompleteBroods <- 0
+    CompleteBYFlag <- NULL
+    MissingBroodYearFlag <- NULL
     
 	if( !M$isReplicateCohShak ){
 
@@ -569,7 +569,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 
         }else{
             
-            MissingBroodYearFlag[BYind] <- TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
+            MissingBroodYearFlag[ BYind ] <- TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
             LastAge[BYind] <- 0
         }
     }

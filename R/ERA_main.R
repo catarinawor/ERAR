@@ -393,7 +393,7 @@ MainSub<-function(M){
             #CASStockString <- NA
                 
             #reset LastCompleteBroodYear to nothing between shaker methods and stocks
-            #LastCompleteBroodYear <- NA
+            D$LastCompleteBroodYear <- NA
 
             #reset pass between shaker methods and stocks
             D$pass <- 0
@@ -549,7 +549,8 @@ MainSub<-function(M){
 
             #'compute cohort sizes without CNR or Shakers, this is necessary to compute shakers and CNR
             if(M$IncompleteYearAlgorithm=="Historic"){
-                #CalcCohort()
+                
+                D1 <- CalcCohort(D,M)
 
             }else if(M$IncompleteYearAlgorithm=="New"){
 
