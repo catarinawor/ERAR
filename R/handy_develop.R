@@ -28,7 +28,7 @@ M <- list(
     traceThisFishery =NA,
     LongTermAverage = FALSE,
     NumAvgYears = 9,
-    TESTDIF=0.05
+    TESTDIF =0.05
 
     )
 

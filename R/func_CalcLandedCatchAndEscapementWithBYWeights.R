@@ -90,7 +90,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 
     LastAge <- NULL
     NumberCompleteBroods <- 0
-    CompleteBYFlag <- NULL
+    CompleteBYFlag <- rep(FALSE, length(AllBY))
     MissingBroodYearFlag <- NULL
     
 	if( !M$isReplicateCohShak ){
@@ -549,7 +549,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
                 #'Set CompleteBYFlag and get the number of complete broods and lastCompleteBroodYear for the stock
                 LastAge[BYind] = D$MaxAge
                 NumberCompleteBroods = NumberCompleteBroods + 1
-                CompleteBYFlag[BYind] = TRUE
+                CompleteBYFlag[BYind] <- TRUE
                 
                 if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & AllBY[BYind] >= M$traceThisYear ){
                     
@@ -559,7 +559,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 
                 }
 
-                LastCompleteBroodYear = AllBY[BYind]
+                LastCompleteBroodYear <- AllBY[BYind]
             
             }else{
             
@@ -574,8 +574,9 @@ CalcLandedCatchAndEscapement <- function( D,M ){
         }
     }
  
+    CompleteBYFlag[is.na(CompleteBYFlag)] <-FALSE
 
-    return(list(LandedCatch = LandedCatch,
+    return(list(new=list(LandedCatch = LandedCatch,
     TotalLandedCatch = TotalLandedCatch,
     TotalLandedCatch_ByFishery = TotalLandedCatch_ByFishery,
     NumberCompleteBroods = NumberCompleteBroods,
@@ -584,7 +585,8 @@ CalcLandedCatchAndEscapement <- function( D,M ){
     TotalLegalDropoffs = TotalLegalDropoffs,
     TotalTerminalLandedCatch = TotalTerminalLandedCatch,  
     LastAge = LastAge,
-    Escape = Escape))
+    Escape = Escape),
+    old=list(LastCompleteBroodYear=LastCompleteBroodYear)))
 }
     #original VB code
     #=============================================================

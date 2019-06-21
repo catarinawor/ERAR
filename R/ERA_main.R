@@ -536,7 +536,8 @@ MainSub<-function(M){
             }else{
                 #in progress
                 D1 <- CalcLandedCatchAndEscapement(D,M)
-                D <- append(D,D1)
+                D <- append(D,D1$new)
+                D$LastCompleteBroodYear <- D1$old$LastCompleteBroodYear
             }
 
             D <- AdjustLastBYandLastCY(D)
@@ -551,6 +552,10 @@ MainSub<-function(M){
             if(M$IncompleteYearAlgorithm=="Historic"){
                 
                 D1 <- CalcCohort(D,M)
+                D <- append(D,D1$new)
+                D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
+                D$pass <- D1$old$pass
+                D$RepeatPass <- D1$old$RepeatPass
 
             }else if(M$IncompleteYearAlgorithm=="New"){
 
@@ -558,15 +563,48 @@ MainSub<-function(M){
             }
 
            
+            if(D$RepeatPass)
 
+           
+            while(i<99){
             
+                D$pass <- D$pass + 1                
 
+                if(M$ShakerMethod1){
+                    #ShakerMethod1(D,M)
+                }else if(M$ShakerMethod4){
+                    #ShakerMethod4(D,M)
+                }else{
+                    error("Must select a shakermethod()")
+                }
 
+                #CalcCNR(D,M)
 
+                if(M$IncompleteYearAlgorithm=="Historic"){
+                
+                    D1 <- CalcCohort(D,M)
+                    D <- append(D,D1$new)
+                    D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
+                    D$pass <- D1$old$pass
+                    D$RepeatPass <- D1$old$RepeatPass
+
+                }else if(M$IncompleteYearAlgorithm=="New"){
+
+                    #CalcCohort_IncompleteBrood()
+                }
+
+                if(!D$RepeatPass)break()
+            }
+
+            #ResetCatches(D,M)
+            #CalcBroodYearExploitRates(D,M)                    
 
         } #next ShakCalcFlg
 
     } #next ERAStock
+
+    print("what the Fish just happened?")
+
 }
 
     
