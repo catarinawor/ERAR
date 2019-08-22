@@ -45,7 +45,7 @@ CalcCalendarYearCatch <- function(D){
                     
                     BYind <- which(allBY==BroodYear)
                     
-                    if(!D$MissingBroodYearFlag[BYind]){
+                    if(!D$MissingBroodYearFlag$Flag[BYind]){
 
                         CalendarYearLandedCatch[CalYr, PSCFishery] <- CalendarYearLandedCatch[CalYr, PSCFishery] + D$LandedCatch[PSCFishery, Age, BYind]
                         #print(CalendarYearLandedCatch[CalYr, PSCFishery])

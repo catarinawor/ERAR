@@ -21,7 +21,7 @@ M <- list(
     MeanMatType = "ArithmeticMean",
     PNVAlgorithm = "FisherySpecific",
     ShakerMethod ="C",
-    IncompleteYearAlgorithm= "New",
+    IncompleteYearAlgorithm= "Historic",
     RoundRecoveriesByTagCode= FALSE,
     traceThisYear = NA,
     traceThisAge =NA,
@@ -41,7 +41,7 @@ M <- list(
 #devtools::load_all()
 
 funcfiles <- list.files(getwd(),pattern="func",full.names=TRUE)
-    
+#funcfiles<-funcfiles[-27]
 for(i in 1:length(funcfiles)){
     
     source(funcfiles[i])

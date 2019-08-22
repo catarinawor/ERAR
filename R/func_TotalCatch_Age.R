@@ -86,7 +86,7 @@ TotalCatch_Age <- function(D, M, BY, age){
 
 
 
-#' @title TotalCatch_Age
+#' @title TotalTerminalCatch_Age
 #'
 #' @description  This function  aggregates catches for all fisheries to catch at age. 
 #'

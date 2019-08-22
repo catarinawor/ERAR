@@ -58,7 +58,7 @@ GetIMData <- function( D,M ){
     
     df1 <- sqlQuery( M$chnl , query = ERASQL )
 
-    summary(df1)
+    #summary(df1)
 
 
     PSCFishery <- df1$PSCFishery
@@ -175,7 +175,7 @@ GetIMData <- function( D,M ){
     df2select_S<- df2[df2$Age<D$MaxAge&df2$SizeClass!="L",c("PSCFishery", "Age", "AvgQ")]   
     SubLegalCatchabilityCoefficient <- tidyr::spread(df2select_L,key=PSCFishery,value=AvgQ)
 
-    return(list(IMdf=df1,catchabilitydf=df2,
+    return(list(IMdf=df1,catchabilitydf=df2, PNV=PNV,PV=PV,
         GetIMDataErr=GetIMDataErr))
 
     #return( list(IM_PSCFishery=PSCFishery,

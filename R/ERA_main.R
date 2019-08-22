@@ -561,10 +561,6 @@ MainSub<-function(M){
 
                 #CalcCohort_IncompleteBrood()
             }
-
-           
-            if(D$RepeatPass)
-
            
             while(i<99){
             

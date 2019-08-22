@@ -67,7 +67,7 @@ CalcCohort <- function(D,M){
 	for( BYind in seq_along(allBY) ){
 
 		#'skip all missing brood years
-		if( !D$MissingBroodYearFlag[ BYind ] & D$CompleteBYFlag[BYind]){
+		if( !D$MissingBroodYearFlag$Flag[ BYind ] & D$CompleteBYFlag$Flag[BYind]){
 			
 			#'the first time, this sub is called then Cohort(BroodYear, OceanStartAge) is empty or zero
 			TestCohortNum <- Cohort[ BYind, D$OceanStartAge ]
@@ -98,7 +98,7 @@ CalcCohort <- function(D,M){
         }
 
         #'estimate cohort size for last available age of an incomplete cohort, otherwise estimate cohort size from backwards cohort analysis
-        if( !D$CompleteBYFlag[BYind] & !is.na(D$CompleteBYFlag[BYind]) & age == D$LastAge[BYind] & pass > 1 ){
+        if( !D$CompleteBYFlag$Flag[BYind] & !is.na(D$CompleteBYFlag$Flag[BYind]) & age == D$LastAge[BYind] & pass > 1 ){
          		
          	Cohort[BYind, age] <- CalcEstmCohrt2( D, M, BYind, age ) / D$survivaldf$SurvivalRate[ survivaldf$Age==age ]
          	#'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1818 compl BY", ShakerMethod, BroodYear, age, Cohort(BroodYear, age), SurvivalRate(age))
@@ -131,7 +131,7 @@ CalcCohort <- function(D,M){
    
         if( !D$ReadAvgMatRteFlg ){
           #'rates not from ERA_Stock table, instead calculate from data
-          if( age == D$LastAge[ BYind ] & D$CompleteBYFlag[ BYind ] &!is.na(D$CompleteBYFlag[ BYind ])){
+          if( age == D$LastAge[ BYind ] & D$CompleteBYFlag$Flag[ BYind ] &!is.na(D$CompleteBYFlag$Flag[ BYind ])){
           	MatRate[ BYind, age ] <- 1	
           }else if( CohortAfterPreTermFishery <= 0 ){
           	MatRate[ BYind, age ] <- 0
@@ -148,7 +148,7 @@ CalcCohort <- function(D,M){
         }
 
         # 'compute adult equivalent factor
-        if(age == D$LastAge[ BYind ] & !D$CompleteBYFlag[ BYind ]){	
+        if(age == D$LastAge[ BYind ] & !D$CompleteBYFlag$Flag[ BYind ]){	
           #'use average adult equivalent for incomplete brood
           AEQ[ BYind, age ] <- MatRate[ BYind, age ] + ((1 - MatRate[ BYind, age ]) * SurvivalRate[ which(D$survivaldf$Age==age ) + 1 ] * AverageAEQ[age + 1])
         }else{
@@ -164,7 +164,7 @@ CalcCohort <- function(D,M){
         #parei aqui
         if(M$LongTermAverage){
           #ACCUMULATE ADULT EQUIVALENTS AND MATURATION RATES FOR COMPLETE BROODS using longterm average
-          if(D$CompleteBYFlag[BYind]){
+          if(D$CompleteBYFlag$Flag[BYind]){
           	SumAEQ[age] <- SumAEQ[age] + AEQ[ BYind,age ]
           	SumPreTermER[age] <- SumPreTermER[age] + PreTermER[ BYind,age ]
           	NumberOceanCohorts[age] <- NumberOceanCohorts[age] + 1 
@@ -228,7 +228,7 @@ CalcCohort <- function(D,M){
   }
   #'PUT AVERAGE VALUES INTO ARRAYS FOR INCOMPLETE BROODS
   for(BYind in seq_along(allBY) ){
-    if(!D$CompleteBYFlag[BYind]){
+    if(!D$CompleteBYFlag$Flag[BYind]){
       for(age in D$OceanStartAge:D$MaxAge){
         AEQ[BYind, age] <- AverageAEQ[age]
         MatRate[BYind, age] <- AverageMatRate[age]
@@ -434,7 +434,7 @@ CalcEstmCohrt2 <- function( D, M, BroodYear,Age ){
     #'option and Brood Year shaker option with oldest age and in final calculation of harvest rates).
     #'local variables
 
-    if( D$MissingBroodYearFlag[BroodYear] ){
+    if( D$MissingBroodYearFlag$Flag[BroodYear] ){
     
     	return(NULL)
     
@@ -518,6 +518,92 @@ CalcEstmCohrt2 <- function( D, M, BroodYear,Age ){
 	#
     #End If
   	#End Function
+
+
+}
+
+
+
+
+
+
+#' @title CalcEstmCohrt
+#'
+#' @description . 
+#'  
+#' @param BroodYear integer indicating brood year
+#' 
+#' @param Age integer indicating age
+#'
+#' @details This subroutine estimates future age cohort sizes so that shakers can be 
+#' calculated for incomplete brood years (Brood Year shaker option only).
+#'
+#' @return 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
+CalcEstmCohrt <- function( D, M, BY,Age ){
+
+  stopifnot(!D$MissingBroodYearFlag$Flag[BY])
+
+  for(CurrAge in (D$LastAge[BY]+1):Age){
+    PrevAge <- CurrAge - 1
+    if(PrevAge == D$LastAge[BY]){
+      #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_terminalCatchID, "2501 CalcEstmCohrt call TotalTerminalCatch_Age", ShakerMethod, BroodYear, Age)
+      MatRun <- TotalTerminalCatch_Age(D, M, BY, PrevAge, D$pass) + D$Escape[BY, PrevAge]
+    }else{
+      #'Use Average Ocean Harvest Rate at current age and Avg Maturity Rate to
+      #'estimate mature run
+      MatRun <- cohrt * (1 - D$AveragePreTermER[CurrAge]) * D$AverageMatRate[PrevAge]
+    }
+    #'Use Avg Mat Rate to estimate incomplete cohort
+      cohrt <- (1 - D$AverageMatRate[PrevAge]) * MatRun / D$AverageMatRate[PrevAge]
+      #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1974 calcestmcohrt", ShakerMethod, BroodYear, CurrAge, cohrt, (1 - AverageMatRate(PrevAge)), MatRun, AverageMatRate(PrevAge))
+      cohrt <- cohrt * D$survivaldf$SurvivalRate[D$survivaldf$Age==CurrAge]
+  }
+  if(is.na(cohrt)){
+    CalcEstmCohrt <- 0
+  }else{
+    CalcEstmCohrt <- cohrt
+  }
+
+  return(CalcEstmCohrt)
+
+
+  #========================================================================
+  #Original vb code
+  #========================================================================
+  #'This subroutine estimates future age cohort sizes so that shakers can be
+  #  'calculated for incomplete brood years (Brood Year shaker option only).
+  #  Dim cohrt, MatRun As Single
+  #  Dim CurrAge, PrevAge As Integer
+  #  If MissingBroodYearFlag(BroodYear) = True Then Exit Function
+  #  For CurrAge = LastAge(BroodYear) + 1 To Age
+  #    PrevAge = CurrAge - 1
+  #    If PrevAge = LastAge(BroodYear) Then
+  #      If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_terminalCatchID, "2501 CalcEstmCohrt call TotalTerminalCatch_Age", ShakerMethod, BroodYear, Age)
+  #      
+  #      MatRun = TotalTerminalCatch_Age(BroodYear, PrevAge, pass) + Escape(BroodYear, PrevAge)
+  #    Else
+  #      'Use Average Ocean Harvest Rate at current age and Avg Maturity Rate to
+  #      'estimate mature run
+  #      MatRun = cohrt * (1 - AveragePreTermER(CurrAge)) * AverageMatRate(PrevAge)
+  #    End If
+  #    'Use Avg Mat Rate to estimate incomplete cohort
+  #    cohrt = (1 - AverageMatRate(PrevAge)) * MatRun / AverageMatRate(PrevAge)
+  #    If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear >= traceThisYear Then WriteLine(debug_Cohort_IncompleteBroodID, "1974 calcestmcohrt", ShakerMethod, BroodYear, CurrAge, cohrt, (1 - AverageMatRate(PrevAge)), MatRun, AverageMatRate(PrevAge))
+  #    cohrt = cohrt * SurvivalRate(CurrAge)
+  #  Next CurrAge
+  #  If Single.IsNaN(cohrt) Then
+  #    CalcEstmCohrt = 0.0
+  #  Else
+  #
+  #    CalcEstmCohrt = cohrt
+  #  End If
+
 
 
 }

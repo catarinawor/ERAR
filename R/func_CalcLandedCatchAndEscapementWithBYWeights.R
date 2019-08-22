@@ -90,8 +90,8 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 
     LastAge <- NULL
     NumberCompleteBroods <- 0
-    CompleteBYFlag <- rep(FALSE, length(AllBY))
-    MissingBroodYearFlag <- NULL
+    CompleteBYFlag <-  data.frame(BY=AllBY, Flag=rep(FALSE, length(AllBY)))
+    MissingBroodYearFlag <- data.frame(BY=AllBY, Flag=rep(FALSE, length(AllBY)))
     
 	if( !M$isReplicateCohShak ){
 
@@ -541,7 +541,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
         #'If BroodYearEscapement > 0 Then
         if( BroodYearCatch > 0 |  BroodYearEscapement > 0 ){
             
-            MissingBroodYearFlag[BYind] <- FALSE
+            MissingBroodYearFlag$Flag[BYind] <- FALSE
             
             #'Get number of ages completed in a broodyear through the last calendar year
             if( AllBY[BYind] + D$MaxAge <= M$LastCalendarYear ){
@@ -549,12 +549,12 @@ CalcLandedCatchAndEscapement <- function( D,M ){
                 #'Set CompleteBYFlag and get the number of complete broods and lastCompleteBroodYear for the stock
                 LastAge[BYind] = D$MaxAge
                 NumberCompleteBroods = NumberCompleteBroods + 1
-                CompleteBYFlag[BYind] <- TRUE
+                CompleteBYFlag$Flag[BYind] <- TRUE
                 
                 if( M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & AllBY[BYind] >= M$traceThisYear ){
                     
                     sink("../logs/debug_EncounterRateID.log")
-                    cat(paste("1432 completeBYFlag",  AllBY[BYind], CompleteBYFlag[BYind], "max", D$MaxAge, "BY+max", AllBY[BYind] + D$MaxAge, "lastCalYr", M$LastCalendarYear))
+                    cat(paste("1432 completeBYFlag",  AllBY[BYind], CompleteBYFlag$Flag[BYind], "max", D$MaxAge, "BY+max", AllBY[BYind] + D$MaxAge, "lastCalYr", M$LastCalendarYear))
                     sink() 
 
                 }
@@ -569,12 +569,12 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 
         }else{
             
-            MissingBroodYearFlag[ BYind ] <- TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
+            MissingBroodYearFlag$Flag[ BYind ] <- TRUE #'set MissingBroodYearFlag to True if there is no escapement for the brood year
             LastAge[BYind] <- 0
         }
     }
  
-    CompleteBYFlag[is.na(CompleteBYFlag)] <-FALSE
+    CompleteBYFlag$Flag[is.na(CompleteBYFlag$Flag)] <-FALSE
 
     return(list(new=list(LandedCatch = LandedCatch,
     TotalLandedCatch = TotalLandedCatch,

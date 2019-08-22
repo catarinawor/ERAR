@@ -34,7 +34,7 @@ AdjustLastBYandLastCY<- function(D){
     allBY<-D$FirstBY:D$LastBY
 
     for(i in 1:length(allBY)){
-        if(!D$MissingBroodYearFlag[i]){
+        if(!D$MissingBroodYearFlag$Flag[i]){
             D$LastBY<-allBY[i]
         }
     }
