@@ -585,7 +585,8 @@ CalcLandedCatchAndEscapement <- function( D,M ){
     TotalLegalDropoffs = TotalLegalDropoffs,
     TotalTerminalLandedCatch = TotalTerminalLandedCatch,  
     LastAge = LastAge,
-    Escape = Escape),
+    Escape = Escape,
+    LegalDropoffMortality=LegalDropoffMortality),
     old=list(LastCompleteBroodYear=LastCompleteBroodYear)))
 }
     #original VB code

@@ -55,12 +55,12 @@ CheckIMData <- function(D,M){
                 		cat(paste("You need to add data to the ERA_IMInputs table for all fisheries in year",
                 		CalYr , "before program will work.  Else if NO CNR then CNRMethod 0 should be 9. ERROR \n"))
                 		sink() 
-                	 	imd<-list(IMerror=1)
+                	 	imd<-1
 
 					}else{
 
 						#Necessary IM data is loaded, do nothing
-						imd<-NULL
+						imd<-0
 
 					}
 				}

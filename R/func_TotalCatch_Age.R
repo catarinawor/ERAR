@@ -23,7 +23,7 @@
 #'
 #' @details
 #'
-#' @return Tuall mortality for a given brood year and age.
+#' @return Total mortality for a given brood year and age.
 #' 
 #' @export
 #'
@@ -48,7 +48,7 @@ TotalCatch_Age <- function(D, M, BY, age){
                            D$TotalCNRLegal[BY, age] + 
                            D$TotalCNRLegalDropoffs[BY, age] + 
                            D$TotalCNRSubLegal[BY, age] + 
-                           D$TotalCNRSubLegalDropoffsl[BY, age]
+                           D$TotalCNRSubLegalDropoffs[BY, age]
         if(BY>= M$traceThisYear & age == M$traceThisAge ){
 
             sink("../logs/debug_totCatAgeID.log", append=TRUE)

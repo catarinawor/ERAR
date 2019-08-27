@@ -485,7 +485,6 @@ MainSub<-function(M){
             cat("Get Tagged Release By Brood... \n")
             sink()
 
-        
             D1 <- GetTaggedReleaseByBrood(D,M)
             D <- append(D,D1)
 
@@ -520,7 +519,6 @@ MainSub<-function(M){
                 D <- append(D,D1)
             }
 
-
             D1 <- SetTerminalFishery(D,M)
             D$terminal <- D1
 
@@ -545,7 +543,18 @@ MainSub<-function(M){
             D1 <- CalcCalendarYearCatch(D)
             D <- append(D,D1)
 
-            D1 <- CheckIMData(D,M)
+            if( CheckIMData(D,M)$IMerror){
+                stop("Necessary IM data NOT loaded \n")
+            }
+            
+            D1 <-list(TotalSublegalShakers=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalSublegalShakerDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalCNRLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalCNRLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalCNRSubLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalCNRSubLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge)
+                )
+
             D <- append(D,D1)
 
             #'compute cohort sizes without CNR or Shakers, this is necessary to compute shakers and CNR
@@ -554,7 +563,6 @@ MainSub<-function(M){
                 D1 <- CalcCohort(D,M)
                 D <- append(D,D1$new)
                 D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
-                D$pass <- D1$old$pass
                 D$RepeatPass <- D1$old$RepeatPass
 
             }else if(M$IncompleteYearAlgorithm=="New"){

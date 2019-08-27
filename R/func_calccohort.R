@@ -249,7 +249,6 @@ CalcCohort <- function(D,M){
           SumMatRate = SumMatRate,
           SumPreTermER = SumPreTermER),
      old=list(NumberCompleteBroods=NumberCompleteBroods,
-              pass = pass,
               RepeatPass= RepeatPass)
   ))
 

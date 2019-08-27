@@ -1,11 +1,7 @@
 #ERA function ShakerMethod1() and ShakerMethod4()
 #Translated from VB ERA CIS code
-#June 2018
+#June 2018 -2019
 #Author: Catarina Wor
-
-
-#source(utils.R)
-
 
 
 #'@title ShakerMethod1
@@ -42,6 +38,11 @@ ShakerMethod1 <- function(D,M){
     TempTerminalShakerDropoffs <- matrix(0,nrow=length(allBY), ncol= D$MaxAge)
     TempTerminalLegalDropoffs <- matrix(0,nrow=D$LastBY, ncol= D$MaxAge)
     TempSublegalShakerDropoffs <- matrix(0,nrow=D$LastBY, ncol= D$MaxAge)
+
+    TotalTerminalShakers <- matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge)
+    TotalTerminalShakerDropoffs <- matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge)
+
+    CalendarYearShakers <- matrix(0,M$LastCalendarYear,M$NumberPSCFisheries)
    
 
     #'calculates the sublegal shakers
@@ -52,20 +53,26 @@ ShakerMethod1 <- function(D,M){
         lastYear <- M$LastCalendarYear 
     }
 
+    valbroodyr <- TRUE
+    valcalyr <- TRUE
+
     for(PSCFishery in seq_len( M$NumberPSCFisheries - 1 )){
         #'excludes escapement but not strays?
         for(CalYr in seq_along(allCalYr)){
             NonVulnerableCohort <- rep(0, D$MaxAge)
             TotalVulnerableCohort <- 0
 
-            #'Broodyear not defilned yet. This makes zero sense. 
+            #'Broodyear not defined yet. This makes zero sense. 
             # If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2878", BroodYear, PSCFishery, TotalVulnerableCohort, "totVulnChrt should be zero")
-            
+            valcalyr <- TRUE
+
             for(age in D$OceanStartAge:D$MaxAge){
+                valbroodyr <- TRUE
+                
                 #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2880", BroodYear, Age, PSCFishery, TotalVulnerableCohort, " totVulnChrt start of age loop")
+                
                 #'derive either brood and calendar year from age as appropriate
                 # If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2882 shakerMethod1", CalYr - Age, Age, CalYr, LastIMDataYear, FirstBY, LastBY, TotalVulnerableCohort)
-      
                 if(M$ShakerMethod=="C"){ #'CalendarYr method
                     
                     BroodYear <- allCalYr[CalYr] - age 
@@ -78,105 +85,271 @@ ShakerMethod1 <- function(D,M){
                 }
                 BYind <- which(allBY==BroodYear)
                 
-                if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & PSCFishery ==M$traceThisFishery ){
-                   sink("../logs/debug_calcEstmCohrtID.log",append =TRUE)
-                   cat( "2890 shakerMethod1", M$ShakerMethod, allCalYr[CalYr], age, BroodYear,max(D$IMdf$CalendarYear) , "oceanstartage", D$OceanStartAge, "ShakerMethod", M$ShakerMethod, "BY", BroodYear, "age", age, TotalVulnerableCohort)
-                   sink() 
-                }
-
+                
                 if((BroodYear + age) > max(D$IMdf$CalendarYear)){
-                    #GoTo NxtAge aka big spaghetti bowl
+                    #GoTo NxtAge
+                    valbroodyr <- FALSE
                     print("GoTo NxtAge")
-                    next  #age 
-                    nxtagefun() 
-
+                    
                 }
 
                 if(M$ShakerMethod == "C"){ #'CalendarYr
                     
                     if(BroodYear < D$FirstBY){
-                        break
+                        stop("BroodYear < D$FirstBY \n Check your data")
                     }
+
                     if(BroodYear > D$LastBY){
-                         print("GoTo NxtAge")   
+                        valbroodyr <- FALSE
                     }
+
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2895 shakerMethod1", ShakerMethod, BroodYear, Age, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), TotalVulnerableCohort)
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "2896 shakerMethod1", ShakerMethod, CalYr, BroodYear, Age, PSCFishery, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), "lastBY", LastBY, TotalVulnerableCohort)
      
                     if(D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==BroodYear]){
-                         print("GoTo NxtAge")
+                        valbroodyr <- FALSE
                     }
 
                 }else if(M$ShakerMethod == "B"){
                     if(BroodYear >  D$LastBY){
-                         print("GoTo SkipYR")
+                        valcalyr <- FALSE
                     }
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2900 shakerMethod1", ShakerMethod, BroodYear, Age, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), TotalVulnerableCohort)
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "2901 shakerMethod1", ShakerMethod, CalYr, BroodYear, Age, PSCFishery, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), "lastBY", LastBY)
             
                     if(D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==BroodYear]){
-                         print("GoTo SkipYR")
+                        valcalyr <- FALSE
                     }
                 }
                 #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2904", BroodYear, Age, PSCFishery, TotalVulnerableCohort, " totVulnchrt before cohrt=")
 
-                if( D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY==BroodYear]){
-                    if(!D$terminal[PSCFishery, age]){
-                        #'PreTerm cohrt after natural mortality
-                        cohrt <- D$Cohort[BYind, age] * D$survivaldf$SurvivalRate[D$survivaldf$Age==age]
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2908 com BY term F", BroodYear, Age, PSCFishery, cohrt, Cohort(BroodYear, Age), SurvivalRate(Age))
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2908 com BY term F", BroodYear, Age, PSCFishery, cohrt, Cohort(BroodYear, Age), SurvivalRate(Age))
-                    }else{
-                        #'total terminal landed catch + terminal shakers + terminal CNR + escapement
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_terminalCatchID, "2911 ShakMeth1 call TotalTerminalcatcg_Age", ShakerMethod, BroodYear, Age)
-                        cohrt <- TotalTerminalCatch_Age(D, M, BY=BYind, age=Age) + D$Escape[BYind, age]
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2914 com BY term T", BroodYear, Age, PSCFishery, "cohort", cohrt, "totalTerminalCatch_Age", TotalTerminalCatch_Age(BroodYear, Age, pass), "Escape", Escape(BroodYear, Age))
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2914 com BY term T", BroodYear, Age, PSCFishery, "cohort", cohrt, "totalTerminalCatch_Age", TotalTerminalCatch_Age(BroodYear, Age, pass), "Escape", Escape(BroodYear, Age))
-                    }
-                }else{ #'cohorts estimated for incomplete broods
-                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2917 shakerMethod1", BroodYear, ShakerMethod, "1", Age, LastAge(BroodYear), TotalVulnerableCohort)
-                    if(M$ShakerMethod == "C" | age <= D$LastAge[BYind]){
-                        cohrt <- CalcEstmCohrt2( D, M, BYind,age )
-                        #'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_Cohort_IncompleteBroodID, "2921 incom BY shakCalcFg 1",ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt2(BroodYear, Age))
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_Cohort_IncompleteBroodID, "2921 ShakerMethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt)
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2921 ShakerMethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt)
-            
-                    }else{
-                       
-                        cohrt <- CalcEstmCohrt( D, M, BYind, age)
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_Cohort_IncompleteBroodID, "2924 Shakermethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt(BroodYear, Age))
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2924 Shakermethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt(BroodYear, Age))
-          
-                    }
-                    #'for all terminal fishery ages
-                    if(D$terminal[PSCFishery,age]){
-                        cohrt <- cohrt * (1 - D$AveragePreTermER[age]) * D$AverageMatRate[age]
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2929 incom BY term", BroodYear, Age, PSCFishery, cohrt, AveragePreTermER(Age), AverageMatRate(Age))
-                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2929 incom BY term", BroodYear, Age, PSCFishery, cohrt, AveragePreTermER(Age), AverageMatRate(Age))
-                    }
-                }#'CompleteBYFlag(BroodYear) = True
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CohortID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
-                NonVulnerableCohort[age] <- cohrt * D$PNV[[age - D$OceanStartAge + 1]][BYind + age, PSCFishery + 1]
-                TotalVulnerableCohort <- TotalVulnerableCohort + cohrt * D$PV[[age - D$OceanStartAge + 1]][BYind + age, PSCFishery + 1]
+                if(valbroodyr & valcalyr){
+                    if( D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY==allBY[BYind]]){
+                        if(!D$terminal[PSCFishery, age]){
+                            #'PreTerm cohrt after natural mortality
+                            cohrt <- D$Cohort[BYind, age] * D$survivaldf$SurvivalRate[D$survivaldf$Age==age]
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2908 com BY term F", BroodYear, Age, PSCFishery, cohrt, Cohort(BroodYear, Age), SurvivalRate(Age))
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2908 com BY term F", BroodYear, Age, PSCFishery, cohrt, Cohort(BroodYear, Age), SurvivalRate(Age))
+                        }else{
+                            #'total terminal landed catch + terminal shakers + terminal CNR + escapement
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_terminalCatchID, "2911 ShakMeth1 call TotalTerminalcatcg_Age", ShakerMethod, BroodYear, Age)
+                            cohrt <- TotalTerminalCatch_Age(D, M, BY=BYind, age=Age) + D$Escape[BYind, age]
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2914 com BY term T", BroodYear, Age, PSCFishery, "cohort", cohrt, "totalTerminalCatch_Age", TotalTerminalCatch_Age(BroodYear, Age, pass), "Escape", Escape(BroodYear, Age))
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2914 com BY term T", BroodYear, Age, PSCFishery, "cohort", cohrt, "totalTerminalCatch_Age", TotalTerminalCatch_Age(BroodYear, Age, pass), "Escape", Escape(BroodYear, Age))
+                        }
+                    }else{ #'cohorts estimated for incomplete broods
+                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2917 shakerMethod1", BroodYear, ShakerMethod, "1", Age, LastAge(BroodYear), TotalVulnerableCohort)
+                        if(M$ShakerMethod == "C" | age <= D$LastAge[BYind]){
+                            cohrt <- CalcEstmCohrt2( D, M, BYind,age )
+                            #'If isTraceCalc = True and shakermethod = traceThisShakerMethod And BroodYear>= traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_Cohort_IncompleteBroodID, "2921 incom BY shakCalcFg 1",ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt2(BroodYear, Age))
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_Cohort_IncompleteBroodID, "2921 ShakerMethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2921 ShakerMethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt)
+                        }else{
+                           
+                            cohrt <- CalcEstmCohrt( D, M, BYind, age)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_Cohort_IncompleteBroodID, "2924 Shakermethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt(BroodYear, Age))
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2924 Shakermethod1", ShakerMethod, BroodYear, Age, PSCFishery, cohrt, CalcEstmCohrt(BroodYear, Age))
+                        }
+                        #'for all terminal fishery ages
+                        if(D$terminal[PSCFishery,age]){
+                            cohrt <- cohrt * (1 - D$AveragePreTermER[age]) * D$AverageMatRate[age]
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery And Age = traceThisAge Then WriteLine(debug_CohortID, "2929 incom BY term", BroodYear, Age, PSCFishery, cohrt, AveragePreTermER(Age), AverageMatRate(Age))
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2929 incom BY term", BroodYear, Age, PSCFishery, cohrt, AveragePreTermER(Age), AverageMatRate(Age))
+                        }
+                    }#'CompleteBYFlag(BroodYear) = True
 
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2937 nonVuln", ShakerMethod, BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2938 totVuln", ShakerMethod, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age))
-                #'If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2937 nonVuln", ShakerMethod, BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2938 totVuln", ShakerMethod, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age))
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CohortID, "line 2939 nonVuln", BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
-                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And CalYr = 1983 Then WriteLine(debug_CohortID, "line 2940 totVuln", CalYr, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age), cohrt * PV(Broo    
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CohortID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2932", BroodYear, Age, PSCFishery, TotalVulnerableCohort, "totVulnChrt before summation")
+                    NonVulnerableCohort[age] <- cohrt * D$PNV[[age - D$OceanStartAge + 1]][BYind + age, PSCFishery + 1]
+                    TotalVulnerableCohort <- TotalVulnerableCohort + cohrt * D$PV[[age - D$OceanStartAge + 1]][BYind + age, PSCFishery + 1]
+
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2937 nonVuln", ShakerMethod, BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2938 totVuln", ShakerMethod, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age))
+                    #'If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2937 nonVuln", ShakerMethod, BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "line 2938 totVuln", ShakerMethod, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age))
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_CohortID, "line 2939 nonVuln", BroodYear, Age, PSCFishery, NonVulnerableCohort(Age), cohrt, PNV(BroodYear + Age, PSCFishery, Age))
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And CalYr = 1983 Then WriteLine(debug_CohortID, "line 2940 totVuln", CalYr, BroodYear, Age, PSCFishery, TotalVulnerableCohort, cohrt, PV(BroodYear + Age, PSCFishery, Age), cohrt * PV(Broo    
                     
                    
-                #If BroodYear + Age > LastIMDataYear Then GoTo NxtAge
-                #If ShakerMethod = "C" Then
-               
+                    #If BroodYear + Age > LastIMDataYear Then GoTo NxtAge
+                    #If ShakerMethod = "C" Then
+                    #}valbroodyr
+                }
+            } #next age
+
+            if(valcalyr){
+
+                #nxtagefun() 
+                for(aged in D$OceanStartAge:D$MaxAge){
+                    #'derive either brood and calendar year from age as appropriate
+                    if(MShakerMethod == "C"){ 
+                    #'CalendarYr
+                        BroodYear <- allCalYr[CalYr] - aged
+                        yr_ <- allCalYr[CalYr]
+                    }else{ 
+                        #'Brood Year method
+                        BroodYear <- allCalYr[CalYr] - D$OceanStartAge
+                        yr_ <- BroodYear + aged
+                        if(M$isReplicateCohShak & D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY == BroodYear]){
+                            yr_ <- allCalYr[CalYr]
+                        }
+                    }#'ShakerMethod = "C"
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2960 calyr", yr_, "age", Age, "brood", BroodYear, "ShakerMethod", ShakerMethod, TotalVulnerableCohort)
+                    #'If isTraceCalc = True and shakermethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2961", "fishery", PSCFishery, "age", Age, "brood", BroodYear, "FirstBY", FirstBY, "ShakerMethod", ShakerMethod, "yr_", yr_, "LastIMDataYear", LastIMDataYear)   
+                    
+                    if(BroodYear < D$FirstBY | yr_ > max(DIMdf$CalendarYear)){
+                        break
+                    }
+                    #'If isTraceCalc = True and shakermethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_ShakerID, "2963", "fishery", PSCFishery, "age", Age, "brood", BroodYear, "yr_", yr_, "CNRMethod", CNRMethod(yr_, PSCFishery), "lastby", LastBY, "ShakerMethod", ShakerMethod)
+                    #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_ShakerID, "2969", yr_, PSCFishery, CNRMethod(yr_, PSCFishery), TotalVulnerableCohort)
+        
+                    if(DIMdf$CNRMethod[DIMdf$CalendarYear==yr_& DIMdf$PSCFishery==PSCFishery]!=3){
+                        if(TotalVulnerableCohort !=0){
+                            encounterRate = 0.00001
+                            if(NonVulnerableCohort[age] > 0 & TotalVulnerableCohort > 0){
+                                encounterRate <- NonVulnerableCohort[aged] / TotalVulnerableCohort
+                            }
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_EncounterRateID, "line 2970 encounterrate", BroodYear, Age, PSCFishery, encounterRate, NonVulnerableCohort(Age) / TotalVulnerableCohort, NonVulnerableCohort(Age), TotalVulnerableCohort)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_CohortID, "line 2971 encounterrate", BroodYear, Age, PSCFishery, encounterRate, NonVulnerableCohort(Age), TotalVulnerableCohort)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_matShakersID, "line 2972 encounterrate", BroodYear, Age, PSCFishery, encounterRate, NonVulnerableCohort(Age), TotalVulnerableCohort)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_ShakerID, "line 2970 encounterrate", BroodYear, Age, PSCFishery, encounterRate, NonVulnerableCohort(Age) / TotalVulnerableCohort, NonVulnerableCohort(Age), TotalVulnerableCohort)
+                        }else{
+                            encounterRate <- 0
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_EncounterRateID, "line 2973 encounterRate & TotalVulnerableCohort=0", BroodYear, Age, PSCFishery, encounterRate, TotalVulnerableCohort)
+                            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_ShakerID, "line 2973 encounterrate =0", BroodYear, Age, PSCFishery, encounterRate, TotalVulnerableCohort)
+                        }
+
+                        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_EncounterRateID, "line 2973", BroodYear, PSCFishery, Age, TotalVulnerableCohort, " totVuln after goto NxtAge and If CNRMethod(yr_, PSCFishery) <> 3")
+                         #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_ShakerID, "2973", ShakerMethod, PSCFishery, Age, BroodYear, encounterRate, TotalVulnerableCohort)
+             
+                        if(allBY[BYind] <= D$LastBY){
+                
+                            SublegalShakerMortalities[PSCFishery, aged, BYind] <- 
+                                                    TempCatch * 
+                                                    D$IMdf$SublegalIMRate[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery] * 
+                                                    encounterRate
+
+                            SublegalDropoffMortalities[PSCFishery, aged, BYind] <- 
+                                                    TempCatch * 
+                                                    D$IMdf$DropoffRate[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery== PSCFishery] * 
+                                                    encounterRate
+                                
+                            #'external shaker algorithm needs more development, as is it will produce too many shakers at the older ages
+                            if(D$IMdf$RetentionMethod[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery] == 1){
+
+                                warning("External Shaker algorithm is not valid.  Do not trust output.\n")
+                                #'handles external shaker estimates
+                   
+                                SublegalShakerMortalities[PSCFishery, age, BYind] <- 
+                                                    ((D$IMdf$SubLegalShakerEst[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery] *
+                                                    D$LandedCatch[PSCFishery, aged, BYind]) /
+                                                    D$IMdf$LandedCatchEst[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery]) * 
+                                                    D$IMdf$SublegalIMRate[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery]
+
+
+                                SublegalDropoffMortalities[PSCFishery, age, BYind] <- ((D$IMdf$SubLegalShakerEst[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery] * 
+                                                                                D$LandedCatch[PSCFishery, age, BYind] / 
+                                                                                D$IMdf$LandedCatchEst[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery]) *
+                                                                                D$IMdf$DropoffRate[D$IMdf$CalendarYear==allCalYr[CalYr] & D$IMdf$PSCFishery==PSCFishery]
+                            }
+                            #'total (PreTerm and terminal) sublegal shakers BroodYear age
+                            #'add up sublegal shakers for all fisheries and add in sublegal dropoffs
+                            TempSublegalShakers[ BYind, age] <- TempSublegalShakers[ BYind, age] + SublegalShakerMortalities[PSCFishery, age, BYind]
+                                
+                            # If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And Age = traceThisAge Then 
+                            TempSublegalShakerDropoffs[BYind, age] <- TempSublegalShakerDropoffs[BYind, age] + SublegalDropoffMortalities[PSCFishery, age, BYind]
+                
+                            #'totalLegalDropoffs moved here to compare against Coshak12, remove when done testing
+                            TempLegalDropoffs[BYind, age] <- TempLegalDropoffs[BYind, age] + LegalDropoffMortality[PSCFishery, age, BYind]
+                            #'TempAgeShak(BroodYear, age) = TempAgeShak(BroodYear, age) + SublegalShakerMortalities(PSCFishery, age, BroodYear) + SublegalDropoffMortalities(PSCFishery, age, BroodYear) + LegalDropoffMortality(PSCFishery, age, BroodYear)
+                                
+                            if(D$terminal[PSCFishery, age-D$OceanStartAge+1]){
+                                TempTerminalShakers[BYind, age] <- TempTerminalShakers[BYind, age] + SublegalShakerMortalities[PSCFishery, age, BYind]
+                                TempTerminalShakerDropoffs[BYind, age] <- TempTerminalShakerDropoffs[BYind, age] + SublegalDropoffMortalities[PSCFishery, age, BYind]
+                                                
+                                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And Age = traceThisAge Then WriteLine(debug_matShakersID, "2999 term shakers", BroodYear, Age, PSCFishery, TempSublegalShakers(BroodYear, Age), TempTerminalShakers(BroodYear, Age), SublegalShakerMortalities(PSCFishery, Age, BroodYear), "calYr", CalYr, "catch", TempCatch, "endRte", encounterRate, "shakerRate", SublegalIMRate(CalYr, PSCFishery), "dropoffRate", DropoffRate(CalYr, PSCFishery))
+                                #'moved to ShakerMethod1 to compare against Coshak12, remove from ShakerMethod1 when done testing
+                                TempTerminalLegalDropoffs[BYind, age] <- TempTerminalLegalDropoffs[BYind, age] + LegalDropoffMortality[PSCFishery, age, BYind]
+                                #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear Then WriteLine(debug_terminalCatchID, "3011 ShakerMethod`", BroodYear, Age, PSCFishery, "TerminalLegalDropoffs", TempTerminalLegalDropoffs(BroodYear, Age), "dropoff", LegalDropoffMortality(PSCFishery, Age, BroodYear))
+                            }
+                        } #end if 'BroodYear <= LastBY
+                    } #endif D$IMdf$CNRMethod[D$IMdf$CalendarYear==yr_& D$IMdf$PSCFishery==PSCFishery]!=3
+                    # If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 3011", BroodYear, Age, PSCFishery, TotalVulnerableCohort, " totVulnChrt before next age")
+                }
             }
+           
+            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 3011", BroodYear, PSCFishery, TotalVulnerableCohort, "totVulnChrt before next yr")
+        #SkipYR:
         } #CalYr
     } #PSCFishery
+    #'code below is necessary outside of loop above so that function TotalCatch_Age works correctly
+    
+    for(BYind in seq_along(allBY)){
+        for(age in D$OceanStartAge:D$MaxAge){
+            #'total (PreTerm and terminal) sublegal shakers by age
+            #'add up sublegal shakers for all fisheries and add in sublegal dropoffs
+            TotalSublegalShakers[BYind, age] <- TempSublegalShakers[BYind, age]
+            TotalSublegalShakerDropoffs[BYind, Age] <- TempSublegalShakerDropoffs[BYind, age]
+            #'totalLegalDropoffs moved here to compare against Coshak12, remove when done testing
+            TotalLegalDropoffs[BYind, age]  <- TempLegalDropoffs[BYind, age] 
+            TotalTerminalShakers[BYind, age] <- TempTerminalShakers[BYind, age]
+            TotalTerminalShakerDropoffs[BYind, age] <- TempTerminalShakerDropoffs[BYind, age]
+            #'moved to ShakerMethod1 to compare against Coshak12, remove from ShakerMethod1 when done testing
+            TotalTerminalLegalDropoffs[BYind, age] <- TempTerminalLegalDropoffs[BYind, age] 
+
+
+        }
+
+    }
+    #'calculate shakers for each calendar year and fishery
+    #'old code errantly added legal dropoffs to shakers so I have added them for now to allow testing against old code output
+    #'************legal dropoffs should be removed from here for final code
+
+
+    for(CalYr in seq_along(allCalYr){
+        for(PSCFishery in seq_len( M$NumberPSCFisheries )){
+            if(M$PSCFisheryGear[PSCFishery]=="STRAY"){
+                isOK <- FALSE
+            }
+            if(M$PSCFisheryGear[PSCFishery]=="ESC"){
+                isOK <- FALSE
+            }
+            if(isOK){
+                for(age in D$OceanStartAge:D$MaxAge){
+                    if(CalYr-age>=D$FirstBY & CalYr-age <= D$LastBY){
+                        CalendarYearShakers[CalYr, PSCFishery] <- CalendarYearShakers[CalYr, PSCFishery] +
+                         SublegalShakerMortalities[PSCFishery, age, CalYr - age] + 
+                         SublegalDropoffMortalities[PSCFishery, age, CalYr - age] + 
+                         D$LegalDropoffMortality[PSCFishery, age, CalYr - age]
+                         #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And CalYr - Age >= traceThisYear And PSCFishery = 8 Then WriteLine(debug_CalYrShakersID, "3038 CalYrShakers", CalYr, PSCFishery, Age, "accum by fishery", CalendarYearShakers(CalYr, PSCFishery), "shaker+dropoff", (SublegalShakerMortalities(PSCFishery, Age, CalYr - Age) + SublegalDropoffMortalities(PSCFishery, Age, CalYr - Age) + LegalDropoffMortality(PSCFishery, Age, CalYr - Age)), "shaker", SublegalShakerMortalities(PSCFishery, Age, CalYr - Age), "SL dropoff", SublegalDropoffMortalities(PSCFishery, Age, CalYr - Age), "L dropoff", LegalDropoffMortality(PSCFishery, Age, CalYr - Age))
+                    }
+                }
+            }
+
+        }
+
+    }
+    
+    
+
+
+    return(list(new=list(TotalTerminalShakers=TotalTerminalShakers,
+                    TotalTerminalShakerDropoffs=TotalTerminalShakerDropoffs,
+                    CalendarYearShakers=CalendarYearShakers,
+                    SublegalShakerMortalities=SublegalShakerMortalities,
+                    SublegalDropoffMortalities=SublegalDropoffMortalities,
+                    SublegalShakerMortalities=SublegalShakerMortalities),
+                old=list(TotalSublegalShakers=TotalSublegalShakers,
+                    TotalSublegalShakerDropoffs=TotalSublegalShakerDropoffs,
+                    TotalLegalDropoffs=TotalLegalDropoffs)
+                
+                    ))
 
 } #end of function
+
+
+
 
 
 
@@ -498,49 +671,27 @@ nxtagefun<- function(M, D,
 
 
     for(i in 1:4){
-        banana <- T
+       
         for(j in 1:5){
-            if(j==1){
-                print("banana")
-                next
+            if(j>2){
+                print(paste("j is", j))
+                break
+
             }
+           
+            print(paste("j is", j))
         }
-         if(banana){
-            if(i==2){
-                #print(paste("a",i))
-                 
-                for(i in 1:4){
-                    
-                    print(paste("inneri",i))
-                }
-                
-                next
-            }
-            
-            if(i==3){
-                 
-                #print(paste("b",i))
-                next
-            }
+        if(i>2){
+               
+                break
+
         }
-        
-        print(i)
+        print(paste("i is", i))
     }
+       
 
 
 
-for(i in 1:4){
-    banana <- T
-    for(j in 1:5){
-        if(j==1){
-            print("banana")
-            print(paste("j",j))
-            break
-            break
-        }
-    }
-}
-     
 
   
     #original VB code
