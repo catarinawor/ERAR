@@ -47,7 +47,7 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
 
     LastAvailableBY<-df1[1,2]
     
-    if(is.na( FirstBY)|is.na(LastAvailableBY)){
+    if(is.na(FirstBY) | is.na(LastAvailableBY)){
 
         sink("../logs/GetFirstAndLastBY.log")
         cat(paste("please open ERA_CASStockToERAStockMapping and see if " , M$CASStockString[[1]] , " is missing in the CASStock field (column).  Program is going to stop"))
@@ -84,7 +84,7 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
 
     youngestAge <- df2[[1]]
 
-    if(youngestAge < D$OceanStartAge& !M$isCombineAge2And3[ERAStock]){
+    if(youngestAge < D$OceanStartAge & !M$isCombineAge2And3[ERAStock]){
         if(youngestAge == 1){
             sink(Log_OlderThanMaxAge_ID,append = TRUE)
             cat(paste(M$ShakerMethod, youngestAge,  "will not be used in Exploitation Rate Analysis.\n"))

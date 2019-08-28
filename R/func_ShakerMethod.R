@@ -96,11 +96,12 @@ ShakerMethod1 <- function(D,M){
                 if(M$ShakerMethod == "C"){ #'CalendarYr
                     
                     if(BroodYear < D$FirstBY){
-                        stop("BroodYear < D$FirstBY \n Check your data")
+                        break
                     }
 
                     if(BroodYear > D$LastBY){
                         valbroodyr <- FALSE
+                        print("GoTo NxtAge")
                     }
 
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2895 shakerMethod1", ShakerMethod, BroodYear, Age, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), TotalVulnerableCohort)
@@ -108,17 +109,20 @@ ShakerMethod1 <- function(D,M){
      
                     if(D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==BroodYear]){
                         valbroodyr <- FALSE
+                        print("GoTo NxtAge")
                     }
 
                 }else if(M$ShakerMethod == "B"){
                     if(BroodYear >  D$LastBY){
                         valcalyr <- FALSE
+                        print("GoTo SkipYR")
                     }
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And PSCFishery = traceThisFishery Then WriteLine(debug_calcEstmCohrtID, "2900 shakerMethod1", ShakerMethod, BroodYear, Age, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), TotalVulnerableCohort)
                     #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "2901 shakerMethod1", ShakerMethod, CalYr, BroodYear, Age, PSCFishery, MissingBroodYearFlag(BroodYear), CompleteBYFlag(BroodYear), "lastBY", LastBY)
             
                     if(D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==BroodYear]){
                         valcalyr <- FALSE
+                        print("GoTo SkipYR")
                     }
                 }
                 #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 2904", BroodYear, Age, PSCFishery, TotalVulnerableCohort, " totVulnchrt before cohrt=")
@@ -277,9 +281,8 @@ ShakerMethod1 <- function(D,M){
                     } #endif D$IMdf$CNRMethod[D$IMdf$CalendarYear==yr_& D$IMdf$PSCFishery==PSCFishery]!=3
                     # If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 3011", BroodYear, Age, PSCFishery, TotalVulnerableCohort, " totVulnChrt before next age")
                 }
-            }
-           
-            #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 3011", BroodYear, PSCFishery, TotalVulnerableCohort, "totVulnChrt before next yr")
+            }   
+        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod And BroodYear = traceThisYear And PSCFishery = traceThisFishery Then WriteLine(debug_EncounterRateID, "line 3011", BroodYear, PSCFishery, TotalVulnerableCohort, "totVulnChrt before next yr")
         #SkipYR:
         } #CalYr
     } #PSCFishery
