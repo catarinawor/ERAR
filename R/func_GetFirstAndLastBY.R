@@ -39,7 +39,7 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
 
     ERASQL <- paste0("SELECT Min(BroodYear) AS MinOfBroodYear, Max(BroodYear) AS MaxOfBroodYear FROM ERA_WireTagCode WHERE CASStock IN ('", as.character(D$CASStockString[[1]]) ,"') AND NOT ExcludeTagCodeFromERA = (-1)")
     
-    df1 <- sqlQuery( M$chnl , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
     
     err_FirstAndLastBY<-0
 
@@ -78,9 +78,9 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
     
 
     #'find youngest age and compare with OceanStartAge
-    ERASQL2 = paste0("SELECT Min(age) FROM ERA_CWDBRecovery as r INNER JOIN ERA_WireTagCode as t ON r.TagCode = t.TagCode  WHERE CASStock IN ('",D$CASStockString[[1]] , "')")
+    ERASQL2 <- paste0("SELECT Min(age) FROM ERA_CWDBRecovery as r INNER JOIN ERA_WireTagCode as t ON r.TagCode = t.TagCode  WHERE CASStock IN ('",D$CASStockString[[1]] , "')")
     
-    df2 <- sqlQuery( M$chnl , query = ERASQL2 )
+    df2 <- RODBC::sqlQuery( M$chnl , query = ERASQL2 )
 
     youngestAge <- df2[[1]]
 

@@ -20,7 +20,7 @@ M <- list(
     LastCompleteBroodsUsed = 9,
     MeanMatType = "ArithmeticMean",
     PNVAlgorithm = "FisherySpecific",
-    ShakerMethod ="C",
+    ShakerMethodType = "1",
     IncompleteYearAlgorithm= "Historic",
     RoundRecoveriesByTagCode= FALSE,
     traceThisYear = NA,
@@ -29,8 +29,8 @@ M <- list(
     LongTermAverage = FALSE,
     NumAvgYears = 9,
     TESTDIF =0.05
-
     )
+
 
 
 #put this file in Rbuild ignore
@@ -41,7 +41,7 @@ M <- list(
 #devtools::load_all()
 
 funcfiles <- list.files(getwd(),pattern="func",full.names=TRUE)
-#funcfiles<-funcfiles[-27]
+#funcfiles<-funcfiles[]
 for(i in 1:length(funcfiles)){
     
     source(funcfiles[i])

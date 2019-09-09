@@ -50,7 +50,7 @@ GetMaxReleaseSize <- function(D,M){
 
      }
 
-     df1 <- sqlQuery( M$chnl , query = ERASQL )
+     df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
        MaxReleaseErr <- 0
 
 

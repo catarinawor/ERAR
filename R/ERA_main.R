@@ -152,9 +152,7 @@ CalculateButton_Click  <- function(M){
     M$ERAStockArray <- as.character(M$ERAStockTable[M$StockListBox,1])
     
     M$NumStocks <- length(M$ERAStockArray)
-
-
-    
+ 
     D1<- MainSub(M)
     
     return(D1)
@@ -381,11 +379,11 @@ MainSub<-function(M){
 
          	if( ShakCalcFlg == 1 ){
 
-         		ShakerMethod <- "C"
+         		M$ShakerMethod <- "C"
 
          	}else if( ShakCalcFlg == 2 ) {
 
-         		 ShakerMethod <- "B"
+         		M$ShakerMethod <- "B"
 
          	}
 
@@ -399,7 +397,7 @@ MainSub<-function(M){
             D$pass <- 0
             
             #update stock label as progress is made - use this inestead of progerss bar
-            ERAStockLabel.Text <- paste("Stock:", D$CurrentStock, "(", ERAStock , "of", M$NumStocks, ") Shaker Method:", ShakerMethod)
+            ERAStockLabel.Text <- paste("Stock:", D$CurrentStock, "(", ERAStock , "of", M$NumStocks, ") Shaker Method:", M$ShakerMethod)
             MainSublog <- paste0("../logs/",D$CurrentStock,"_MainSub.log")
             sink(MainSublog)
             cat(paste(ERAStockLabel.Text,"\n"))
@@ -512,7 +510,6 @@ MainSub<-function(M){
                 D1 <- GetMeanLength(D,M)
                 D <- append(D,D1)
 
-                D <- append(D,D1)
 
                 #need to implement this one - there is something wrong with the get mean length function. 
                 D1 <- CreatePNV(D,M)
@@ -525,7 +522,6 @@ MainSub<-function(M){
             sink(MainSublog, append=TRUE)
             cat("Get Landed Catch and Escapement\n")
             sink()
-
 
             if( D$WithinBYWeightFlag ){
                 #not implemented yet$
@@ -543,7 +539,7 @@ MainSub<-function(M){
             D1 <- CalcCalendarYearCatch(D)
             D <- append(D,D1)
 
-            if( CheckIMData(D,M)$IMerror){
+            if( CheckIMData(D,M)){
                 stop("Necessary IM data NOT loaded \n")
             }
             
@@ -552,7 +548,14 @@ MainSub<-function(M){
                     TotalCNRLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
                     TotalCNRLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
                     TotalCNRSubLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
-                    TotalCNRSubLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge)
+                    TotalCNRSubLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalShakers=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalShakerDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalCNRSubLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalCNRSubLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalCNRLegal=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge),
+                    TotalTerminalCNRLegalDropoffs=matrix(0,nrow=length(D$FirstBY:D$LastBY),ncol=D$MaxAge)
                 )
 
             D <- append(D,D1)
@@ -574,9 +577,19 @@ MainSub<-function(M){
             
                 D$pass <- D$pass + 1                
 
-                if(M$ShakerMethod1){
-                    #ShakerMethod1(D,M)
-                }else if(M$ShakerMethod4){
+                if(M$ShakerMethodType=="1"){
+                    D1 <- ShakerMethod1(D,M)
+
+                    D <- append(D,D1$new)
+                    D$TotalSublegalShakers <- D1$old$TotalSublegalShakers
+                    D$TotalSublegalShakerDropoffs <- D1$old$TotalSublegalShakerDropoffs
+                    D$TotalLegalDropoffs <- D1$old$TotalLegalDropoffs
+                    D$TotalTerminalShakers <- D1$old$TotalTerminalShakers
+                    D$TotalTerminalShakerDropoffs <- D1$old$TotalTerminalShakerDropoffs
+                    D$TotalTerminalLegalDropoffs <- D1$old$TotalTerminalLegalDropoffs
+
+
+                }else if(M$ShakerMethodType=="4"){
                     #ShakerMethod4(D,M)
                 }else{
                     error("Must select a shakermethod()")

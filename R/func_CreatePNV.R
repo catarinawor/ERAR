@@ -61,8 +61,6 @@ CreatePNV <- function(M,D){
 
             for(PSCfishery in 1:nPSCFisheries+1){
 
-                head(SizeLimitLengthVulnerabledf)
-                head(MeanLengthdf)
 
                 minSize_tmp<-D$SizeLimitLengthVulnerabledf$MinSizeLimit[D$SizeLimitLengthVulnerabledf$CalendarYear== CalYrs[CalYr]&
                                                                         D$SizeLimitLengthVulnerabledf$PSCFishery==PSCfisheries[PSCfishery]]

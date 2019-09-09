@@ -46,7 +46,7 @@ GetInterDamSurvival <- function(D,M){
     #Get InterDamSurvival Rates for each stock
     ERASQL = paste0("SELECT CalendarYear, AdultInterDamSurvivalRate, JackInterDamSurvivalRate FROM ERA_Stock INNER JOIN InterDamSurvival ON ERA_Stock.SuperStock = InterDamSurvival.SuperStock WHERE ERAStock = '" , D$CurrentStock ,"' and TimePeriod ='", D$TimePeriod, "' and CalendarYear <= ", D$LastBY + D$MaxAge)
         
-    df1 <- sqlQuery( M$chnl , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
         
     if( nrow(df1)==0){

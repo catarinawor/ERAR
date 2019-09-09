@@ -40,7 +40,7 @@ GetMeanLength <- function(D,M){
 
     ERASQL = paste0("SELECT CalendarYear, Age, MeanLength, StandardDeviation FROM ERA_Stock INNER JOIN MeanLength ON ERA_Stock.SuperStock = MeanLength.SuperStock WHERE ERAStock = '", D$CurrentStock, "' and TimePeriod = '", D$TimePeriod, "'")
     
-    df1 <- sqlQuery( M$chnl , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
     CY <- df1[,1]
     Age <- df1[,2]

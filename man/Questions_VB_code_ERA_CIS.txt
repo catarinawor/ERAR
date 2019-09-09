@@ -12,4 +12,4 @@
 
 
 
-   
+# On shakermethod1 the code loops ove all PSCfisheries, including strays which is causing problems with the incidental mortality.  

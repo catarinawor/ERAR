@@ -37,7 +37,7 @@ GetCASStocks <- function(curr_stk=CurrentStock,dbse=M$datbse){
 	#curr_stk=CurrentStock
 	#dbse=M$datbse
 
-	require(RODBC)
+	
 
 	#dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path
 	

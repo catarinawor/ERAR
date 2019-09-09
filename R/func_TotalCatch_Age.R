@@ -49,7 +49,7 @@ TotalCatch_Age <- function(D, M, BY, age){
                            D$TotalCNRLegalDropoffs[BY, age] + 
                            D$TotalCNRSubLegal[BY, age] + 
                            D$TotalCNRSubLegalDropoffs[BY, age]
-        if(BY>= M$traceThisYear & age == M$traceThisAge ){
+        if(!is.na(M$traceThisYear) & BY >= M$traceThisYear & !is.na(M$traceThisAge)  & age == M$traceThisAge ){
 
             sink("../logs/debug_totCatAgeID.log", append=TRUE)
             cat(paste("line 2578 totalcatch_age", BY, age, TotalCatch_Age, D$TotalLandedCatch[BY, age], 
@@ -107,7 +107,7 @@ TotalCatch_Age <- function(D, M, BY, age){
 #' 
 TotalTerminalCatch_Age <- function(D, M, BY, age){
 
-
+    #print("enter TotalTerminalCatch_Age")
 
     # 'return total Mortalities for all ages in a brood year
     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod){
@@ -143,6 +143,8 @@ TotalTerminalCatch_Age <- function(D, M, BY, age){
             D$TotalTerminalCNRSubLegal[BY,age] +  D$TotalTerminalCNRSubLegalDropoffs[BY,age]))
         sink()
     }
+
+    #print("exit TotalTerminalCatch_Age")
 
     return(TotalTerminalCatch_Age)
 

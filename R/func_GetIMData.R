@@ -56,7 +56,7 @@ GetIMData <- function( D,M ){
               
     #read from data base
     
-    df1 <- sqlQuery( M$chnl , query = ERASQL )
+    df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
     #summary(df1)
 
@@ -157,8 +157,8 @@ GetIMData <- function( D,M ){
 
    
 
-    ERASQL2 = paste0("SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients WHERE ERAStock = '", D$CurrentStock ,"' AND ShakerMethod = '" ,M$ShakerMethod ,"'")
-    df2 <- sqlQuery( M$chnl , query = ERASQL2 )
+    ERASQL2 <- paste0("SELECT PSCFishery,Age,SizeClass,AvgQ FROM ERA_CatchabilityCoefficients WHERE ERAStock = '", D$CurrentStock ,"' AND ShakerMethod = '" ,M$ShakerMethod ,"'")
+    df2 <- RODBC::sqlQuery( M$chnl , query = ERASQL2 )
      GetIMDataErr <- 0
 
     if(nrow(df2)==0){

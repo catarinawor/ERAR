@@ -118,7 +118,8 @@ CalcLandedCatchAndEscapement <- function( D,M ){
 		cat(paste0(D$CASStockString,"\n"))
         cat(paste0("Get Landed Catch and Escapement for fishery " , Fish, " of ", NumFish, " fine scale fisheries\n"))
         sink()
-#
+        
+        #
         #'Create a list of CAS Fisheries mapped to each PSC Fishery with appropriate start and end date ranges
         if( !M$isReplicateCohShak ){
 
@@ -131,8 +132,8 @@ CalcLandedCatchAndEscapement <- function( D,M ){
                 "WHERE wtc.CASStock IN ('",  as.character(D$CASStockString[[1]]) ,"') AND Not wtc.ExcludeTagCodeFromERA = -1 AND r.Fishery in " , d$FisheryIdList ," ", d$DateRangeClause , " AND r.age > 1" ,
                 " GROUP BY r.Age,wtc.BroodYear ORDER BY wtc.BroodYear, r.Age")
     
-       }else{#'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
-       #not tested
+        }else{#'same as above except by tag code in addition to brood year and age BY ERAFishery instead of PSCFishery
+            #not tested
 
             d <- BuildERAFisheryIdList( M,Fish )
 
@@ -157,18 +158,14 @@ CalcLandedCatchAndEscapement <- function( D,M ){
         SumAdjustedEstimatedNumber <- EstimatedNumberdf$SumEstimatedNumber
 
         if( M$isReplicateCohShak ){
-
             #'reproduce CFile numbers
             tag_code <- EstimatedNumberdf[,4]
             #'reproduce CFile numbers
             #not tested
             FishName <- M$ERAFisheryName[Fish]
-
         }else{ 
-
             tag_code <- rep("",nrow(EstimatedNumberdf))
             FishName <- M$PSCFisheryName[Fish]
-
         }
       
        #'limit data to last calendar year selected by user 
@@ -245,7 +242,7 @@ CalcLandedCatchAndEscapement <- function( D,M ){
                                     }
                                 
                                 }else{ 
-
+                                    
                                     Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] <- Escape[which(AllBY==BroodYear[ya]),which(Allages==RecoveryAge[ya])] + Esc / D$InterDamSurvivaldf$AdultInterDamSurvivalRate[which(D$InterDamSurvivaldf$InterDamSurvival_CalendarYear==(BroodYear[ya] + RecoveryAge[ya]))]
                                     
                                     if(M$isTraceCalc & M$ShakerMethod == M$traceThisShakerMethod & BroodYear[ya] >= M$traceThisYear) {

@@ -36,7 +36,7 @@ SetTerminalFishery <- function(D,M){
 
     ERASQL = "SELECT * FROM ERA_PSCFishery WHERE PSCTerminal=Yes"
 
-    df2<- sqlQuery( M$chnl , query = ERASQL )
+    df2<- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
     terminal<-matrix(FALSE,nrow=M$NumberPSCFisheries,ncol=D$MaxAge)
 
