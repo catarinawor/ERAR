@@ -41,7 +41,7 @@ M <- list(
 #devtools::load_all()
 
 funcfiles <- list.files(getwd(),pattern="func",full.names=TRUE)
-#funcfiles<-funcfiles[]
+#funcfiles<-funcfiles[-5]
 for(i in 1:length(funcfiles)){
     
     source(funcfiles[i])

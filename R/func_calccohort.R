@@ -10,9 +10,9 @@
 
 
 
-#' @title CheckIMData
+#' @title CalcCohort
 #'
-#' @description function where the actual ERa is done, this one is for complete cohorts only. 
+#' @description function where the actual ERA is done, this one is for complete cohorts only. 
 #'  
 #' @param M A list passed to StartCohortAnalysis_Click
 #' 
@@ -406,6 +406,41 @@ CalcCohort <- function(D,M){
 
 
 
+#' @title CalcCohort_IncompleteBrood
+#'
+#' @description function where the actual ERA is done, this one is for incomplete cohorts only. 
+#'  
+#' @param M A list passed to StartCohortAnalysis_Click
+#' 
+#' @param D  A list containing stock specific info
+#'
+#' @details 
+#'
+#' @return 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
+CalcCohort_IncompleteBrood <- function(D,M){
+
+  allBY <- D$FirstBY:D$LastBY
+
+  #'determine the last complete brood year
+  for(BY in seq_along(allBY)){
+    #'skip over missing brood years, 
+    if(D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==allBY[BY]]){
+
+    }
+
+  }
+
+}
+
+
+
+
 
 
 
@@ -607,6 +642,60 @@ CalcEstmCohrt <- function( D, M, BY,Age ){
   #    CalcEstmCohrt = cohrt
   #  End If
 
+
+
+}
+
+
+
+
+#' @title FindBY
+#'
+#' @description . 
+#'  
+#' @param BY integer indicating brood year
+#'
+#' @details 'give a brood year where Brood(BY%).MissingByFlg = true
+#' 'return the next brood year where Brood(BY%).MissingByFlg = false
+#' 
+#'
+#' @return 
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' 
+FindBY <- function(BY, D,){
+    
+    #'give a brood year where Brood(BY%).MissingByFlg = true
+    #'return the next brood year where Brood(BY%).MissingByFlg = false
+    
+    BY <- BY + 1
+    while(MissingBroodYearFlag[BY]){
+      if(BY > D$LastBY){
+        BY <- D$LastBY
+        break
+      }else{
+        BY <- BY + 1
+      }
+    }
+    
+    return(BY)
+
+#-------------------------------------
+#Original  VB code
+
+#'give a brood year where Brood(BY%).MissingByFlg = true
+#        'return the next brood year where Brood(BY%).MissingByFlg = false
+#        Do
+#            by = by + 1
+#            If by > LastBY Then
+#                by = LastBY
+#                Exit Do
+#            End If
+#        Loop Until MissingBroodYearFlag(by) = False
+#        FindBY = by
 
 
 }

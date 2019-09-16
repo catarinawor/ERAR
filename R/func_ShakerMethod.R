@@ -27,10 +27,10 @@ ShakerMethod1 <- function(D,M){
 
     allCalYr <- (D$FirstBY + D$OceanStartAge) : M$LastCalendarYear
     allBY <- D$FirstBY:D$LastBY
-    SublegalShakerMortalities <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, D$LastBY)) 
-    SublegalDropoffMortalities <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, D$LastBY)) 
-    ExtraLegalShakerMortality <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, D$LastBY))
-    ExtraLegalShakerDropoffs <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, D$LastBY))
+    SublegalShakerMortalities <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, length(allBY))) 
+    SublegalDropoffMortalities <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, length(allBY))) 
+    ExtraLegalShakerMortality <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, length(allBY)))
+    ExtraLegalShakerDropoffs <- array(NA, dim=c(M$NumberPSCFisheries, D$MaxAge, length(allBY)))
 
     TempLegalDropoffs <- matrix(0,nrow=length(allBY), ncol= D$MaxAge)
     TempTerminalShakers <- matrix(0,nrow=length(allBY), ncol= D$MaxAge)

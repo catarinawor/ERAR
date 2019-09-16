@@ -37,7 +37,7 @@ GetSuperStockData <- function(curr_stk,dbse){
 
     #dta <- RODBC::odbcConnectAccess2007(dbse)   #specifies the file path   
 
-    ERASQL = paste0("Select TerminalNetAge,OceanStartAge,MaxAge,SuperStock.SuperStock from SuperStock INNER JOIN ERA_Stock ON SuperStock.SuperStock = ERA_Stock.SuperStock Where ERA_Stock.ERAStock = '",curr_stk,"'")
+    ERASQL <- paste0("Select TerminalNetAge,OceanStartAge,MaxAge,SuperStock.SuperStock from SuperStock INNER JOIN ERA_Stock ON SuperStock.SuperStock = ERA_Stock.SuperStock Where ERA_Stock.ERAStock = '",curr_stk,"'")
     df1 <- RODBC::sqlQuery( M$chnl , query = ERASQL )
 
     D<-list(TermNetSwitchAge = df1[[1]],

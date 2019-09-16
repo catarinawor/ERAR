@@ -43,9 +43,9 @@ GetFirstAndLastBY <- function(D,M,ERAStock){
     
     err_FirstAndLastBY<-0
 
-    FirstBY<-df1[1,1]
+    FirstBY <- df1[1,1]
 
-    LastAvailableBY<-df1[1,2]
+    LastAvailableBY <- df1[1,2]
     
     if(is.na(FirstBY) | is.na(LastAvailableBY)){
 

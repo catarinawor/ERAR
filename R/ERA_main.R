@@ -370,7 +370,7 @@ MainSub<-function(M){
         for( ShakCalcFlg in 1:2 ){
 
             #to be deleted
-            #ShakCalcFlg<- 1            
+            #ShakCalcFlg <- 1            
 
         	#loop through once using the brood year method and then again using the calendar year method
 
@@ -595,8 +595,10 @@ MainSub<-function(M){
                     error("Must select a shakermethod()")
                 }
 
-                #CalcCNR(D,M)
+                D1 <- CalcCNR(D,M)
+                D <- append(D,D1)
 
+                #'compute cohort sizes with CNR and Shakers
                 if(M$IncompleteYearAlgorithm=="Historic"){
                 
                     D1 <- CalcCohort(D,M)
@@ -610,7 +612,11 @@ MainSub<-function(M){
                     #CalcCohort_IncompleteBrood()
                 }
 
-                if(!D$RepeatPass)break()
+                if(!D$RepeatPass){
+                    i<-99
+                }else{
+                    i=i+1
+                    }
             }
 
             #ResetCatches(D,M)
