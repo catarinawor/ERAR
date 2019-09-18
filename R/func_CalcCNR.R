@@ -45,7 +45,7 @@ CalcCNR <- function(D, M){
 
     for(BroodYear in seq_along(allBY)){
         #'skip missing brood years
-        if(!D$MissingBroodYearFlag[BroodYear]){
+        if(!D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==allBY[BroodYear]]){
             for(PSCFishery in seq_len(M$NumberPSCFisheries-3)){
                 for(age in D$OceanStartAge:D$LastAge[BroodYear]){
                     #If isTraceCalc = True Then WriteLine(debug_subLegalCNRID, "9999 follow BY 2013 age 3 CENTRL T", BroodYear, PSCFishery, age, SubLegalCNRDropoffs(PSCFishery, age, BroodYear))

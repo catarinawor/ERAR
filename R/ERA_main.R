@@ -577,7 +577,7 @@ MainSub<-function(M){
             
                 D$pass <- D$pass + 1                
 
-                if(M$ShakerMethodType=="1"){
+                if(M$ShakerMethodType == "1"){
                     D1 <- ShakerMethod1(D,M)
 
                     D <- append(D,D1$new)
