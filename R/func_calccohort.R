@@ -435,7 +435,7 @@ CalcCohort_IncompleteBrood <- function(D,M){
   SumPreTermER <- rep(0,D$MaxAge)
 
   #AveragePreTermER <- NULL
-  #AverageMatRate <- NULL
+  AverageMatRate <- NULL
   #PreTermER <- matrix(NA, nrow = length(allBY),ncol = 7 )
   
 
@@ -461,6 +461,13 @@ CalcCohort_IncompleteBrood <- function(D,M){
   }else{
     PreTermER <- matrix(0, nrow = length(allBY),ncol = 7 )
   }
+
+  if("AEQ" %in% names(D)){
+    AveragePreTermER <- D$AveragePreTermER
+  }else{
+    AveragePreTermER <- matrix(0, nrow = length(allBY),ncol = 7 )
+  }
+
 
   #
 
@@ -515,7 +522,7 @@ CalcCohort_IncompleteBrood <- function(D,M){
                
       }
       
-      if(age == D$OceanStartAge & Cohort[BroodYear, D$OceanStartAge]) == 0){
+      if(age == D$OceanStartAge & Cohort[BroodYear, D$OceanStartAge] == 0){
         ErrCaption <- paste("Brood Year", BroodYear, "has NO CWT recoveries at all! \n")
         ErrMessage <- paste("Hint: If the brood year has no recoveries, decrement last brood year")# in the .CM1 file and remove from the .CDS file."
         ErrMessage <- paste(ErrMessage,"If intermediate brood year, treat as missing brood")# and remove from .CDS file."
@@ -529,7 +536,7 @@ CalcCohort_IncompleteBrood <- function(D,M){
         if(age == D$LastAge[BroodYear] & D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY==allBY[BroodYear]] & CohortAfterPreTermFishery > 0  ){
           MatRate[BroodYear, age] <- 1
           #If isTraceCalc = True Then WriteLine(debug_MatRteID, "2587 MatRte ", MatRate(BroodYear, age))           
-        }elseif(CohortAfterPreTermFishery <= 0){
+        }else if(CohortAfterPreTermFishery <= 0){
           MatRate[BroodYear, age] <- 0
           #If isTraceCalc = True Then WriteLine(debug_MatRteID, "2590 MatRte ", MatRate(BroodYear, age))
         }else{
@@ -620,7 +627,7 @@ CalcCohort_IncompleteBrood <- function(D,M){
           }
         }else{
           #'Product of  ADULT EQUIVALENTS AND MATURATION RATES and Ocean HRs FOR COMPLETE BROODS using average number of years specified by NumAvgYears
-          if(BroodYear = D$LastCompleteBroodYear){
+          if(BroodYear == D$LastCompleteBroodYear){
             for(BY in 0:(M$NumAvgYears-1)){
               SumAEQ[age] = SumAEQ[age] * AEQ[BroodYear - BY, age]
               if(PreTermER[BroodYear, age] == 0){
@@ -649,31 +656,48 @@ CalcCohort_IncompleteBrood <- function(D,M){
   }
   #'COMPUTE AVERAGE MATURATION RATES, OCEAN HARVEST RATES, AND ADULT EQUIVALENTS
   for(age in D$OceanStartAge:D$MaxAge){
-    if(!M$ArithmeticMeanFlag){
-      AverageMatRate[age] = SumMatRate[age] / NumberCompleteBroods
-    }
-    AverageAEQ[age] = SumAEQ[age] / NumberCompleteBroods
-  }else{
-    #'if you want to use the geometric mean
-    if(D$NumberOceanCohorts[age]==0){
-      #'there are never any ocean recoveries of this age
-      AveragePreTermER[age] <- 0
-    }else{
-      AveragePreTermER[age] = SumPreTermER[age]^(1 / NumberOceanCohorts[age])
-    }
-    if(age != D$MaxAge){
-      if(D$ReadAvgMatRteFlg == 0){
-        #'rates not from .cm1 file, instead calculate from data
-        AverageMatRate[age] = SumMatRate[age] ^ (1 / D$NumberCompleteBroods)
-        #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_AvgMatRteID, "2379 avgMatRte", BroodYear, Age, AverageMatRate(Age), "accum", SumMatRate(Age), "numBroods", NumberCompleteBroods)
+    if(M$ArithmeticMeanFlag){
+      if(D$NumberOceanCohorts[age]==0){
+        #'there are never any ocean recoveries of this age
+        AveragePreTermER[age] <- 0
+      }else{
+        AverageMatRate[age] <- SumMatRate[age] / NumberCompleteBroods
       }
-      AverageAEQ[age] <- SumAEQ[age] ^ [1 / NumberCompleteBroods]
-
-    }else{
-      if(D$ReadAvgMatRteFlg){
-        AverageMatRate[MaxAge] <- 1 
+      if(age != D$MaxAge){
+        #'rates not from ERA_Stock table, instead calculate from data
+        if(!D$ReadAvgMatRteFlg){
+          AverageMatRate[age] <- SumMatRate[age] / NumberCompleteBroods
+        }
+        AverageAEQ[age] <- SumAEQ[age] / NumberCompleteBroods
+      }else{
         #'rate for oldest age not from .cm1 file, instead calculate from data
-          AverageAEQ[MaxAge] = 1
+        if(!D$ReadAvgMatRteFlg){
+          AverageMatRate[D$MaxAge] <- 1
+        }
+        AverageAEQ[D$MaxAge] <- 1
+      }
+    }else{
+      #'if you want to use the geometric mean
+      if(D$NumberOceanCohorts[age]==0){
+        #'there are never any ocean recoveries of this age
+        AveragePreTermER[age] <- 0
+      }else{
+        AveragePreTermER[age] = SumPreTermER[age]^(1 / NumberOceanCohorts[age])
+      }
+      
+      if(age != D$MaxAge){
+        if(D$ReadAvgMatRteFlg == 0){
+          #'rates not from .cm1 file, instead calculate from data
+          AverageMatRate[age] = SumMatRate[age] ^ (1 / D$NumberCompleteBroods)
+          #If isTraceCalc = True And ShakerMethod = traceThisShakerMethod Then WriteLine(debug_AvgMatRteID, "2379 avgMatRte", BroodYear, Age, AverageMatRate(Age), "accum", SumMatRate(Age), "numBroods", NumberCompleteBroods)
+        }
+        AverageAEQ[age] <- SumAEQ[age] ^ (1 / D$NumberCompleteBroods)
+      }else{
+        if(D$ReadAvgMatRteFlg){
+          #'rate for oldest age not from .cm1 file, instead calculate from data
+          AverageMatRate[MaxAge] <- 1 
+        }
+        AverageAEQ[MaxAge] = 1
       }
     } #'ArithmeticMeanFlag = True
   }
@@ -889,7 +913,7 @@ CalcCohort_IncompleteBrood <- function(D,M){
 #
 #}
 
-
+}
 
 
 
@@ -1123,7 +1147,7 @@ FindBY <- function(BY, D){
     #'return the next brood year where Brood(BY%).MissingByFlg = false
     
     BY <- BY + 1
-    while(MissingBroodYearFlag[BY]){
+    while(D$MissingBroodYearFlag$Flag[BY]){
       if(BY > D$LastBY){
         BY <- D$LastBY
         break

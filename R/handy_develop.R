@@ -40,6 +40,7 @@ M <- list(
 #not working yet - since I still have a bunch of crap in the R folder - nee to clean it up and leave just functions
 #devtools::load_all()
 
+
 funcfiles <- list.files(getwd(),pattern="func",full.names=TRUE)
 #funcfiles<-funcfiles[-6]
 for(i in 1:length(funcfiles)){
