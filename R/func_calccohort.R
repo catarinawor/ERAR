@@ -702,6 +702,17 @@ CalcCohort_IncompleteBrood <- function(D,M){
     } #'ArithmeticMeanFlag = True
   }
 
+  return(list(NumberOceanCohorts=NumberOceanCohorts,
+      SumAEQ=SumAEQ,
+      SumMatRate=SumMatRate,
+      SumPreTermER=SumPreTermER,
+      PreTermER=PreTermER,
+      AveragePreTermER=AveragePreTermER,
+      Cohort= Cohort,
+      MatRate=MatRate,
+      AEQ=AEQ,
+    ))
+
     #==========================================================
     #Original VB code
 #    Dim ActDif As Single

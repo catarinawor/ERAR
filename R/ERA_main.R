@@ -580,13 +580,29 @@ MainSub<-function(M){
                 if(M$ShakerMethodType == "1"){
                     D1 <- ShakerMethod1(D,M)
 
-                    D <- append(D,D1$new)
-                    D$TotalSublegalShakers <- D1$old$TotalSublegalShakers
-                    D$TotalSublegalShakerDropoffs <- D1$old$TotalSublegalShakerDropoffs
-                    D$TotalLegalDropoffs <- D1$old$TotalLegalDropoffs
-                    D$TotalTerminalShakers <- D1$old$TotalTerminalShakers
-                    D$TotalTerminalShakerDropoffs <- D1$old$TotalTerminalShakerDropoffs
-                    D$TotalTerminalLegalDropoffs <- D1$old$TotalTerminalLegalDropoffs
+                    if(D$pass<2){
+
+                        D <- append(D,D1$new)
+                        D$TotalSublegalShakers <- D1$old$TotalSublegalShakers
+                        D$TotalSublegalShakerDropoffs <- D1$old$TotalSublegalShakerDropoffs
+                        D$TotalLegalDropoffs <- D1$old$TotalLegalDropoffs
+                        D$TotalTerminalShakers <- D1$old$TotalTerminalShakers
+                        D$TotalTerminalShakerDropoffs <- D1$old$TotalTerminalShakerDropoffs
+                        D$TotalTerminalLegalDropoffs <- D1$old$TotalTerminalLegalDropoffs
+                    
+                    }else{
+                        D$CalendarYearShakers <- D1$new$CalendarYearShakers,
+                        D$SublegalShakerMortalities <- D1$new$SublegalShakerMortalities,
+                        D$SublegalDropoffMortalities <- D1$new$SublegalDropoffMortalities,
+                        D$SublegalShakerMortalities <- D1$new$SublegalShakerMortalities
+                        D$TotalSublegalShakers <- D1$old$TotalSublegalShakers
+                        D$TotalSublegalShakerDropoffs <- D1$old$TotalSublegalShakerDropoffs
+                        D$TotalLegalDropoffs <- D1$old$TotalLegalDropoffs
+                        D$TotalTerminalShakers <- D1$old$TotalTerminalShakers
+                        D$TotalTerminalShakerDropoffs <- D1$old$TotalTerminalShakerDropoffs
+                        D$TotalTerminalLegalDropoffs <- D1$old$TotalTerminalLegalDropoffs
+                    
+                    }
 
 
                 }else if(M$ShakerMethodType=="4"){
@@ -596,16 +612,53 @@ MainSub<-function(M){
                 }
 
                 D1 <- CalcCNR(D,M)
-                D <- append(D,D1)
+                
+                if(D$pass<2){
+
+                    D <- append(D,D1)
+
+                }else{
+                
+                    D$TotalCNRLegal <- D1$TotalCNRLegal,
+                    D$TotalCNRLegalDropoffs <- D1$TotalCNRLegalDropoffs,
+                    D$TotalCNRSubLegal <- D1$TotalCNRSubLegal,
+                    D$TotalCNRSubLegalDropoffs <- D1$TotalCNRSubLegalDropoffs, 
+                    D$TotalTerminalCNRLegal <- D1$TotalTerminalCNRLegal,
+                    D$TotalTerminalCNRLegalDropoffs <- D1$TotalTerminalCNRLegalDropoffs,
+                    D$TotalTerminalCNRSubLegal <- D1$TotalTerminalCNRSubLegal,
+                    D$TotalTerminalCNRSubLegalDropoffs <- D1$TotalTerminalCNRSubLegalDropoffs,
+                    D$LegalCNRMortality  <- D1$LegalCNRMortality, 
+                    D$LegalCNRDropoffs  <- D1$LegalCNRDropoffs, 
+                    D$SubLegalCNRMortality  <- D1$SubLegalCNRMortality,
+                    D$LegalCNRDropoffs  <- D1$LegalCNRDropoffs
+                }
 
                 #'compute cohort sizes with CNR and Shakers
                 if(M$IncompleteYearAlgorithm=="Historic"){
                 
                     D1 <- CalcCohort(D,M)
-                    D <- append(D,D1$new)
-                    D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
-                    D$pass <- D1$old$pass
-                    D$RepeatPass <- D1$old$RepeatPass
+                    
+                    if(D$pass<2){
+                        D <- append(D,D1$new)
+                        D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
+                        D$pass <- D1$old$pass
+                        D$RepeatPass <- D1$old$RepeatPass
+                    }else{
+                        D$Cohort <- D1$new$Cohort
+                        D$AEQ <- D1$new$AEQ,
+                        D$MatRate <- D1$new$MatRate,
+                        D$PreTermER <- D1$new$PreTermER,
+                        D$AverageAEQ <- D1$new$AverageAEQ,
+                        D$AverageMatRate <- D1$new$AverageMatRate,
+                        D$AveragePreTermER <- D1$new$AveragePreTermER,
+                        D$NumberOceanCohorts <- D1$new$NumberOceanCohorts,
+                        D$SumAEQ <- D1$new$SumAEQ,
+                        D$SumMatRate <- D1$new$SumMatRate,
+                        D$SumPreTermER <- D1$new$SumPreTermER
+                        D$NumberCompleteBroods <- D1$old$NumberCompleteBroods
+                        D$pass <- D1$old$pass
+                        D$RepeatPass <- D1$old$RepeatPass
+                    }
 
                 }else if(M$IncompleteYearAlgorithm=="New"){
 
@@ -616,7 +669,7 @@ MainSub<-function(M){
                     i<-99
                 }else{
                     i=i+1
-                    }
+                }
             }
 
             #ResetCatches(D,M)
@@ -626,7 +679,7 @@ MainSub<-function(M){
 
     } #next ERAStock
 
-    print("what the Fish just happened?")
+    print("what just happened?")
 
 }
 

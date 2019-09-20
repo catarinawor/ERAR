@@ -45,7 +45,7 @@ CalcCNR <- function(D, M){
 
     for(BroodYear in seq_along(allBY)){
         #'skip missing brood years
-        if(!D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY==allBY[BroodYear]]){
+        if(!D$MissingBroodYearFlag$Flag[D$MissingBroodYearFlag$BY == allBY[BroodYear]]){
             for(PSCFishery in seq_len(M$NumberPSCFisheries-3)){
                 for(age in D$OceanStartAge:D$LastAge[BroodYear]){
                     #If isTraceCalc = True Then WriteLine(debug_subLegalCNRID, "9999 follow BY 2013 age 3 CENTRL T", BroodYear, PSCFishery, age, SubLegalCNRDropoffs(PSCFishery, age, BroodYear))
@@ -307,7 +307,7 @@ CNRNoDir <- function(YR, BroodYear, PSCFishery,age){
     #    '      (see SUB ResetCatches)
 
     #    'local variables
-    IMortRt <-matrx(NA, nrow=2, ncol=2)
+    IMortRt <-matrix(NA, nrow=2, ncol=2)
     sublegal <- 1
     legal <- 2
     Instantaneous <- 1
@@ -359,11 +359,11 @@ CNRNoDir <- function(YR, BroodYear, PSCFishery,age){
         IMortRt[Instantaneous, 1] <- -log(1 - IMortRt[Annual, 1]) #'this is already computed above
         IMortRt[Annual, 2] = 1 - exp(-IMortRt[Instantaneous, 1] * tp) #'this is already computed above
 
-        if(D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY==BroodYear]){
+        if(D$CompleteBYFlag$Flag[D$CompleteBYFlag$BY == allBY[BroodYear]]){
             if(!D$terminal[PSCFishery,age]){
                 cohrt <- D$Cohort[BroodYear, age] * D$survivaldf$SurvivalRate[D$survivaldf$Age==age] 
             }else{
-                cohrt <- TotalTerminalCatch_Age(D, M, BY, age) + D$Escape[BroodYear, age]
+                cohrt <- TotalTerminalCatch_Age(D, M, BY=BroodYear, age) + D$Escape[BroodYear, age]
             }
         }else{
             if(M$ShakerMethod == "C"| age <= D$LastAge[BroodYear] ){
